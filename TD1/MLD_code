@@ -1,0 +1,126 @@
+@startuml
+entity "Administrateur" as admin {
+    + id_admin: int [PK][FK]
+    + email: varchar
+    + mdp: varchar
+    + nom: varchar
+    + prenom: varchar
+    + numero_telephone: varchar[15]
+    + date_creation:date 
+    + statut: {actif|inactif}
+}
+
+entity "Recruteur" as rec {
+    + id_rec: int [PK][FK]
+    + siren: varchar[9] [FK]
+    + email: varchar
+    + mdp: varchar
+    + nom: varchar
+    + prenom: varchar
+    + numero_telephone: varchar[15]
+    + date_creation:date 
+    + statut: {actif|inactif}
+}
+
+entity "DemandeChangerOrganisation" as dcho {
+    + id_rec: int [PK][FK]
+    + siren:  varchar[9] [PK][FK]
+    + descriptionChO: text
+    + dateDemandeChO: date
+    + statutChO: {validee|refusee|en_attente}
+}
+
+entity "Organisation" as orga {
+    + siren: varchar[9] [PK]
+    + nom: varchar
+    + type: {association|EURL|SARL|SA|SAS|SASU|ONG}
+    + siege_social: JSON
+    + statut: {innactive, en_cours, active}
+}
+
+entity "DemandeCreationOrganisation" as dcro {
+    + id_can: int [PK][FK]
+    + siren: varchar[9] [PK][FK]
+    + descriptionCrO: text
+    + dateDemandeCrO: date
+    + statutCrO: {validee|refusee|en_attente};
+}
+
+entity "DemandeRecruteur" as dr {
+    + id_can: int [PK][FK]
+    + siren: varchar[9] [PK][FK]
+    + descriptionDR: text
+    + dateDemandeDR: date
+    + statutDR: {validee|refusee|en_attente};
+}
+
+entity "Candidat" as candidat {
+    + id_can: int [PK][FK]
+    + email: varchar
+    + mdp: varchar
+    + nom: varchar
+    + prenom: varchar
+    + numero_telephone: varchar[15]
+    + date_creation:date 
+    + statut: {actif|inactif}
+}
+
+entity "Candidature" as candidature {
+    + id_can: int [PK][FK]
+    + num_OE: int [PK][FK]
+    + date_candidature: date
+}
+
+entity "Piece_Jointe_Temporaire" as pjt {
+    + chemin: varchar [PK]
+    + nom: varchar
+    + type: {pdf|jpeg|png|xlsx|docx}
+    + id_can: serial [FK] [not null]
+    + num_OE: serial [FK] [not null]
+}
+
+entity "Piece_Jointe_Durable" as pjd {
+    + chemin: varchar [PK]
+    + nom: varchar
+    + type: {pdf|jpeg|png|xlsx|docx}
+    + id_can: serial [FK] [not null]
+}
+
+entity "Offre_Emploi" as oe {
+    + numero: int [PK]
+    + etat: {non_publiee|publiee|expiree}
+    + date_validite: date
+    + indication: text
+    + nb_piece_demandees: int
+    + id_fiche: int [FK] [not null]
+}
+
+entity "Fiche_Poste" as fp {
+    + id_fiche: int [PK]
+    + intitule: varchar
+    + statut_de_poste: {ouvrier|employé|ETAM|cadre|ingénieur|fonctionnaire|stagiaire}
+    + responsable_hierarchique: varchar
+    + type_metier: varchar
+    + lieu_mission: JSON
+    + rythme: varchar
+    + fourchette_salaire: varchar
+    + description: text
+    + siren: varchar[9] [FK] [not null]
+}
+
+candidat ||--o{ candidature : postule à une
+candidature }o--|| oe : concerne
+oe }|--|| fp : regroupe
+orga ||--o{ fp : propose
+candidature ||--|{ pjt : contient
+rec }|--o| orga : est dans
+candidat ||--o{ pjd : possède
+
+candidat ||--o{ dcro : veut créer une organisation
+dcro }o--|| orga : demande relative à 
+candidat ||--o{ dr : veut devenir recruteur
+dr }o--|| orga : demande pour
+rec ||--o{ dcho : veut changer d organisation
+dcho }o--|| orga : demande concernant
+
+@enduml
