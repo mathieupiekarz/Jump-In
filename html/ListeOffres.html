@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Jump'In</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+
+    <style>
+        @media screen and (max-width: 730px) {
+            .sidebar {
+                display: none;
+                width: 280px;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .search-bar {
+                display: block;
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .job-header h2 {
+                font-size: 15px;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <header class="header">
+        <div>
+            <img src="JumpIn_Logo.png" alt="Jump'In Logo" height="80">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="ListeOffres.html">Les offres</a></li>
+                <li><a href="#">Mes candidatures</a></li>
+                <li><a href="#" class="btn-connexion">Mon Profil</a></li>
+            </ul>
+
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("active");
+        }
+    </script>
+
+    <div class="container">
+        <!-- Barre latérale de filtrage -->
+        <aside class="sidebar">
+            <h2>Trier les offres</h2>
+            <div class="filter-section">
+                <h3>Type de contrat</h3>
+                <label><input type="checkbox"> CDD</label>
+                <label><input type="checkbox"> CDI</label>
+                <label><input type="checkbox"> Stage de fin d'études</label>
+                <label><input type="checkbox"> Stage Bac+4</label>
+                <label><input type="checkbox"> Job étudiant</label>
+            </div>
+            <div class="filter-section">
+                <h3>Métiers</h3>
+                <label><input type="checkbox"> Informatique</label>
+                <label><input type="checkbox"> Mécanique</label>
+                <label><input type="checkbox"> Urbain et Civil</label>
+                <label><input type="checkbox"> Biologique</label>
+                <label><input type="checkbox"> Procédés</label>
+            </div>
+            <div class="filter-section">
+                <h3>Localisation</h3>
+                <label><input type="checkbox"> Paris</label>
+                <label><input type="checkbox"> Bordeaux</label>
+                <label><input type="checkbox"> Nantes</label>
+                <label><input type="checkbox"> Lyon</label>
+                <label><input type="checkbox"> Lille</label>
+                <label><input type="checkbox"> +9 autres</label>
+            </div>
+        </aside>
+
+        <!-- Section des offres -->
+        <main class="job-list">
+            <div class="search-bar">
+                <input type="text" placeholder="Le job de vos rêves...">
+                <button class="filter-btn">Filtrer </button>
+                <button class="search-btn">Rechercher</button>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <img src="microsoft-logo.png" alt="Microsoft">
+                    <div>
+                        <h2>Développeur Front-End</h2>
+                        <p>Microsoft</p>
+                    </div>
+                </div>
+                <div class="job-context">
+                <p>Le développeur back-end est responsable de la conception et de l’optimisation des serveurs et
+                    d'autres fonctionnalités qui sont propres à blababababab</p>
+                </div>
+                <div class="job-footer">
+                    <a href="OffrePresice.html"><i class="bi bi-eye-fill" style="color: #333; font-size: 30px;"></i></a>
+                    <button id="openModalBtn" class="btn">Postuler</button>
+                </div>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <img src="microsoft-logo.png" alt="Microsoft">
+                    <div>
+                        <h2>Développeur Back-End</h2>
+                        <p>Microsoft</p>
+                    </div>
+                </div>
+                <div class="job-context">
+                <p>Le développeur front-end s’occupe de l’interface utilisateur et de l’expérience utilisateur
+                    (UI/UX)...</p>
+                </div>
+                <div class="job-footer">
+                    <i class="bi bi-eye-fill" style="color: #333; font-size: 30px;"></i>
+                    <button id="openModalBtn" class="btn">Postuler</button>
+                </div>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <img src="google-logo.png" alt="Google">
+                    <div>
+                        <h2>Développeur Full-Stack</h2>
+                        <p>Google</p>
+                    </div>
+                </div>
+                <div class="job-context">
+                <p>Le développeur full-stack est polyvalent : il gère à la fois le front-end et le back-end...</p>
+                </div>
+                <div class="job-footer">
+                    <i class="bi bi-eye-fill" style="color: #333; font-size: 30px;"></i>
+                    <button id="openModalBtn" class="btn">Postuler</button>
+                </div>
+            </div>
+
+            <div class="job">
+                <div class="job-header">
+                    <img src="google-logo.png" alt="Google">
+                    <div>
+                        <h2>Data Scientist</h2>
+                        <p>Google</p>
+                    </div>
+                </div>
+                <div class="job-context">
+                <p>Le Data Scientist est un expert de l’analyse et de l’exploitation des données...</p>
+                </div>  
+                <div class="job-footer">
+                    <i class="bi bi-eye-fill" style="color: #333; font-size: 30px;"></i>
+                    <button id="openModalBtn" class="btn">Postuler</button>
+                </div>
+            </div>
+        </main>
+        <div id="modalOverlay" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="job-header2">
+                    <div class="job-header2">
+                        <h3><b>Jump’In to the job !</b></h3><img src="JumpIn_IMG.png" alt="Logo" class="img2">
+                    </div>
+                    <button id="closeModalBtn" class="close-btn">&times;</button>
+                </div>
+                <form>
+                    <div class="form-group">
+                        <label>Adresse e-mail</label>
+                        <input type="email" placeholder="ex : pierre.fromont@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Numéro de téléphone</label>
+                        <input type="tel" placeholder="ex : +33 6 38 35 86 50">
+                    </div>
+                    <div class="form-group">
+                        <label>Mon CV</label>
+                        <input type="file">
+                    </div>
+                    <div class="form-group">
+                        <label>Ma Lettre de motivation</label>
+                        <input type="file">
+                    </div>
+
+                    <button class="btn">Jump’In !</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+    function toggleMenu() {
+        document.querySelector(".nav-links").classList.toggle("active");
+    }
+
+    document.getElementById("openModalBtn").addEventListener("click", function () {
+        document.getElementById("modalOverlay").style.display = "flex";
+    });
+
+    document.getElementById("closeModalBtn").addEventListener("click", function () {
+        document.getElementById("modalOverlay").style.display = "none";
+    });
+
+    // Fermer la modal si on clique en dehors du formulaire
+    document.getElementById("modalOverlay").addEventListener("click", function (event) {
+        if (event.target === this) {
+            this.style.display = "none";
+        }
+    });
+
+
+</script>
+
+</html>
