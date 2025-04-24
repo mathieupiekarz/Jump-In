@@ -1,0 +1,13 @@
+DROP TABLE Administrateur;
+DROP TABLE DemandeChangerOrganisation;
+DROP TABLE DemandeCreationOrganisation;
+DROP TABLE DemandeRecruteur;
+DROP TABLE Recruteur;
+DROP TABLE Piece_Jointe_Durable;
+DROP TABLE Piece_Jointe_Temporaire;
+DROP TABLE Candidature;
+DROP TABLE Offre_Emploi;
+DROP TABLE Candidat;
+DROP TABLE Fiche_Poste;
+DROP TABLE Organisation;
+DROP TABLE Utilisateur;
