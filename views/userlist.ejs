@@ -23,14 +23,21 @@
             <th>Firstname</th>
             <th>Lastname</th>
             <th>Email</th>
+            <th>Numéro Téléphone</th>
+            <th>Date Création Compte</th>
+            <th>Statut</th>
           </tr>
         </thead>
         <tbody>
-          <% users.forEach((user) => { %>
+          <% users.forEach((user) => { %> <% const date =
+          user.date_creation.toISOString().split('T')[0]; %>
           <tr>
             <td><%= user.prenom %></td>
             <td><%= user.nom %></td>
             <td><%= user.email %></td>
+            <td><%= user.numero_telephone %></td>
+            <td><%= date %></td>
+            <td><%= user.statut %></td>
           </tr>
           <% }); %>
         </tbody>
