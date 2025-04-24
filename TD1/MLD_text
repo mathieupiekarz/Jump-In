@@ -1,0 +1,29 @@
+Administrateur(#id_admin=>Utilisateur, email:varchar, mdp:varchar, nom:varchar, prenom:varchar, numero_telephone:varchar(15), date_creation:date, statut:{actif|inactif}) avec email UNIQUE
+
+Recruteur(#id_rec=>Utilisateur, siren=>Organisation, email:varchar, mdp:varchar, nom:varchar, prenom:varchar, numero_telephone:varchar(15), date_creation:date, statut:{actif|inactif}) avec siren not null et email UNIQUE
+
+DemandeChangerOrganisaton(#id_rec=>Recruteur, #siren=>Organisation, descriptionChO:text, dateDemandeChO:date, statutChO:{validee|refusee|en_attente});
+
+Organisation(#siren:varchar(9), nom:varchar, type:{association|EURL|SARL|SA|SAS|SASU|ONG}, siege_social:JSON, statut:{innactive, en cours, active})
+
+DemandeCreationOrganisation(#id_can=>Candidat, #siren=>Organisation, descriptionCrO:text, dateDemandeCrO:date, statutCrO:{validee|refusee|en_attente});
+
+DemandeRecruteur(#id_can=>Candidat, #siren=>Organisation, descriptionDR:text, dateDemandeDR:date, statutDR:{validee|refusee|en_attente});
+
+Candidat(#id_can=>Utilisateur, email:varchar, mdp:varchar, nom:varchar, prenom:varchar, numero_telephone:varchar(15), date_creation:date, statut:{actif|inactif}) avec email UNIQUE
+
+Candidature(#id_can=>Candidat, #num_OE=>Offre_Emploi, date_candidature:date)
+
+
+Piece_Jointe_Temporaire(#chemin:varchar, nom:varchar, type:{pdf|jpeg|png|xlsx|docx}, candidature=>Candidature) avec candidature not null
+Piece_Jointe_Durable(#chemin:varchar, nom:varchar, type:{pdf|jpeg|png|xlsx|docx}, id_can=>Candidat) avec id_can not null
+
+
+Offre_Emploi(#numero:int, etat:{non_publiee|publiee|expiree}, date_validite:date, indication:text, nb_piece_demandees:integer, id_fiche=>Fiche_Poste) 
+avec id_fiche not null
+
+Fiche_Poste(#id_fiche: int, intitule:varchar, statut_de_poste:{ouvrier|employé|ETAM|cadre|ingénieur|fonctionnaire|stagiaire}, responsable_hierarchique:varchar, type_metier:varchar, lieu_mission:JSON, rythme:varchar, fourchette_salaire:varchar, description:text, siren=>Organisation)
+avec siren not null
+
+
+TOUS LES ATTRIBUTS HORS-CLEF SONT NOT NULL
