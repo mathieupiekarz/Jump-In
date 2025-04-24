@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+
+    <style>
+
+        @media screen and (max-width: 730px) {
+
+        .search-bar {
+            display: block;
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .job-header2 h2 {
+            font-size: 15px;
+        }
+        
+        }
+
+    </style>
+
+</head>
+<body>
+    <header class="header">
+        <div>
+            <img src="JumpIn_Logo.png" alt="Jump'In Logo" height="80">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="ListeOffres.html">Les offres</a></li>
+                <li><a href="#">Mes candidatures</a></li> 
+                <li><a href="#" class="btn-connexion">Mon Profil</a></li>
+            </ul>
+
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("active");
+        }
+    </script>
+
+    <div class="container">
+
+        <div class="job-list">
+            <div class="search-bar">
+                <input type="text" placeholder="Le job de vos rêves..." />
+                <button class="filter-btn">Filtrer</button>
+                <button class="search-btn">Rechercher</button>
+            </div>
+
+            <div class="job">
+                <div class="job-header2">
+                    <div class="job-header2">
+                        <img src="profile-logo.png" alt="Profile Logo" />
+                        <div>
+                            <h2>Mathéo GROS</h2>
+                            <p>Candidat</p>
+                        </div>
+                    </div>
+                    <span>
+                    <a href="#"><i class="bi bi-pencil" style="color: #333;"></i></a>
+                    <button class="btn2">Rejoindre</button>
+                    <button class="btn">Modifier</button>
+                    </span>
+                </div>
+            </div>
+            <div class="job">
+                <div>
+                    <div class="job-content">
+                        <h4>Informations du profil :</h4>
+                        <div class="caracteristiques">
+                            <p class="smallbox"><strong>Prénom :</strong> Mathéo </p>
+                            <p class="smallbox"><strong>Nom :</strong> Gros </p>
+                            <p class="smallbox"><strong>E-mail :</strong> matheo.gros@outlook.fr </p>
+                            <p class="smallbox"><strong>Téléphone :</strong> 0638358650 </p>
+                            <p class="smallbox"><strong>Statut :</strong> Actif </p>
+                                                
+                        </div>
+                    </div>
+                    <div class="job-content">
+                        <h4>Détails du profil :</h4>
+                        <p>Étudiant en 3ème année à l'UTC en Génie Informatique, je souhaite me spécialiser en Intelligence et Sciences des Données. Je recherche un stage de 6 mois à partir de Septembre 2025 en Data, IA ou développement informatique.</p>
+                    </div>
+                    <div class="job-content">
+                        <h4>Mes documents :</h4>
+                        <span class="caracteristiques">
+                            <input type="file" placeholder="Mon CV..."></span>
+                            <input type="file" placeholder="Ma Lettre de Motivation..."></span>
+                            <input type="file" placeholder="Mon diplôme..."></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
