@@ -4,6 +4,7 @@ var router = express.Router();
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
 var organisation = require("../model/organisation.js");
+var pjd = require("../model/piece_jointe_durable.js");
 
 router.get("/userlist", function (req, res, next) {
   result = candidat.readall((result) => {
@@ -25,6 +26,15 @@ router.get("/orgalist", function (req, res, next) {
     res.render("orgalist", {
       title: "Liste des organisations",
       orgs: result,
+    });
+  });
+});
+
+router.get("/pjd", function (req, res, next) {
+  result = pjd.readall(function (result) {
+    res.render("pjd", {
+      title: "Liste des pièces jointes durables",
+      pjds: result,
     });
   });
 });
