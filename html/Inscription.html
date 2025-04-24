@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S'inscrire - Jump'In</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <header class="header">
+        <div>
+            <img src="JumpIn_Logo.png" alt="Jump'In Logo" height="80">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Les offres</a></li>
+                <li><a href="#">Mes candidatures</a></li> 
+                <li><a href="#" class="btn-connexion">Connexion</a></li>
+            </ul>
+
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("active");
+        }
+    </script>
+
+    <div class="login-container" style="position: relative;">
+        <h3>Créer un compte</h3>
+        <img src="JumpIn_IMG.png" alt="Logo" class="icon">
+        <div class="form-group">
+            <div>
+            <label for="nom" class="form-label">Nom :</label>
+            <input type="nom" id="nom" placeholder="Fromont" class="form-control">
+            <label for="prenom" class="form-label">Prénom :</label>
+            <input type="prenom" id="prenom" placeholder="Pierre" class="form-control">
+            <label for="telephone" class="form-label">Numéro de téléphone :</label>
+            <input type="telephone" id="telephone" placeholder="Ex : 06 38 35 86 50" class="form-control">
+            
+            </div>
+            <div>
+            <label for="email" class="form-label">Adresse mail :</label>
+            <input type="email" id="email" placeholder="Pierre.fromont@email.com" class="form-control">
+            <label for="password" class="form-label">Mot de passe :</label>
+            <input type="password" id="password" placeholder="password..." class="form-control">
+            <label for="password2" class="form-label">Confirmez :</label>
+            <input type="password2" id="password2" placeholder="password..." class="form-control">
+            </div>
+        </div>
+        <button class="btn">Valider</button>
+        <div class="forgot-links mt-2">
+            <a href="connexion.html" class="forgot-links mt-2">Déjà membre ? Se connecter</a>
+        </div>
+    </div>
+</body>
+</html>
