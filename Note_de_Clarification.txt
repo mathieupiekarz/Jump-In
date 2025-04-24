@@ -26,3 +26,11 @@ siege social Organisation : json
     pays: "Pays"
 };
 toutes les valeurs sont obligatoires sauf complément qui peut être null
+
+
+
+LIENS : 
+http://localhost:3000/users/userlist
+http://localhost:3000/users/adminlist
+http://localhost:3000/users/orgalist
+http://localhost:3000/users/pjd
