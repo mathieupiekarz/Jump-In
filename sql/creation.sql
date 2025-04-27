@@ -54,8 +54,7 @@ descriptionCrO text NOT NULL,
 dateDemandeCrO date NOT NULL,
 statutCrO enum('validee', 'refusee', 'en_attente') NOT NULL,
 PRIMARY KEY(id_can, siren),
-FOREIGN KEY(id_can) REFERENCES Candidat(id_can) ON DELETE CASCADE,
-FOREIGN KEY(siren) REFERENCES Organisation(siren) ON DELETE CASCADE
+FOREIGN KEY(id_can) REFERENCES Candidat(id_can) ON DELETE CASCADE
 );
 
 CREATE TABLE Fiche_Poste(
@@ -109,7 +108,8 @@ nom varchar(100) NOT NULL,
 prenom varchar(100) NOT NULL,
 numero_telephone varchar(15) NOT NULL,
 date_creation date DEFAULT CURRENT_DATE,
-statut enum('actif', 'inactif') NOT NULL
+statut enum('actif', 'inactif') NOT NULL,
+FOREIGN KEY (siren) REFERENCES Organisation(siren) ON DELETE CASCADE
 ); 
 
 CREATE TABLE DemandeChangerOrganisation(
