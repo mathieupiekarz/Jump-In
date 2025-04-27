@@ -1,0 +1,37 @@
+insert into Candidat (email, mdp, nom, prenom, numero_telephone, date_creation, statut) values ('mathieu.piekarz@gmail.com', 'oui', 'piekarz', 'mathieu', '0611737612', CURDATE(), 'actif')
+
+insert into Organisation (siren, nom, type, siege_social, statut) values ('123456789', 'Ricard', 'EURL', '{
+  "nom": "Ricard",
+  "adresse": "12 rue du temple",
+  "complement": "Escalier E",
+  "code_postal": "1212",
+  "ville": "Marseille",
+  "pays": "France"
+}', 'active')
+
+insert into Piece_Jointe_Durable (chemin, nom, type) values ('http://localhost:3000/users/userlist', 'helise', 'png')
+
+insert into DemandeRecruteur (id_can, siren, descriptionDR, dateDemandeDR, statutDR) values (2, '123456789', 'souhaite intégrer Ricard .Inc', CURDATE(), 'en_attente')
+
+insert into DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO)
+values (1, '787878781', 'souhaite créer l''organisation UTC', CURDATE(), 'en_attente');
+
+insert into Fiche_Poste (intitule, statut_de_poste, responsable_hierarchique, type_metier, lieu_mission, rythme, fourchette_salaire, description, siren) values ('Testeur', 'cadre', 'TOURENG Hadrien','chimie des acides', '{
+  "nom": "Cathédrale",
+  "adresse": "8 rue du pissenlit",
+  "complement": "à gauche",
+  "code_postal": "13000",
+  "ville": "Marseille",
+  "pays": "France"
+}', '8h/jour', '2800-3500', 'on cherche un testeur pour goûter nos produits', '123456789')
+
+insert into Offre_Emploi (etat, date_validite, indication, nb_pieces_demandees, id_fiche) values ('non_publiee', '2026-12-07', 'CV, lettre de motivation, attestion civile', 3, 1)
+
+insert into Candidature (id_can, num_OE, date_candidature) values (1, 1, CURDATE())
+
+insert into Piece_Jointe_Temporaire (chemin, nom, type) values ('http://localhost:3000/users/demandeCrOlist', 'maxence', 'xlsx')
+
+insert into Recruteur (siren, email, mdp, nom, prenom, numero_telephone, date_creation, statut) values ('pierre.liquois@yahoo.fr', 'lazoneenpersonne', 'liquois', 'pierre', '0622122212', CURDATE(), 'actif')
+
+insert into DemandeChangerOrganisation (id_rec, siren, descriptionChO, dateDemandeChO, statutChO)
+values (1, '121212121', 'souhaite rejoindre l''organisation Apple', CURDATE(), 'en_attente');
