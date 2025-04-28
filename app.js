@@ -1,6 +1,5 @@
 var createError = require("http-errors");
 var express = require("express");
-var session = require("express-session");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -10,15 +9,6 @@ var usersRouter = require("./routes/users");
 
 var app = express();
 
-// session
-app.use(
-  session({
-    secret: "c0f8ad7f-2e49-4a1e-9d6c-fb75e3c8abf4~Z4!tR9@Kx#Wp2$Mq7J^Lv0Xe", // 🔒 change ça par un secret sécurisé
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // à mettre à true si HTTPS
-  })
-);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
