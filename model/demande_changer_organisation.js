@@ -32,29 +32,35 @@ const dcho = {
       return callback(null);
     }
 
-    // Vérification si le recruteur appartient déjà à l'entreprise (siren)
-    const sqlVerif = "SELECT * FROM Recruteur WHERE id_rec = ? AND siren = ?";
-    db.query(sqlVerif, [id_rec, siren], (err, resVerif) => {
+    // Vérifie d'abord si le siren existe dans Organisation
+    const sqlOrg = "SELECT 1 FROM Organisation WHERE siren = ?";
+    db.query(sqlOrg, [siren], (err, resOrg) => {
       if (err) throw err;
-      console.log(resVerif);
-      if (resVerif.length > 0) return callback(null);
+      if (resOrg.length === 0) return callback(null);
 
-      // Vérification si une demande existe déjà entre ce recruteur et cette entreprise
-      dcho.read(id_rec, siren, (result) => {
-        if (result && result.length > 0) return callback(null);
+      // Vérifie si le recruteur est déjà dans cette organisation
+      const sqlVerif = "SELECT 1 FROM Recruteur WHERE id_rec = ? AND siren = ?";
+      db.query(sqlVerif, [id_rec, siren], (err, resVerif) => {
+        if (err) throw err;
+        if (resVerif.length > 0) return callback(null);
 
-        // Insertion de la demande
-        const sql =
-          "INSERT INTO DemandeChangerOrganisation (id_rec, siren, descriptionChO, dateDemandeChO, statutChO) VALUES (?, ?, ?, ?, ?)";
-        const dateDemandeChO = new Date().toISOString().split("T")[0];
-        db.query(
-          sql,
-          [id_rec, siren, descriptionChO, dateDemandeChO, statutChO],
-          (err, results) => {
-            if (err) throw err;
-            callback(results.insertId);
-          }
-        );
+        // Vérifie si une demande identique existe déjà
+        dcho.read(id_rec, siren, (result) => {
+          if (result && result.length > 0) return callback(null);
+
+          // Insertion de la nouvelle demande
+          const sql =
+            "INSERT INTO DemandeChangerOrganisation (id_rec, siren, descriptionChO, dateDemandeChO, statutChO) VALUES (?, ?, ?, ?, ?)";
+          const dateDemandeChO = new Date().toISOString().split("T")[0];
+          db.query(
+            sql,
+            [id_rec, siren, descriptionChO, dateDemandeChO, statutChO],
+            (err, results) => {
+              if (err) throw err;
+              callback(results.insertId);
+            }
+          );
+        });
       });
     });
   },

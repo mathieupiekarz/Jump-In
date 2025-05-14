@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeChO = require("../model/demande_changer_organisation.js");
+const demandeCrO = require("../model/demande_creation_organisation.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeChO", (done) => {
-    demandeChO.read(1, 121212121, (resultat) => {
+  test("read demandeCrO", (done) => {
+    demandeChO.read(1, "121212121", (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutChO).toBe("en_attente");
+          expect(resultat[0].statutChO).toBe("refusee");
           done();
         }
       } catch (err) {
@@ -43,7 +43,7 @@ describe("Model Tests", () => {
       1,
       "123456788",
       "demande de rejoindre Ricard",
-      "refusee",
+      "en_attente",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -58,17 +58,12 @@ describe("Model Tests", () => {
       }
     );
   });
-  /*
-  test("update user", (done) => {
+  test("update demandeChO", (done) => {
     var dico = {
-      email: "mathieu.piekarz@outlook.fr",
-      mdp: "ttAA11#*izgoaajivza",
-      nom: "piekarz",
-      prenom: "mathieu",
-      numero_telephone: "+33667654578",
-      statut: "actif",
+      descriptionChO: "voudrait rejoindre APPLE&co",
+      statutChO: "refusee",
     };
-    candidat.update(1, dico, (resultat) => {
+    demandeChO.update(1, "121212121", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -80,8 +75,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete user", (done) => {
-    candidat.delete(2, (resultat) => {
+  test("delete demandeChO", (done) => {
+    demandeChO.delete(1, "123456788", (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -93,22 +88,4 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("connexion user", (done) => {
-    candidat.connect(
-      "benoit.demiscault@outlook.fr",
-      "AB123test@?test",
-      (resultat) => {
-        try {
-          if (resultat === null) done();
-          else {
-            expect(resultat[0].email).toBe("benoit.demiscault@outlook.fr");
-            done();
-          }
-        } catch (err) {
-          done(err);
-        }
-      }
-    );
-  });
-  */
 });
