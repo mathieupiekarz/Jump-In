@@ -5,6 +5,7 @@ const candidat = {
     let sql = "SELECT * FROM Candidat WHERE email = ?";
     db.query(sql, [email], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -48,22 +49,25 @@ const candidat = {
       console.log("Erreur : format invalide !");
       return callback(null);
     }
-    
+
     // vérification de la composition du mot de passe
     let regex =
       /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤\d]{12,}$/;
-    if (!regex.test(mdp)) {console.log("Erreur : mot de passe invalide !"); return callback(null)};
-    
-    
+    if (!regex.test(mdp)) {
+      console.log("Erreur : mot de passe invalide !");
+      return callback(null);
+    }
+
     // vérification du format du numéro de téléphone
     const numValide = /^\+33\d{9}$/.test(num);
     if (!numValide) return callback(null);
-    
+
     // vérification du format de l'email
     regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
-    if (!regex.test(email)) {console.log("Erreur : e-mail invalide !"); return callback(null)};
-    
-    
+    if (!regex.test(email)) {
+      console.log("Erreur : e-mail invalide !");
+      return callback(null);
+    }
 
     // vérification si un candidat existant a déjà le même email
     candidat.read(email, (result) => {
@@ -183,14 +187,12 @@ const candidat = {
   },
   // vérification si le candidat existe
   connect: (email, mdp, callback) => {
-    let sql = 'SELECT email FROM Candidat WHERE email = ? AND mdp = ?';
-    db.query(sql,[email, mdp],(err, results) => {
-        if (err) throw err;
-        callback(results);
-      }
-    );
+    let sql = "SELECT email FROM Candidat WHERE email = ? AND mdp = ?";
+    db.query(sql, [email, mdp], (err, results) => {
+      if (err) throw err;
+      callback(results);
+    });
   },
 };
-
 
 module.exports = candidat;
