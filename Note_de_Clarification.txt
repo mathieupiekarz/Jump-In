@@ -1,0 +1,44 @@
+MDP :
+    - au minimum 12 caractères
+    - comprenant des majuscules, des minuscules, des chiffres et des caractères spéciaux à choisir dans
+une liste d'au moins 37 caractères spéciaux possibles
+
+liste caractères spéciaux : 
+    - ['!', '?', '@', '$', '%', '&', '*', '+', '=', '-', '_', '.', ',', ';', ':', '/', '\\', '|', '^', '~', '#', '(', ')', '[', ']', '{', '}', '<', '>', '`', "'", '"', '€', '£', 'µ', '§', '°', '¤']
+
+dans les caractères non spéciaux, on comprend les caractères suivant : [à, â, ä, ç, é, è, ê, ë, î, ï, ô, ö, û, ü, ù, ÿ, À, Â, Ä, Ç, É, È, Ê, Ë, Î, Ï, Ô, Ö, Û, Ü, Ù]
+
+
+siege_social Organisation & lie_mission Fiche_Poste : json 
+[NOM DE L’ENTREPRISE]
+[Numéro et nom de rue]
+[Complément éventuel : Bâtiment, étage, boîte, etc.]
+[Code postal] [Ville]
+[FRANCE]
+
+==> format obligatoire : 
+{ 
+    nom: "NOM DE L’ENTREPRISE",
+    adresse: "Numéro et nom de rue",
+    complement: "Bâtiment, étage, boîte, etc",
+    code_postal: "Code postal",
+    ville: "Ville",
+    pays: "Pays"
+};
+toutes les valeurs sont obligatoires sauf complément qui peut être null
+
+
+
+LIENS Rendu 3mai : 
+http://localhost:3000/users/userlist
+http://localhost:3000/users/adminlist
+http://localhost:3000/users/orgalist
+http://localhost:3000/users/pjdlist
+http://localhost:3000/users/demandeRlist
+http://localhost:3000/users/demandeCrOlist
+http://localhost:3000/users/fichePostelist
+http://localhost:3000/users/offreEmploilist
+http://localhost:3000/users/candidaturelist
+http://localhost:3000/users/pjtlist
+http://localhost:3000/users/reclist
+http://localhost:3000/users/demandeChOlist
