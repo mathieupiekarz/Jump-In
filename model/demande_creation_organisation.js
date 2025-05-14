@@ -6,12 +6,14 @@ const dco = {
       "SELECT * FROM DemandeCreationOrganisation WHERE id_can = ? AND siren = ?";
     db.query(sql, [id_can, siren], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM DemandeCreationOrganisation", (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -30,11 +32,18 @@ const dco = {
       return callback(null);
     }
 
-    // vérification si une demande existante a déjà le même id_can et siren
-    dco.read(id_can, siren, (result) => {
-      if (result.length > 0) return callback(null);
-      else {
-        let sql =
+    // Vérifier que le siren n'existe pas déjà dans Organisation
+    const sqlVerifSiren = "SELECT 1 FROM Organisation WHERE siren = ?";
+    db.query(sqlVerifSiren, [siren], (err, resSiren) => {
+      if (err) throw err;
+      if (resSiren.length > 0) return callback(null);
+
+      // Vérification si une demande identique existe déjà
+      dco.read(id_can, siren, (result) => {
+        if (result && result.length > 0) return callback(null);
+
+        // Insertion de la nouvelle demande
+        const sql =
           "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO) VALUES (?, ?, ?, ?, ?)";
         const dateDemandeCrO = new Date().toISOString().split("T")[0];
         db.query(
@@ -45,7 +54,7 @@ const dco = {
             callback(results.insertId);
           }
         );
-      }
+      });
     });
   },
   // prend en argument un dictionnaire qui contient tous les arguments de DemandeCreationOrganisation en clé

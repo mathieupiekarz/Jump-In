@@ -13,11 +13,12 @@ describe("Model Tests", () => {
     DB.end(callback);
   });
   test("read demandeCrO", (done) => {
-    demandeChO.read(1, "121212121", (resultat) => {
+    demandeCrO.read(1, "787878781", (resultat) => {
       try {
+        console.log(resultat);
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutChO).toBe("refusee");
+          expect(resultat[0].statutCrO).toBe("refusee");
           done();
         }
       } catch (err) {
@@ -25,8 +26,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeChO", (done) => {
-    demandeChO.readall((resultat) => {
+  test("readall demandeCrO", (done) => {
+    demandeCrO.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -38,11 +39,11 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeChO", (done) => {
-    demandeChO.creat(
+  test("create demandeCrO", (done) => {
+    demandeCrO.creat(
       1,
-      "123456788",
-      "demande de rejoindre Ricard",
+      "939393931",
+      "demande de créer Lamborghini",
       "en_attente",
       (resultat) => {
         try {
@@ -58,12 +59,12 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update demandeChO", (done) => {
+  test("update demandeCrO", (done) => {
     var dico = {
-      descriptionChO: "voudrait rejoindre APPLE&co",
-      statutChO: "refusee",
+      descriptionCrO: "voudrait créer ESCOM",
+      statutCrO: "refusee",
     };
-    demandeChO.update(1, "121212121", dico, (resultat) => {
+    demandeCrO.update(1, "787878781", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -75,8 +76,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeChO", (done) => {
-    demandeChO.delete(1, "123456788", (resultat) => {
+  test("delete demandeCrO", (done) => {
+    demandeCrO.delete(1, "939393931", (resultat) => {
       try {
         if (resultat === null) done();
         else {
