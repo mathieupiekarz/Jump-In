@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Jump'In</title>
+
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+
+    <style>
+        @media screen and (max-width: 730px) {
+            .sidebar {
+                display: none;
+                width: 280px;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .search-bar {
+                display: block;
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .job-header h2 {
+                font-size: 15px;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <header class="header">
+        <div>
+            <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="./ListeOffres" class="active">Les offres</a></li>
+                <li><a href="./MesOffres">Mes candidatures</a></li>
+                <li><a href="./profile" class="btn-connexion">Mon Profil</a></li>
+            </ul>
+
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("active");
+        }
+    </script>
+
+    <div class="container">
+        <!-- Barre latérale de filtrage -->
+        <aside class="sidebar">
+            <h2>Trier les offres</h2>
+            <div class="filter-section">
+                <h4>Type de contrat</h4>
+                <label><input type="checkbox"> CDD</label>
+                <label><input type="checkbox"> CDI</label>
+                <label><input type="checkbox"> Stage de fin d'études</label>
+                <label><input type="checkbox"> Stage Bac+4</label>
+                <label><input type="checkbox"> Job étudiant</label>
+            </div>
+            <div class="filter-section">
+                <h4>Métiers</h4>
+                <label><input type="checkbox"> Informatique</label>
+                <label><input type="checkbox"> Mécanique</label>
+                <label><input type="checkbox"> Urbain et Civil</label>
+                <label><input type="checkbox"> Biologique</label>
+                <label><input type="checkbox"> Procédés</label>
+            </div>
+            <div class="filter-section">
+                <h4>Localisation</h4>
+                <label><input type="checkbox"> Paris</label>
+                <label><input type="checkbox"> Bordeaux</label>
+                <label><input type="checkbox"> Nantes</label>
+                <label><input type="checkbox"> Lyon</label>
+                <label><input type="checkbox"> Lille</label>
+                <label><input type="checkbox"> +9 autres</label>
+            </div>
+        </aside>
+
+        <!-- Section des offres -->
+        <main class="job-list">
+            <div class="search-bar">
+                <input type="text" placeholder="Le job de vos rêves...">
+                <button class="filter-btn">Filtrer </button>
+                <button class="search-btn">Rechercher</button>
+            </div>
+
+            <% offres.forEach((offre) => { %>
+            <div class="job">
+                <div class="job-header">
+                <img src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png" alt="<%= offre.organisation_nom %>">
+                <div>
+                    <h2><%= offre.intitule %></h2>
+                    <p><%= offre.organisation_nom %></p>
+                </div>
+                </div>
+
+                <div class="job-context">
+                <p><%= offre.description %></p>
+                </div>
+
+                <div class="job-footer">
+                <a href="/users/offre/<%= offre.numero %>">
+                    <i class="bi bi-eye-fill" style="color: #333; font-size: 30px;"></i>
+                </a>
+                <button class="btn openModalBtn" data-offre-id="<%= offre.numero %>">Postuler</button>
+                </div>
+            </div>
+            <% }) %>
+
+        </main>
+        
+        <div id="modalOverlay" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="job-header2">
+                    <div class="job-header2">
+                        <h3><b>Jump'In to the job !</b></h3><img src="/images/JumpIn_IMG.png" alt="Logo" class="img2">
+                    </div>
+                    <button id="closeModalBtn" class="close-btn">&times;</button>
+                </div>
+                <form method="post" action="/users/postuler">
+                    <input type="hidden" name="numero_offre" id="hiddenOffreId">
+                    <input type="hidden" name="id_candidat" id="hiddenCandidatId">
+
+                    <div class="form-group">
+                        <label>Adresse e-mail</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Numéro de téléphone</label>
+                        <input type="tel" name="telephone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mon CV</label>
+                        <input type="file" name="cv" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ma Lettre de motivation</label>
+                        <input type="file" name="lettre" required>
+                    </div>
+                
+                    <button class="btn">Jump'In !</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+
+
+<script>
+    function toggleMenu() {
+        document.querySelector(".nav-links").classList.toggle("active");
+    }
+
+    const modal = document.getElementById("modalOverlay");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const offreIdInput = document.getElementById("hiddenOffreId");
+
+    document.querySelectorAll(".openModalBtn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const offreId = this.dataset.offreId;
+            offreIdInput.value = offreId; // Injecter l'ID dans le formulaire, très important !
+            modal.style.display = "flex";
+        });
+    });
+
+    closeModalBtn.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+
+    modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+</script>
+
+</html>

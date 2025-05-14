@@ -14,13 +14,53 @@ const candidature = {
       callback(results);
     });
   },
+  readWithCandidatAndOffre: (numero, id_can, callback) => {
+    let sql = `SELECT o.numero, o.etat, o.date_validite, o.indication, o.nb_pieces_demandees,
+          f.id_fiche, f.intitule, f.statut_de_poste, f.responsable_hierarchique,
+          f.type_metier, f.lieu_mission, f.rythme, f.fourchette_salaire, f.description,
+          org.nom AS organisation_nom, org.siren, org.type, org.siege_social,
+          c.date_candidature
+        FROM Offre_Emploi o
+        JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
+        JOIN Organisation org ON f.siren = org.siren
+        JOIN Candidature c ON o.numero = c.num_OE
+        WHERE o.numero = ? AND c.id_can = ?`;
+    db.query(sql, [numero, id_can], (err, results) => {
+      if (err) throw err;
+      callback(results);
+    });
+  },
+  
+  readCandidaturesWithOffreDetails: (id_can, callback) => {
+    let sql = `
+      SELECT o.numero, o.etat, o.date_validite, o.indication, o.nb_pieces_demandees,
+        f.id_fiche, f.intitule, f.statut_de_poste, f.responsable_hierarchique,
+        f.type_metier, f.lieu_mission, f.rythme, f.fourchette_salaire, f.description,
+        org.nom AS organisation_nom, org.siren, org.type, org.siege_social,
+        c.date_candidature
+      FROM Candidature c
+      JOIN Offre_Emploi o ON c.num_OE = o.numero
+      JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
+      JOIN Organisation org ON f.siren = org.siren
+      WHERE c.id_can = ?
+    `;
+    db.query(sql, [id_can], (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la récupération des candidatures:", err);
+        callback([]);
+      } else {
+        callback(results);
+      }
+    });
+  },
+
   creat: (id_can, num_OE, callback) => {
     // vérification non null et types cohérents
     if (
       !id_can ||
-      typeof id_can !== "int" ||
+      typeof id_can !== "number" ||
       !num_OE ||
-      typeof num_OE !== "int"
+      typeof num_OE !== "number"
     ) {
       return callback(null);
     }

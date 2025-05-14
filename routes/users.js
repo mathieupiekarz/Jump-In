@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var db = require("../model/db.js");
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -112,6 +113,168 @@ router.get("/demandeChOlist", function (req, res, next) {
     res.render("demandeChOlist", {
       title: "Liste de Demandes de Changement d'Organisation",
       demandes: result,
+    });
+  });
+});
+
+/////////////////////////////////////////////////////////////////////////////
+router.get("/login", function (req, res, next) {
+  res.render("Login", { title: "S'authentifier" });
+});
+
+router.post('/login', function(req, res, next) {
+  const { email, password } = req.body;
+  console.log("email :", email);
+  console.log("password :", password);
+
+  candidat.connect(email, password, (result) => {
+    if (!result || result.length === 0) {
+      return res.send("Identifiants incorrects.");
+    }  
+    const utilisateur = result[0];
+    console.log("result :", utilisateur);
+    console.log("type :", typeof utilisateur);
+  
+    utilisateur.role = "candidat";
+    req.session.userid = utilisateur.email;
+    req.session.role = utilisateur.role;
+
+    console.log("Session enregistrée :", req.session);
+
+    res.redirect("/users/ListeOffres");
+  });
+});
+
+router.get("/Profile", function (req, res, next) {
+  if (!req.session.userid) {
+    return res.status(403).send("Accès interdit. Veuillez vous connecter.");
+  }
+  const email = req.session.userid;
+  candidat.read(email, function(result) {
+    if (!result || result.length === 0) {
+      return res.status(404).send("Candidat non trouvée.");
+    }
+    res.render("Profile", {
+      title: "Informations Personnelles",
+      candidat: result[0]
+    });
+  });
+});
+
+router.get("/ListeOffres", function (req, res, next) {
+  offre.readAllWithFicheAndOrganisation((result) => {
+    res.render("ListeOffres", {
+      title: "Liste des Offres d'Emploi",
+      offres: result
+    });
+  });
+});
+
+router.get("/inscription", function (req, res, next) {
+  res.render("inscription", { title: "Créer un compte" });
+});
+
+router.post('/inscription', function(req, res, next) {
+  const { nom, prenom, num, email, password, password2 } = req.body;
+
+  // Exemple de simple validation pour le moment
+  if (!nom || !prenom || !num || !email || !password || !password2) {
+    return res.status(400).send("Veuillez remplir tous les champs !");
+  }
+
+  if (password !== password2) {
+    return res.send("Les mots de passe ne correspondent pas !");
+  }
+
+  // Statut = actif par défaut, à voir si on le garde
+  // ou si on le met à inactif par défaut et qu'on l'active après validation
+  const statut = "actif";
+
+  candidat.creat(email, password, nom, prenom, num, statut, (result) => {
+    if (!result) {
+      return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
+    } else {
+      res.redirect('/users/userlist'); // après inscription, retour à la liste des utilisateurs (à enlever ensuite car c'est pour tester)
+    }
+  });
+});
+
+router.get("/offre/:id", function (req, res, next) {
+  const id = req.params.id;
+
+  offre.readWithFicheAndOrganisation(id, function (result) {
+    if (!result || result.length === 0) {
+      return res.status(404).send("Offre non trouvée.");
+    }
+
+    res.render("OffreDetail", {
+      title: "Détail de l'offre",
+      offre: result[0],
+    });
+  });
+});
+
+router.post('/postuler', function(req, res, next) {
+  // Vérifier si l'utilisateur est connecté sinon impossible
+  if (!req.session.userid) {
+    return res.status(403).send("Accès interdit. Veuillez vous connecter.");
+  }
+
+  const email = req.session.userid;
+  const numero_offre = parseInt(req.body.numero_offre, 10);
+
+  // Récupérer l'ID du candidat à partir de son email (très important, sinon on ne peut pas récupérer id_candidat)
+  candidat.read(email, function(result) {
+    if (!result || result.length === 0) {
+      return res.status(404).send("Candidat non trouvé.");
+    }
+    const id_candidat = result[0].id_can;
+    
+    candidature.creat(id_candidat, numero_offre, (result) => {
+      if (result === null) {
+        return res.send("Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre.");
+      } else {
+        res.redirect('/users/ListeOffres');
+      }
+    });
+  });
+});
+
+router.get("/offre/:id", function (req, res, next) {
+  const id = req.params.id;
+
+  offre.readWithFicheAndOrganisation(id, function (result) {
+    if (!result || result.length === 0) {
+      return res.status(404).send("Offre non trouvée.");
+    }
+
+    res.render("OffreDetail", {
+      title: "Détail de l'offre",
+      offre: result[0],
+    });
+  });
+});
+
+router.get("/MesOffres", function (req, res, next) {
+  // Vérifier si l'utilisateur est connecté (toujours important avec la session)
+  if (!req.session.userid) {
+    return res.status(403).send("Accès interdit. Veuillez vous connecter.");
+  }
+
+  const email = req.session.userid;
+
+  // Récupérer l'ID du candidat à partir de son email (très important, sinon on ne peut pas récupérer id_candidat)
+  candidat.read(email, function(candidatResult) {
+    if (!candidatResult || candidatResult.length === 0) {
+      return res.status(404).send("Candidat non trouvé.");
+    }
+    const id_candidat = candidatResult[0].id_can;
+  
+    candidature.readCandidaturesWithOffreDetails(id_candidat, (offres) => {
+      res.render("MesOffres", {
+        title: "Mes candidatures",
+        offres: offres
+      });
     });
   });
 });
