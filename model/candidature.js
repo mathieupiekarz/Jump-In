@@ -5,6 +5,7 @@ const candidature = {
     let sql = "SELECT * FROM Candidature WHERE id_can = ? AND num_OE = ?";
     db.query(sql, [id_can, num_OE], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -30,7 +31,7 @@ const candidature = {
       callback(results);
     });
   },
-  
+
   readCandidaturesWithOffreDetails: (id_can, callback) => {
     let sql = `
       SELECT o.numero, o.etat, o.date_validite, o.indication, o.nb_pieces_demandees,
