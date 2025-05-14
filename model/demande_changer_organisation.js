@@ -6,12 +6,14 @@ const dcho = {
       "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?";
     db.query(sql, [id_rec, siren], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM DemandeChangerOrganisation", (err, results) => {
       if (err) throw err;
+      if (results === null) callback(null);
       callback(results);
     });
   },
@@ -19,7 +21,7 @@ const dcho = {
     // vérification non null et types cohérents
     if (
       !id_rec ||
-      typeof id_rec !== "int" ||
+      typeof id_rec !== "number" ||
       !siren ||
       typeof siren !== "string" ||
       !descriptionChO ||
@@ -30,11 +32,19 @@ const dcho = {
       return callback(null);
     }
 
-    // vérification si une demande existante a déjà le même id_rec et siren
-    dcho.read(id_rec, siren, (result) => {
-      if (result.length > 0) return callback(null);
-      else {
-        let sql =
+    // Vérification si le recruteur appartient déjà à l'entreprise (siren)
+    const sqlVerif = "SELECT * FROM Recruteur WHERE id_rec = ? AND siren = ?";
+    db.query(sqlVerif, [id_rec, siren], (err, resVerif) => {
+      if (err) throw err;
+      console.log(resVerif);
+      if (resVerif.length > 0) return callback(null);
+
+      // Vérification si une demande existe déjà entre ce recruteur et cette entreprise
+      dcho.read(id_rec, siren, (result) => {
+        if (result && result.length > 0) return callback(null);
+
+        // Insertion de la demande
+        const sql =
           "INSERT INTO DemandeChangerOrganisation (id_rec, siren, descriptionChO, dateDemandeChO, statutChO) VALUES (?, ?, ?, ?, ?)";
         const dateDemandeChO = new Date().toISOString().split("T")[0];
         db.query(
@@ -45,7 +55,7 @@ const dcho = {
             callback(results.insertId);
           }
         );
-      }
+      });
     });
   },
   // prend en argument un dictionnaire qui contient tous les arguments de DemandeChangerOrganisation en clé
@@ -93,7 +103,7 @@ const dcho = {
       }
     );
   },
-  delete: (id_can, siren, callback) => {
+  delete: (id_rec, siren, callback) => {
     // vérification si la demande existe
     db.query(
       "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?",

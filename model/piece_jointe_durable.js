@@ -24,7 +24,7 @@ const pjd = {
       !type ||
       !["pdf", "jpeg", "png", "xlsx", "docx"].includes(type) ||
       !id_can ||
-      typeof id_can !== "int"
+      typeof id_can !== "number"
     ) {
       return callback(null);
     }

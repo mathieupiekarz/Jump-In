@@ -57,11 +57,11 @@ const offre = {
       !date_validite ||
       typeof date_validite !== "string" ||
       !nb_pieces_demandees ||
-      typeof nb_pieces_demandees !== "int" ||
+      typeof nb_pieces_demandees !== "number" ||
       !etat ||
       !["non_publiee", "publiee", "expiree"].includes(etat) ||
       !id_fiche ||
-      typeof id_fiche !== "int"
+      typeof id_fiche !== "number"
     ) {
       return callback(null);
     }
@@ -134,7 +134,7 @@ const offre = {
 
           // vérification si nb_pieces_demandees est dans le bon format
           if ("nb_pieces_demandees" in nvdict) {
-            if (typeof nvdict.nb_pieces_demandees !== "int")
+            if (typeof nvdict.nb_pieces_demandees !== "number")
               return callback(null);
             if (nvdict.nb_pieces_demandees < 0) return callback(null);
           }

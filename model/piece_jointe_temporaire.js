@@ -24,9 +24,9 @@ const pjt = {
       !type ||
       !["pdf", "jpeg", "png", "xlsx", "docx"].includes(type) ||
       !id_can ||
-      typeof id_can !== "int" ||
+      typeof id_can !== "number" ||
       !num_OE ||
-      typeof num_OE !== "int"
+      typeof num_OE !== "number"
     ) {
       return callback(null);
     }

@@ -18,7 +18,7 @@ const dr = {
     // vérification non null et types cohérents
     if (
       !id_can ||
-      typeof id_can !== "int" ||
+      typeof id_can !== "number" ||
       !siren ||
       typeof siren !== "string" ||
       !descriptionDR ||
