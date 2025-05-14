@@ -24,7 +24,6 @@
         }
         
         }
-
     </style>
 
 </head>
@@ -55,6 +54,22 @@
         }
     </script>
 
+    <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+    <div id="successNotification" class="success-notification">
+        <%= successMessage %>
+    </div>
+    <script>
+        // Faire disparaître la notification après 3 secondes
+        setTimeout(function() {
+            const notification = document.getElementById('successNotification');
+            notification.classList.add('fadeOut');
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 500);
+        }, 3000);
+    </script>
+    <% } %>
+
     <div class="container">
 
         <div class="job-list">
@@ -76,7 +91,7 @@
                     <span>
                     <a href="#"><i class="bi bi-pencil" style="color: #333;"></i></a>
                     <button class="btn2">Rejoindre</button>
-                    <button class="btn">Modifier</button>
+                    <button class="btn" id="modifyBtn">Modifier</button>
                     </span>
                 </div>
             </div>
@@ -109,5 +124,101 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de modification du profil -->
+    <div id="editProfileModal" class="modal-profile">
+        <div class="modal-content-profile">
+            <div class="modal-header-profile">
+                <h3>Modifier mon profil</h3>
+                <span class="close-profile" id="closeModal">&times;</span>
+            </div>
+            <form id="editProfileForm" action="/users/updateProfile" method="POST">
+                <div class="form-group-profile">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" id="prenom" name="prenom" value="<%= candidat.prenom %>" required>
+                </div>
+                <div class="form-group-profile">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom" value="<%= candidat.nom %>" required>
+                </div>
+                <div class="form-group-profile">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" value="<%= candidat.email %>" required>
+                </div>
+                <div class="form-group-profile ">
+                    <label for="numero_telephone">Téléphone (format: +33XXXXXXXXX)</label>
+                    <input type="tel" id="numero_telephone" name="numero_telephone" value="<%= candidat.numero_telephone %>" pattern="^\+33\d{9}$" required>
+                </div>
+                <div class="form-group-profile">
+                    <label for="mdp">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+                    <input type="password" id="mdp" name="mdp" placeholder="Nouveau mot de passe">
+                    <small>Le mot de passe doit contenir au moins 12 caractères, 2 majuscules, 2 minuscules et 2 caractères spéciaux</small>
+                </div>
+                <div class="form-group-profile">
+                    <label for="mdp_confirm">Confirmer le mot de passe</label>
+                    <input type="password" id="mdp_confirm" name="mdp_confirm" placeholder="Confirmer le mot de passe">
+                </div>
+                <input type="hidden" name="id_can" value="<%= candidat.id_can %>">
+                <div class="form-buttons-profile">
+                    <button type="button" class="cancel-btn-profile" id="cancelBtn">Annuler</button>
+                    <button type="submit" class="save-btn-profile">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Gestion du modal de modification
+        const modal = document.getElementById("editProfileModal");
+        const modifyBtn = document.getElementById("modifyBtn");
+        const closeModal = document.getElementById("closeModal");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const form = document.getElementById("editProfileForm");
+        const mdpInput = document.getElementById("mdp");
+        const mdpConfirmInput = document.getElementById("mdp_confirm");
+
+        // Ouvrir le modal
+        modifyBtn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Fermer le modal
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        cancelBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Fermer si on clique en dehors du modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Validation du formulaire
+        form.onsubmit = function(e) {
+            // Vérifier que les mots de passe correspondent
+            if (mdpInput.value && mdpInput.value !== mdpConfirmInput.value) {
+                e.preventDefault();
+                alert("Les mots de passe ne correspondent pas.");
+                return false;
+            }
+            
+            // Vérifier le format du mot de passe si renseigné
+            if (mdpInput.value) {
+                const regex = /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
+                if (!regex.test(mdpInput.value)) {
+                    e.preventDefault();
+                    alert("Le mot de passe ne respecte pas les critères de sécurité.");
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+    </script>
 </body>
 </html>

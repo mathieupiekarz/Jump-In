@@ -609,4 +609,124 @@
             border-radius: 5px;
         }
 
+        .candidature-date {
+            background-color: #6ec7d3;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
         
+        .no-candidatures {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .no-candidatures h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .no-candidatures p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Style pour le modal de modification */
+        .modal-profile {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content-profile {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header-profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-profile {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .form-group-profile {
+            margin-bottom: 15px;
+        }
+
+        .form-group-profile label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group-profile input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-buttons-profile {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .form-buttons-profile button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cancel-btn-profile {
+            background-color: #f0f0f0;
+        }
+
+        .save-btn-profile {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Style pour la notification de succès */
+        .success-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1100;
+            transition: opacity 0.5s ease-in-out;
+            max-width: 300px;
+        }
+
+        .success-notification.fadeOut {
+            opacity: 0;
+        }

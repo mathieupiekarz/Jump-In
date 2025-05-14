@@ -154,9 +154,16 @@ router.get("/Profile", function (req, res, next) {
     if (!result || result.length === 0) {
       return res.status(404).send("Candidat non trouvée.");
     }
+    
+    // Récupérer le message de succès s'il existe
+    const successMessage = req.session.successMessage;
+    // Supprimer le message de la session pour qu'il ne s'affiche qu'une fois
+    delete req.session.successMessage;
+    
     res.render("Profile", {
       title: "Informations Personnelles",
-      candidat: result[0]
+      candidat: result[0],
+      successMessage: successMessage
     });
   });
 });
@@ -276,6 +283,49 @@ router.get("/MesOffres", function (req, res, next) {
         offres: offres
       });
     });
+  });
+});
+
+router.post('/updateProfile', function(req, res, next) {
+  // Vérifier si l'utilisateur est connecté
+  if (!req.session.userid) {
+    return res.status(403).send("Accès interdit. Veuillez vous connecter.");
+  }
+
+  const email = req.session.userid;
+  
+  // Récupérer les données du formulaire
+  const { prenom, nom, email: newEmail, numero_telephone, mdp, id_can } = req.body;
+  
+  // Créer un objet avec les champs à mettre à jour
+  const updateData = {
+    prenom,
+    nom,
+    email: newEmail,
+    numero_telephone
+  };
+  
+  //  mot de passe seulement si fourni
+  if (mdp && mdp.trim() !== '') {
+    updateData.mdp = mdp;
+  }
+  
+  // Mettre à jour le profil du candidat
+  candidat.update(parseInt(id_can), updateData, (result) => {
+    if (result === null) {
+      return res.status(400).send("Erreur lors de la mise à jour du profil. Vérifiez vos données.");
+    }
+    
+    // Si l'email a été modifié, mettre à jour la session
+    if (newEmail !== email) {
+      req.session.userid = newEmail;
+    }
+    
+    // Stocker un message de succès dans la session
+    req.session.successMessage = "Modifications apportées avec succès !";
+    
+    // Rediriger vers la page profil
+    res.redirect('/users/Profile');
   });
 });
 
