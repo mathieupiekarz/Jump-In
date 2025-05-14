@@ -13,3 +13,6 @@ const regex =
 
 if (!regex.test(mdp)) console.log("erreur");
 else console.log("valide");
+
+var dico = { email: "benoit.demiscault@outlook.fr" };
+console.log(dico.email);

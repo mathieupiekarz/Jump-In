@@ -25,6 +25,19 @@ describe("Model Tests", () => {
       }
     });
   });
+  test("readall user", (done) => {
+    candidat.readall((resultat) => {
+      try {
+        if (resultat === null) done();
+        else {
+          expect(resultat.length > 0).toBe(true);
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
   test("arevalide user", async () => {
     const isValid = await candidat.areValide("AB123test@?test");
     expect(isValid).toBe(true);
@@ -84,5 +97,22 @@ describe("Model Tests", () => {
         done(err);
       }
     });
+  });
+  test("connexion user", (done) => {
+    candidat.connect(
+      "benoit.demiscault@outlook.fr",
+      "AB123test@?test",
+      (resultat) => {
+        try {
+          if (resultat === null) done();
+          else {
+            expect(resultat[0].email).toBe("benoit.demiscault@outlook.fr");
+            done();
+          }
+        } catch (err) {
+          done(err);
+        }
+      }
+    );
   });
 });

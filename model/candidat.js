@@ -12,6 +12,7 @@ const candidat = {
   readall: (callback) => {
     db.query("SELECT * FROM Candidat", (err, results) => {
       if (err) throw err;
+      if (results === null) callback(null);
       callback(results);
     });
   },
@@ -186,6 +187,7 @@ const candidat = {
     let sql = "SELECT email FROM Candidat WHERE email = ? AND mdp = ?";
     db.query(sql, [email, mdp], (err, results) => {
       if (err) throw err;
+      if (results === null) callback(null);
       callback(results);
     });
   },

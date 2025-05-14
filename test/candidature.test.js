@@ -17,7 +17,8 @@ describe("Model Tests", () => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].prenom).toBe("maxence");
+          const dateSQL = new Date(resultat[0].date_candidature);
+          expect(dateSQL.toLocaleDateString("fr-CA")).toBe("2025-04-26");
           done();
         }
       } catch (err) {
@@ -25,46 +26,12 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("arevalide admin", async () => {
-    const isValid = await admin.areValide("AB123test@?test");
-    expect(isValid).toBe(true);
-  });
-  test("create admin", (done) => {
-    admin.creat(
-      "antoine.trouve@oui.com",
-      "AB123test@?test",
-      "trouve",
-      "antoire",
-      "+33611121314",
-      "actif",
-      (resultat) => {
-        try {
-          if (resultat === null) {
-            done();
-          } else {
-            expect(typeof resultat).toBe("number");
-            done();
-          }
-        } catch (err) {
-          done(err);
-        }
-      }
-    );
-  });
-  test("update admin", (done) => {
-    var dico = {
-      email: "mathieu.12@oui.fr",
-      mdp: "ttAA11#*izgoaajivza",
-      nom: "piekarz",
-      prenom: "mathieu",
-      numero_telephone: "+33667654578",
-      statut: "inactif",
-    };
-    admin.update(1, dico, (resultat) => {
+  test("readall candidature", (done) => {
+    candidature.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect([0, 1]).toContain(resultat);
+          expect(resultat.length > 0).toBe(true);
           done();
         }
       } catch (err) {
@@ -72,8 +39,48 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete admin", (done) => {
-    admin.delete(5, (resultat) => {
+  test("readWithCandidatAndOffre candidature", (done) => {
+    candidature.readWithCandidatAndOffre(1, 1, (resultat) => {
+      try {
+        if (resultat === null) done();
+        else {
+          expect(resultat[0].type_metier).toBe("chimie des acides");
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+  test("readCandidaturesWithOffreDetails candidature", (done) => {
+    candidature.readCandidaturesWithOffreDetails(9, (resultat) => {
+      try {
+        if (resultat.length === 0) done();
+        else {
+          expect(resultat[0].type_metier).toBe("chimie des acides");
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+  test("create candidature", (done) => {
+    candidature.creat(1, 2, (resultat) => {
+      try {
+        if (resultat === null) {
+          done();
+        } else {
+          expect(typeof resultat).toBe("number");
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+  test("delete candidature ", (done) => {
+    candidature.delete(500, 500, (resultat) => {
       try {
         if (resultat === null) done();
         else {

@@ -12,12 +12,25 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read administrateur", (done) => {
+  test("read admin", (done) => {
     admin.read("barrau.12@non.com", (resultat) => {
       try {
         if (resultat === null) done();
         else {
           expect(resultat[0].prenom).toBe("maxence");
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+  test("readall admin", (done) => {
+    admin.readall((resultat) => {
+      try {
+        if (resultat === null) done();
+        else {
+          expect(resultat.length > 0).toBe(true);
           done();
         }
       } catch (err) {

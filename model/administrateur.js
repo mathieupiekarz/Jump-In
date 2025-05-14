@@ -12,6 +12,7 @@ const admin = {
   readall: (callback) => {
     db.query("SELECT * FROM Administrateur", (err, results) => {
       if (err) throw err;
+      if (results === null) callback(null);
       callback(results);
     });
   },
