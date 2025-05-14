@@ -15,22 +15,15 @@ const candidat = {
       callback(results);
     });
   },
-  areValide: (pwd, callback) => {
-    // vérification de la composition du mot de passe
-    let regex =
-      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-    if (!regex.test(pwd)) return callback(null);
-    const sql = "SELECT * FROM Candidat WHERE mdp = ?";
-    db.query(sql, [pwd], (err, results) => {
-      if (err) throw err;
-      if (results.length == 1 && results[0].mdp === pwd) {
-        callback(true);
-      } else {
-        callback(false);
-      }
+  areValide: (pwd) => {
+    return new Promise((resolve) => {
+      // vérification de la composition du mot de passe
+      const regex =
+        /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+      resolve(regex.test(pwd));
     });
   },
-  creat: (email, mdp, nom, prenom, num, statut, callback) => {
+  creat: async (email, mdp, nom, prenom, num, statut, callback) => {
     // vérification non null et types cohérents
     if (
       !email ||
@@ -51,9 +44,8 @@ const candidat = {
     }
 
     // vérification de la composition du mot de passe
-    let regex =
-      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤\d]{12,}$/;
-    if (!regex.test(mdp)) {
+    const isValide = await candidat.areValide(mdp);
+    if (!isValide) {
       console.log("Erreur : mot de passe invalide !");
       return callback(null);
     }
@@ -71,7 +63,7 @@ const candidat = {
 
     // vérification si un candidat existant a déjà le même email
     candidat.read(email, (result) => {
-      if (result.length > 0) return callback(null);
+      if (result !== null) return callback(null);
       else {
         let sql =
           "INSERT INTO Candidat (email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -93,7 +85,7 @@ const candidat = {
     db.query(
       "SELECT * FROM Candidat WHERE id_can = ?",
       [id_can],
-      (err, results) => {
+      async (err, results) => {
         if (err) throw err;
         if (results.length === 0) return callback(null);
         // vérification si dict est du bon format
@@ -127,9 +119,11 @@ const candidat = {
 
           // vérification si le nouveau mdp est dans le bon format
           if ("mdp" in nvdict) {
-            const regex =
-              /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-            if (!regex.test(nvdict.mdp)) return callback(null);
+            const isValide = await candidat.areValide(nvdict.mdp);
+            if (!isValide) {
+              console.log("Erreur : mot de passe invalide !");
+              return callback(null);
+            }
           }
 
           // vérification si le nouveau téléphone est dans le bon format
@@ -149,7 +143,7 @@ const candidat = {
             if (!regex.test(nvdict.email)) return callback(null);
 
             candidat.read(nvdict.email, (result) => {
-              if (result.length > 1) return callback(null);
+              if (result !== null && result.length > 1) return callback(null);
               // mise à jour de la BDD
               db.query(sql, [...values, id_can], (err, results) => {
                 if (err) throw err;
@@ -174,7 +168,9 @@ const candidat = {
       [id_can],
       (err, results) => {
         if (err) throw err;
-        if (results.length == 0) return callback(null);
+
+        //vérification qu'il existe un candidat avec cet id
+        if (results.length === 0) return callback(null);
 
         // suppression
         let sql = "DELETE FROM Candidat WHERE id_can = ?";
