@@ -46,7 +46,7 @@
             transition: 0.3s;
         }
 
-        .nav-links a.btn-connexion {
+        .nav-links a.btn-connexion{
             font-weight: bold;
             padding: 8px 15px;
             background: #4a90e2;
@@ -55,6 +55,20 @@
             border-radius: 5px;
             cursor: pointer;
             transition: 0.3s;
+        }
+
+        .nav-links div.btn-connexion{
+            font-weight: bold;
+            padding: 8px 15px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .nav-links .btn-connexion:hover {
@@ -729,4 +743,318 @@
 
         .success-notification.fadeOut {
             opacity: 0;
+        }
+
+        .actions-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn, .action-button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .view-btn {
+            background-color: #4a90e2;
+        }
+        
+        .edit-btn {
+            background-color: #ffa500;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+        }
+        
+        .action-button.warning, .action-btn.warning {
+            background-color: #ffc107;
+            color: black;
+        }
+        
+        .action-button.danger, .action-btn.danger {
+            background-color: #dc3545;
+        }
+        
+        .org-banner {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .org-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+        
+        .org-info h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .org-info p {
+            margin: 5px 0 0;
+            color: #666;
+        }
+        
+        .create-offer-btn {
+            font-weight: bold;
+            height: 100%;
+            background: #2525c2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-weight: bold;
+            color: #666;
+            position: relative;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .tab.active {
+            color: #4a90e2 !important;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #4a90e2;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .fiche-poste {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            border-left: 5px solid #4a90e2;
+        }
+        
+        .fiche-poste-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .fiche-poste-title h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        
+        .fiche-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            padding-top: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .fiche-detail-item {
+            background-color: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        .fiche-detail-item strong {
+            display: block;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .create-fiche-btn {
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+        
+        .create-fiche-btn:hover {
+            background-color: #388e3c;
+            color: white;
+        }
+
+        /* Styles pour l'interface administrateur */
+        .admin-header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-table th, 
+        .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .admin-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .admin-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .status-inactive {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .status-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+        
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .action-button.warning {
+            background-color: #ffc107;
+            color: black;
+        }
+        
+        .action-button.danger {
+            background-color: #dc3545;
+        }
+        
+        .admin-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .admin-card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .admin-card-content {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .admin-count {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .admin-cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }

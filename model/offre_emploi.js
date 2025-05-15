@@ -44,6 +44,28 @@ const offre = {
       callback(results);
     });
   },
+  // Récupère toutes les offres d'emploi d'une organisation spécifique
+  readAllByOrganisation: (siren, callback) => {
+    const sql = `
+      SELECT 
+        o.numero, o.etat, o.date_validite, o.indication, o.nb_pieces_demandees,
+        f.id_fiche, f.intitule, f.statut_de_poste, f.responsable_hierarchique,
+        f.type_metier, f.lieu_mission, f.rythme, f.fourchette_salaire, f.description,
+        org.nom AS organisation_nom, org.siren, org.type, org.siege_social
+      FROM Offre_Emploi o
+      JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
+      JOIN Organisation org ON f.siren = org.siren
+      WHERE org.siren = ?
+    `;
+    db.query(sql, [siren], (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la récupération des offres de l'organisation:", err);
+        callback([]);
+      } else {
+        callback(results);
+      }
+    });
+  },
   creat: (
     etat,
     date_validite,
@@ -57,11 +79,11 @@ const offre = {
       !date_validite ||
       typeof date_validite !== "string" ||
       !nb_pieces_demandees ||
-      typeof nb_pieces_demandees !== "int" ||
+      typeof nb_pieces_demandees !== "number" ||
       !etat ||
       !["non_publiee", "publiee", "expiree"].includes(etat) ||
       !id_fiche ||
-      typeof id_fiche !== "int"
+      typeof id_fiche !== "number"
     ) {
       return callback(null);
     }
@@ -134,7 +156,7 @@ const offre = {
 
           // vérification si nb_pieces_demandees est dans le bon format
           if ("nb_pieces_demandees" in nvdict) {
-            if (typeof nvdict.nb_pieces_demandees !== "int")
+            if (typeof nvdict.nb_pieces_demandees !== "number")
               return callback(null);
             if (nvdict.nb_pieces_demandees < 0) return callback(null);
           }

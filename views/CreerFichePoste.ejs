@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Jump'In</title>
+
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <style>
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-title {
+            margin-bottom: 25px;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .cancel-btn {
+            background-color: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .adresse-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #eee;
+        }
+        
+        .adresse-section h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div>
+            <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#">Tableau de bord</a></li>
+                <li><a href="/<%= organisation.siren %>/NosOffres">Nos offres</a></li>
+                <li><a href="#" class="btn-connexion">Mon Compte</a></li>
+            </ul>
+
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("active");
+        }
+    </script>
+
+    <div class="container">
+        <main class="job-list">
+            <div class="org-banner">
+                <img src="/images/<%= organisation.nom.toLowerCase() %>-logo.png" alt="<%= organisation.nom %>" class="org-logo" onerror="this.src='/images/default-logo.png'">
+                <div class="org-info">
+                    <h2><%= organisation.nom %></h2>
+                    <p>SIREN: <%= organisation.siren %> • Type: <%= organisation.type %></p>
+                </div>
+            </div>
+            
+            <div class="form-container">
+                <h2 class="form-title">Créer une nouvelle fiche de poste</h2>
+                
+                <form action="/<%= organisation.siren %>/fiche/creer" method="POST">
+                    <div class="form-group">
+                        <label for="intitule">Intitulé du poste *</label>
+                        <input type="text" id="intitule" name="intitule" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="statut_de_poste">Statut du poste *</label>
+                            <select id="statut_de_poste" name="statut_de_poste" required>
+                                <option value="">Sélectionner un statut</option>
+                                <option value="CDI">CDI</option>
+                                <option value="CDD">CDD</option>
+                                <option value="Intérim">Intérim</option>
+                                <option value="Stage">Stage</option>
+                                <option value="Alternance">Alternance</option>
+                                <option value="Freelance">Freelance</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="type_metier">Type de métier *</label>
+                            <input type="text" id="type_metier" name="type_metier" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="responsable_hierarchique">Responsable hiérarchique *</label>
+                        <input type="text" id="responsable_hierarchique" name="responsable_hierarchique" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rythme">Rythme de travail *</label>
+                            <input type="text" id="rythme" name="rythme" placeholder="Ex: Temps plein, 35h/semaine" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fourchette_salaire">Fourchette de salaire *</label>
+                            <input type="text" id="fourchette_salaire" name="fourchette_salaire" placeholder="Ex: 35000€ - 45000€ brut annuel" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Lieu de mission *</label>
+                        <div class="adresse-section">
+                            <h4>Adresse</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lieu_nom">Nom du site</label>
+                                    <input type="text" id="lieu_nom" name="lieu_mission[nom]" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="lieu_adresse">Adresse</label>
+                                    <input type="text" id="lieu_adresse" name="lieu_mission[adresse]" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="lieu_complement">Complément d'adresse</label>
+                                <input type="text" id="lieu_complement" name="lieu_mission[complement]">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lieu_code_postal">Code postal</label>
+                                    <input type="text" id="lieu_code_postal" name="lieu_mission[code_postal]" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="lieu_ville">Ville</label>
+                                    <input type="text" id="lieu_ville" name="lieu_mission[ville]" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="lieu_pays">Pays</label>
+                                    <input type="text" id="lieu_pays" name="lieu_mission[pays]" value="France" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description du poste *</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    
+                    <input type="hidden" name="siren" value="<%= organisation.siren %>">
+                    
+                    <div class="form-buttons">
+                        <a href="/<%= organisation.siren %>/NosOffres" class="cancel-btn">Annuler</a>
+                        <button type="submit" class="submit-btn">Créer la fiche de poste</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html> 

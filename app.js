@@ -7,6 +7,8 @@ var logger = require("morgan");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var recruteurRouter = require("./routes/recruteur");
+var adminRouter = require("./routes/admin");
 
 var app = express();
 
@@ -26,7 +28,18 @@ app.use(session.init()); //Initialiser les sessions
 app.all("*", function (req, res, next) {
   console.log("Session actuelle :", req.session);
   const nonSecurePaths = ["/users/login", "/users/inscription"];
-  const adminPaths = []; //list des urls admin
+  const adminPaths = ["/admin/dashboard", "/admin/dashboard?tab=candidats", "/admin/dashboard?tab=recruteurs", "/admin/dashboard?tab=organisations", "/admin/dashboard?tab=admins"]; //list des urls admin
+  
+  // Désactiver temporairement la vérification de session pour les routes recruteur
+  if (req.path.startsWith('/recruteur') || req.path.match(/^\/\d{9}\//)) {
+    return next();
+  }
+  
+  // Désactiver temporairement la vérification de session pour les routes admin
+  if (req.path.startsWith('/admin')) {
+    return next();
+  }
+  
   if (nonSecurePaths.includes(req.path)) return next();
   //authenticate user
   if (adminPaths.includes(req.path)) {
@@ -42,6 +55,9 @@ app.all("*", function (req, res, next) {
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/recruteur", recruteurRouter);
+app.use("/:entreprise_id", recruteurRouter);
+app.use("/admin", adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
