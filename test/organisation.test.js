@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeChO = require("../model/demande_changer_organisation.js");
+const orga = require("../model/organisation.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeChO", (done) => {
-    demandeChO.read(1, "121212121", (resultat) => {
+  test("read Organisation", (done) => {
+    orga.read(1, (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutChO).toBe("en_attente");
+          expect(resultat[0].statut_de_poste).toBe("cadre");
           done();
         }
       } catch (err) {
@@ -25,10 +25,10 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeChO", (done) => {
-    demandeChO.readall((resultat) => {
+  /*
+  test("readall Fiche Poste", (done) => {
+    fp.readall((resultat) => {
       try {
-        console.log(resultat);
         if (resultat === null) done();
         else {
           expect(resultat.length > 0).toBe(true);
@@ -39,12 +39,24 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeChO", (done) => {
-    demandeChO.creat(
-      1,
-      "121212121",
-      "demande de rejoindre Apple",
-      "en_attente",
+  test("create Fiche Poste", (done) => {
+    fp.creat(
+      "commercial",
+      "salarié",
+      "Navarre Titouan",
+      "marketing",
+      {
+        nom: "Building 1",
+        adresse: "4 rue des ibis bleus",
+        complement: null,
+        code_postal: "13",
+        ville: "Marseille",
+        pays: "France",
+      },
+      "10h/j",
+      "1500e net",
+      "recherche d'un commercial pour vendre du Ricard",
+      "123456789",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -59,12 +71,13 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update demandeChO", (done) => {
+  /*
+  test("update demandeR", (done) => {
     var dico = {
-      descriptionChO: "voudrait rejoindre microsoft",
-      statutChO: null,
+      descriptionDR: "aimerait boire du Ricard",
+      statutDR: "refusee",
     };
-    demandeChO.update(1, "123456788", "123456788", dico, (resultat) => {
+    demandeR.update(9, "123456789", "123456789", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -76,8 +89,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeChO", (done) => {
-    demandeChO.delete(1, "123456789", (resultat) => {
+  test("delete demandeR", (done) => {
+    demandeR.delete(1, "939393931", (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -89,4 +102,5 @@ describe("Model Tests", () => {
       }
     });
   });
+  */
 });

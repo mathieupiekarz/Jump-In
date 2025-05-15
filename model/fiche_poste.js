@@ -5,6 +5,7 @@ const fp = {
     let sql = "SELECT * FROM Fiche_Poste WHERE id_fiche = ?";
     db.query(sql, [id_fiche], (err, results) => {
       if (err) throw err;
+      console.log("oui");
       callback(results);
     });
   },
@@ -58,6 +59,8 @@ const fp = {
       sum += digit;
     }
     if (sum % 10 !== 0) return callback(null);
+
+    console.log("oui");
 
     // vérification du json lieu_mission
     const champsValides = [

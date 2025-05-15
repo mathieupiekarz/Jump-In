@@ -13,7 +13,7 @@ const dcho = {
   readall: (callback) => {
     db.query("SELECT * FROM DemandeChangerOrganisation", (err, results) => {
       if (err) throw err;
-      if (results === null) callback(null);
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },

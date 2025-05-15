@@ -12,7 +12,7 @@ const candidature = {
   readall: (callback) => {
     db.query("SELECT * FROM Candidature", (err, results) => {
       if (err) throw err;
-      if (results === null) callback(null);
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },
@@ -28,7 +28,7 @@ const candidature = {
         JOIN Candidature c ON o.numero = c.num_OE
         WHERE o.numero = ? AND c.id_can = ?`;
     db.query(sql, [numero, id_can], (err, results) => {
-      if (results === null) callback(null);
+      if (results.lenght === 0) return callback(null);
       if (err) throw err;
       callback(results);
     });
@@ -97,7 +97,7 @@ const candidature = {
                 [id_can, num_OE, date_candidature],
                 (err, results) => {
                   if (err) throw err;
-                  if (results === null) return callback(null);
+                  if (results.lenght === 0) return callback(null);
                   callback(results.insertId);
                 }
               );

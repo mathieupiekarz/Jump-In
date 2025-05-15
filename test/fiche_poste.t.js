@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeR = require("../model/demande_recruteur.js");
+const fp = require("../model/fiche_poste.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeR", (done) => {
-    demandeR.read(1, "123456789", (resultat) => {
+  test("read FichePoste", (done) => {
+    fp.read(1, (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutDR).toBe("en_attente");
+          expect(resultat[0].statut_de_poste).toBe("cadre");
           done();
         }
       } catch (err) {
@@ -25,8 +25,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeR", (done) => {
-    demandeR.readall((resultat) => {
+  test("readall Fiche Poste", (done) => {
+    fp.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -38,12 +38,24 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeR", (done) => {
-    demandeR.creat(
-      9,
-      "121212121",
-      "demande recruteur pour APPLE",
-      "en_attente",
+  test("create Fiche Poste", (done) => {
+    fp.creat(
+      "commercial",
+      "salarié",
+      "Navarre Titouan",
+      "marketing",
+      {
+        nom: "Building 1",
+        adresse: "4 rue des ibis bleus",
+        complement: null,
+        code_postal: "13",
+        ville: "Marseille",
+        pays: "France",
+      },
+      "10h/j",
+      "1500e net",
+      "recherche d'un commercial pour vendre du Ricard",
+      "123456789",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -58,6 +70,7 @@ describe("Model Tests", () => {
       }
     );
   });
+  /*
   test("update demandeR", (done) => {
     var dico = {
       descriptionDR: "aimerait boire du Ricard",
@@ -75,9 +88,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  /*
-  test("delete demandeCrO", (done) => {
-    demandeCrO.delete(1, "939393931", (resultat) => {
+  test("delete demandeR", (done) => {
+    demandeR.delete(1, "939393931", (resultat) => {
       try {
         if (resultat === null) done();
         else {

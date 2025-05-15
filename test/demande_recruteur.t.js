@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeChO = require("../model/demande_changer_organisation.js");
+const demandeR = require("../model/demande_recruteur.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeChO", (done) => {
-    demandeChO.read(1, "121212121", (resultat) => {
+  test("read demandeR", (done) => {
+    demandeR.read(1, "123456789", (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutChO).toBe("en_attente");
+          expect(resultat[0].statutDR).toBe("en_attente");
           done();
         }
       } catch (err) {
@@ -25,10 +25,9 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeChO", (done) => {
-    demandeChO.readall((resultat) => {
+  test("readall demandeR", (done) => {
+    demandeR.readall((resultat) => {
       try {
-        console.log(resultat);
         if (resultat === null) done();
         else {
           expect(resultat.length > 0).toBe(true);
@@ -39,11 +38,11 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeChO", (done) => {
-    demandeChO.creat(
-      1,
+  test("create demandeR", (done) => {
+    demandeR.creat(
+      9,
       "121212121",
-      "demande de rejoindre Apple",
+      "demande recruteur pour APPLE",
       "en_attente",
       (resultat) => {
         try {
@@ -59,12 +58,12 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update demandeChO", (done) => {
+  test("update demandeR", (done) => {
     var dico = {
-      descriptionChO: "voudrait rejoindre microsoft",
-      statutChO: null,
+      descriptionDR: "aimerait boire du Ricard",
+      statutDR: "refusee",
     };
-    demandeChO.update(1, "123456788", "123456788", dico, (resultat) => {
+    demandeR.update(9, "123456789", "123456789", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -76,8 +75,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeChO", (done) => {
-    demandeChO.delete(1, "123456789", (resultat) => {
+  test("delete demandeR", (done) => {
+    demandeR.delete(1, "939393931", (resultat) => {
       try {
         if (resultat === null) done();
         else {

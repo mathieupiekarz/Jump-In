@@ -42,3 +42,18 @@ http://localhost:3000/users/candidaturelist
 http://localhost:3000/users/pjtlist
 http://localhost:3000/users/reclist
 http://localhost:3000/users/demandeChOlist
+
+
+
+Numero SIREN possible :
+732829320 --> APPLE
+552100554 --> MICROSOFT
+775620326 --> RICARD
+
+
+343134763
+349244859
+398392284
+342376332
+444608442
+519229739

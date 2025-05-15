@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">61.45% </span>
+                <span class="strong">63.26% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>59/96</span>
+                <span class='fraction'>62/98</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">55.71% </span>
+                <span class="strong">56.94% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>39/70</span>
+                <span class='fraction'>41/72</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">76.19% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>16/21</span>
+                <span class='fraction'>18/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">69.73% </span>
+                <span class="strong">74.02% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>53/76</span>
+                <span class='fraction'>57/77</span>
             </div>
         
             
@@ -246,7 +246,8 @@
 <a name='L181'></a><a href='#L181'>181</a>
 <a name='L182'></a><a href='#L182'>182</a>
 <a name='L183'></a><a href='#L183'>183</a>
-<a name='L184'></a><a href='#L184'>184</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -254,13 +255,14 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -436,14 +438,15 @@ const admin = {
     let sql = "SELECT * FROM Administrateur WHERE email = ?";
     db.query(sql, [email], (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      if (results.length === 0) return callback(null);
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
       callback(results);
     });
   },
-  readall: <span class="fstat-no" title="function not covered" >(c</span>allback) =&gt; {
-<span class="cstat-no" title="statement not covered" >    db.query("SELECT * FROM Administrateur", <span class="fstat-no" title="function not covered" >(e</span>rr, results) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      if (err) <span class="cstat-no" title="statement not covered" >throw err;</span></span>
-<span class="cstat-no" title="statement not covered" >      callback(results);</span>
+  readall: (callback) =&gt; {
+    db.query("SELECT * FROM Administrateur", (err, results) =&gt; {
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.lenght === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      callback(results);
     });
   },
   areValide: (pwd) =&gt; {
@@ -571,7 +574,7 @@ const admin = {
             <span class="missing-if-branch" title="if path not taken" >I</span>if (!regex.test(nvdict.email)) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
 &nbsp;
             admin.read(nvdict.email, (result) =&gt; {
-              <span class="missing-if-branch" title="if path not taken" >I</span>if (result !== null &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >result.length &gt; 1)</span> <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+              <span class="missing-if-branch" title="if path not taken" >I</span>if (result !== null &amp;&amp; result.length &gt; 1) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
               // mise à jour de la BDD
               db.query(sql, [...values, id_admin], (err, results) =&gt; {
                 <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
@@ -619,7 +622,7 @@ module.exports = admin;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-14T17:17:58.274Z
+                at 2025-05-15T13:10:15.705Z
             </div>
         <script src="prettify.js"></script>
         <script>
