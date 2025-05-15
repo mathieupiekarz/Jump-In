@@ -14,6 +14,22 @@ const fp = {
       callback(results);
     });
   },
+  readByOrganisation: (siren, callback) => {
+    let sql = `
+      SELECT fp.*, org.nom AS organisation_nom 
+      FROM Fiche_Poste fp
+      JOIN Organisation org ON fp.siren = org.siren
+      WHERE fp.siren = ?
+    `;
+    db.query(sql, [siren], (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la récupération des fiches de poste:", err);
+        callback([]);
+      } else {
+        callback(results);
+      }
+    });
+  },
   creat: (
     intitule,
     statut_de_poste,
