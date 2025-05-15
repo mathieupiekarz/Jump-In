@@ -5,12 +5,14 @@ const candidature = {
     let sql = "SELECT * FROM Candidature WHERE id_can = ? AND num_OE = ?";
     db.query(sql, [id_can, num_OE], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Candidature", (err, results) => {
       if (err) throw err;
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },
@@ -26,11 +28,12 @@ const candidature = {
         JOIN Candidature c ON o.numero = c.num_OE
         WHERE o.numero = ? AND c.id_can = ?`;
     db.query(sql, [numero, id_can], (err, results) => {
+      if (results.lenght === 0) return callback(null);
       if (err) throw err;
       callback(results);
     });
   },
-  
+
   readCandidaturesWithOffreDetails: (id_can, callback) => {
     let sql = `
       SELECT o.numero, o.etat, o.date_validite, o.indication, o.nb_pieces_demandees,
@@ -65,19 +68,44 @@ const candidature = {
       return callback(null);
     }
 
-    // vérification si une candidature existe déjà pour ce candidat et cette offre d'emploi
-    candidature.read(id_can, num_OE, (result) => {
-      if (result.length > 0) return callback(null);
-      else {
-        let sql =
-          "INSERT INTO Candidature (id_can, num_OE, date_candidature) VALUES (?, ?, ?)";
-        const date_candidature = new Date().toISOString().split("T")[0];
-        db.query(sql, [id_can, num_OE, date_candidature], (err, results) => {
-          if (err) throw err;
-          callback(results.insertId);
-        });
+    // Vérification si le candidat existe
+    db.query(
+      "SELECT 1 FROM Candidat WHERE id_can = ?",
+      [id_can],
+      (err, resCan) => {
+        if (err) throw err;
+        if (resCan.length === 0) return callback(null); // id_can inexistant
+
+        // Vérification si l'offre d'emploi existe
+        db.query(
+          "SELECT 1 FROM Offre_Emploi WHERE numero = ?",
+          [num_OE],
+          (err, resOffre) => {
+            if (err) throw err;
+            if (resOffre.length === 0) return callback(null); // num_OE inexistant
+
+            // Vérification si une candidature existe déjà
+            candidature.read(id_can, num_OE, (result) => {
+              if (result !== null && result.length > 0) return callback(null);
+
+              // Insertion si tout est valide
+              const sql =
+                "INSERT INTO Candidature (id_can, num_OE, date_candidature) VALUES (?, ?, ?)";
+              const date_candidature = new Date().toISOString().split("T")[0];
+              db.query(
+                sql,
+                [id_can, num_OE, date_candidature],
+                (err, results) => {
+                  if (err) throw err;
+                  if (results.lenght === 0) return callback(null);
+                  callback(results.insertId);
+                }
+              );
+            });
+          }
+        );
       }
-    });
+    );
   },
   delete: (id_can, num_OE, callback) => {
     // vérification si la candidature existe
@@ -86,7 +114,7 @@ const candidature = {
       [id_can, num_OE],
       (err, results) => {
         if (err) throw err;
-        if (results.length == 0) return callback(null);
+        if (results.length === 0) return callback(null);
 
         // suppression
         let sql = "DELETE FROM Candidature WHERE id_can = ? AND num_OE = ?";

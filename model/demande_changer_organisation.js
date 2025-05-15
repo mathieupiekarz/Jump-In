@@ -6,12 +6,14 @@ const dcho = {
       "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?";
     db.query(sql, [id_rec, siren], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM DemandeChangerOrganisation", (err, results) => {
       if (err) throw err;
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },
@@ -19,7 +21,7 @@ const dcho = {
     // vérification non null et types cohérents
     if (
       !id_rec ||
-      typeof id_rec !== "int" ||
+      typeof id_rec !== "number" ||
       !siren ||
       typeof siren !== "string" ||
       !descriptionChO ||
@@ -30,26 +32,41 @@ const dcho = {
       return callback(null);
     }
 
-    // vérification si une demande existante a déjà le même id_rec et siren
-    dcho.read(id_rec, siren, (result) => {
-      if (result.length > 0) return callback(null);
-      else {
-        let sql =
-          "INSERT INTO DemandeChangerOrganisation (id_rec, siren, descriptionChO, dateDemandeChO, statutChO) VALUES (?, ?, ?, ?, ?)";
-        const dateDemandeChO = new Date().toISOString().split("T")[0];
-        db.query(
-          sql,
-          [id_rec, siren, descriptionChO, dateDemandeChO, statutChO],
-          (err, results) => {
-            if (err) throw err;
-            callback(results.insertId);
-          }
-        );
-      }
+    // Vérifie d'abord si le siren existe dans Organisation
+    const sqlOrg = "SELECT 1 FROM Organisation WHERE siren = ?";
+    db.query(sqlOrg, [siren], (err, resOrg) => {
+      if (err) throw err;
+      if (resOrg.length === 0) return callback(null);
+
+      // Vérifie si le recruteur est déjà dans cette organisation
+      const sqlVerif = "SELECT 1 FROM Recruteur WHERE id_rec = ? AND siren = ?";
+      db.query(sqlVerif, [id_rec, siren], (err, resVerif) => {
+        if (err) throw err;
+        if (resVerif.length > 0) return callback(null);
+
+        // Vérifie si une demande identique existe déjà
+        dcho.read(id_rec, siren, (result) => {
+          if (result && result.length > 0) return callback(null);
+
+          // Insertion de la nouvelle demande
+          const sql =
+            "INSERT INTO DemandeChangerOrganisation (id_rec, siren, descriptionChO, dateDemandeChO, statutChO) VALUES (?, ?, ?, ?, ?)";
+          const dateDemandeChO = new Date().toISOString().split("T")[0];
+          db.query(
+            sql,
+            [id_rec, siren, descriptionChO, dateDemandeChO, statutChO],
+            (err, results) => {
+              if (err) throw err;
+              callback(results.insertId);
+            }
+          );
+        });
+      });
     });
   },
   // prend en argument un dictionnaire qui contient tous les arguments de DemandeChangerOrganisation en clé
-  update: (id_rec, siren, dictUpdate, callback) => {
+  update: (id_rec, siren, nv_siren, dictUpdate, callback) => {
+    if (!nv_siren || typeof nv_siren !== "string") callback(null);
     // vérification si la demande existe
     db.query(
       "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?",
@@ -80,20 +97,41 @@ const dcho = {
           )
             return callback(null);
 
-          // mise à jour de la BDD
-          const champs = Object.keys(nvdict);
-          const values = Object.values(nvdict);
-          const clause = champs.map((k) => `${k} = ?`).join(", ");
-          const sql = `UPDATE DemandeChangerOrganisation SET ${clause} WHERE id_rec = ? AND siren = ?`;
-          db.query(sql, [...values, id_rec, siren], (err, results) => {
+          // Vérification que le nv_siren existe dans Organisation
+          const sqlVerifNvSiren = "SELECT 1 FROM Organisation WHERE siren = ?";
+          db.query(sqlVerifNvSiren, [nv_siren], (err, resSiren) => {
             if (err) throw err;
-            callback(results.affectedRows);
+            if (resSiren.length === 0) return callback(null);
+
+            // vérification que la demande avec le nouveau siren n'existe pas dans la table demandeChO
+            if (siren !== nv_siren) {
+              const req =
+                "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?";
+              db.query(req, [id_rec, nv_siren], (err, result) => {
+                if (err) throw err;
+                if (result.length !== 0) return callback(null);
+              });
+            }
+
+            // mise à jour de la BDD
+            const champs = Object.keys(nvdict);
+            const values = Object.values(nvdict);
+            const clause = champs.map((k) => `${k} = ?`).join(", ");
+            const sql = `UPDATE DemandeChangerOrganisation SET siren = ?, ${clause} WHERE id_rec = ? AND siren = ?`;
+            db.query(
+              sql,
+              [nv_siren, ...values, id_rec, siren],
+              (err, results) => {
+                if (err) throw err;
+                callback(results.affectedRows);
+              }
+            );
           });
         }
       }
     );
   },
-  delete: (id_can, siren, callback) => {
+  delete: (id_rec, siren, callback) => {
     // vérification si la demande existe
     db.query(
       "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?",

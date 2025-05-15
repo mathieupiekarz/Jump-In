@@ -5,12 +5,14 @@ const organisation = {
     let sql = "SELECT * FROM Organisation WHERE siren = ?";
     db.query(sql, [siren], (err, results) => {
       if (err) throw err;
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Organisation", (err, results) => {
       if (err) throw err;
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },

@@ -5,31 +5,27 @@ const admin = {
     let sql = "SELECT * FROM Administrateur WHERE email = ?";
     db.query(sql, [email], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Administrateur", (err, results) => {
       if (err) throw err;
+      if (results.lenght === 0) return callback(null);
       callback(results);
     });
   },
-  areValide: (pwd, callback) => {
+  areValide: (pwd) => {
     // vérification de la composition du mot de passe
-    let regex =
-      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-    if (!regex.test(pwd)) return callback(null);
-    const sql = "SELECT * FROM Administrateur WHERE mdp = ?";
-    db.query(sql, [pwd], (err, results) => {
-      if (err) throw err;
-      if (results.length == 1 && results[0].mdp === pwd) {
-        callback(true);
-      } else {
-        callback(false);
-      }
+    return new Promise((resolve) => {
+      // vérification de la composition du mot de passe
+      const regex =
+        /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+      resolve(regex.test(pwd));
     });
   },
-  creat: (email, mdp, nom, prenom, num, statut, callback) => {
+  creat: async (email, mdp, nom, prenom, num, statut, callback) => {
     // vérification non null et types cohérents
     if (
       !email ||
@@ -49,9 +45,11 @@ const admin = {
     }
 
     // vérification de la composition du mot de passe
-    let regex =
-      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-    if (!regex.test(mdp)) return callback(null);
+    const isValide = await admin.areValide(mdp);
+    if (!isValide) {
+      console.log("Erreur : mot de passe invalide !");
+      return callback(null);
+    }
 
     // vérification du format du numéro de téléphone
     const numValide = /^\+33\d{9}$/.test(num);
@@ -85,7 +83,7 @@ const admin = {
     db.query(
       "SELECT * FROM Administrateur WHERE id_admin = ?",
       [id_admin],
-      (err, results) => {
+      async (err, results) => {
         if (err) throw err;
         if (results.length === 0) return callback(null);
         // vérification si dict est du bon format
@@ -119,9 +117,11 @@ const admin = {
 
           // vérification si le nouveau mdp est dans le bon format
           if ("mdp" in nvdict) {
-            const regex =
-              /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-            if (!regex.test(nvdict.mdp)) return callback(null);
+            const isValide = await admin.areValide(nvdict.mdp);
+            if (!isValide) {
+              console.log("Erreur : mot de passe invalide !");
+              return callback(null);
+            }
           }
 
           // vérification si le nouveau téléphone est dans le bon format
@@ -141,7 +141,7 @@ const admin = {
             if (!regex.test(nvdict.email)) return callback(null);
 
             admin.read(nvdict.email, (result) => {
-              if (result.length > 1) return callback(null);
+              if (result !== null && result.length > 1) return callback(null);
               // mise à jour de la BDD
               db.query(sql, [...values, id_admin], (err, results) => {
                 if (err) throw err;
@@ -166,7 +166,9 @@ const admin = {
       [id_admin],
       (err, results) => {
         if (err) throw err;
-        if (results.length == 0) return callback(null);
+
+        //vérification qu'il existe un admin avec cet id
+        if (results.length === 0) return callback(null);
 
         // suppression
         let sql = "DELETE FROM Administrateur WHERE id_admin = ?";
