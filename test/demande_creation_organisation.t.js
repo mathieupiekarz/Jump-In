@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeChO = require("../model/demande_changer_organisation.js");
+const demandeCrO = require("../model/demande_creation_organisation.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeChO", (done) => {
-    demandeChO.read(1, "121212121", (resultat) => {
+  test("read demandeCrO", (done) => {
+    demandeCrO.read(1, "787878781", (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutChO).toBe("en_attente");
+          expect(resultat[0].statutCrO).toBe("refusee");
           done();
         }
       } catch (err) {
@@ -25,8 +25,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeChO", (done) => {
-    demandeChO.readall((resultat) => {
+  test("readall demandeCrO", (done) => {
+    demandeCrO.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -38,11 +38,11 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeChO", (done) => {
-    demandeChO.creat(
+  test("create demandeCrO", (done) => {
+    demandeCrO.creat(
       1,
-      "121212121",
-      "demande de rejoindre Apple",
+      "939393931",
+      "demande de créer Lamborghini",
       "en_attente",
       (resultat) => {
         try {
@@ -58,12 +58,12 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update demandeChO", (done) => {
+  test("update demandeCrO", (done) => {
     var dico = {
-      descriptionChO: "voudrait rejoindre Ricard&co",
-      statutChO: null,
+      descriptionCrO: "voudrait créer ESCOM",
+      statutCrO: "refusee",
     };
-    demandeChO.update(1, "123456788", "123456788", dico, (resultat) => {
+    demandeCrO.update(1, "787878781", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -75,8 +75,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeChO", (done) => {
-    demandeChO.delete(1, "123456789", (resultat) => {
+  test("delete demandeCrO", (done) => {
+    demandeCrO.delete(1, "939393931", (resultat) => {
       try {
         if (resultat === null) done();
         else {

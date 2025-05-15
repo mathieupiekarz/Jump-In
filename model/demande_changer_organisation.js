@@ -65,7 +65,8 @@ const dcho = {
     });
   },
   // prend en argument un dictionnaire qui contient tous les arguments de DemandeChangerOrganisation en clé
-  update: (id_rec, siren, dictUpdate, callback) => {
+  update: (id_rec, siren, nv_siren, dictUpdate, callback) => {
+    if (!nv_siren || typeof nv_siren !== "string") callback(null);
     // vérification si la demande existe
     db.query(
       "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?",
@@ -96,14 +97,35 @@ const dcho = {
           )
             return callback(null);
 
-          // mise à jour de la BDD
-          const champs = Object.keys(nvdict);
-          const values = Object.values(nvdict);
-          const clause = champs.map((k) => `${k} = ?`).join(", ");
-          const sql = `UPDATE DemandeChangerOrganisation SET ${clause} WHERE id_rec = ? AND siren = ?`;
-          db.query(sql, [...values, id_rec, siren], (err, results) => {
+          // Vérification que le nv_siren existe dans Organisation
+          const sqlVerifNvSiren = "SELECT 1 FROM Organisation WHERE siren = ?";
+          db.query(sqlVerifNvSiren, [nv_siren], (err, resSiren) => {
             if (err) throw err;
-            callback(results.affectedRows);
+            if (resSiren.length === 0) return callback(null);
+
+            // vérification que la demande avec le nouveau siren n'existe pas dans la table demandeChO
+            if (siren !== nv_siren) {
+              const req =
+                "SELECT * FROM DemandeChangerOrganisation WHERE id_rec = ? AND siren = ?";
+              db.query(req, [id_rec, nv_siren], (err, result) => {
+                if (err) throw err;
+                if (result.length !== 0) return callback(null);
+              });
+            }
+
+            // mise à jour de la BDD
+            const champs = Object.keys(nvdict);
+            const values = Object.values(nvdict);
+            const clause = champs.map((k) => `${k} = ?`).join(", ");
+            const sql = `UPDATE DemandeChangerOrganisation SET siren = ?, ${clause} WHERE id_rec = ? AND siren = ?`;
+            db.query(
+              sql,
+              [nv_siren, ...values, id_rec, siren],
+              (err, results) => {
+                if (err) throw err;
+                callback(results.affectedRows);
+              }
+            );
           });
         }
       }

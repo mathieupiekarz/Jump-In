@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeCrO = require("../model/demande_creation_organisation.js");
+const demandeR = require("../model/demande_recruteur.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,13 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeCrO", (done) => {
-    demandeCrO.read(1, "787878781", (resultat) => {
+  test("read demandeR", (done) => {
+    demandeR.read(1, "123456789", (resultat) => {
       try {
-        console.log(resultat);
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutCrO).toBe("refusee");
+          expect(resultat[0].statutDR).toBe("en_attente");
           done();
         }
       } catch (err) {
@@ -26,8 +25,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeCrO", (done) => {
-    demandeCrO.readall((resultat) => {
+  test("readall demandeR", (done) => {
+    demandeR.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -39,11 +38,11 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeCrO", (done) => {
-    demandeCrO.creat(
-      1,
-      "939393931",
-      "demande de créer Lamborghini",
+  test("create demandeR", (done) => {
+    demandeR.creat(
+      9,
+      "121212121",
+      "demande recruteur pour APPLE",
       "en_attente",
       (resultat) => {
         try {
@@ -59,12 +58,12 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update demandeCrO", (done) => {
+  test("update demandeR", (done) => {
     var dico = {
-      descriptionCrO: "voudrait créer ESCOM",
-      statutCrO: "refusee",
+      descriptionDR: "aimerait boire du Ricard",
+      statutDR: "refusee",
     };
-    demandeCrO.update(1, "787878781", dico, (resultat) => {
+    demandeR.update(9, "123456789", "123456789", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -76,6 +75,7 @@ describe("Model Tests", () => {
       }
     });
   });
+  /*
   test("delete demandeCrO", (done) => {
     demandeCrO.delete(1, "939393931", (resultat) => {
       try {
@@ -89,4 +89,5 @@ describe("Model Tests", () => {
       }
     });
   });
+  */
 });

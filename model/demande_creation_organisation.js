@@ -32,28 +32,35 @@ const dco = {
       return callback(null);
     }
 
-    // Vérifier que le siren n'existe pas déjà dans Organisation
-    const sqlVerifSiren = "SELECT 1 FROM Organisation WHERE siren = ?";
-    db.query(sqlVerifSiren, [siren], (err, resSiren) => {
+    // Vérifier que le candidat existe
+    const sqlVerifCandidat = "SELECT 1 FROM Candidat WHERE id_can = ?";
+    db.query(sqlVerifCandidat, [id_can], (err, resCandidat) => {
       if (err) throw err;
-      if (resSiren.length > 0) return callback(null);
+      if (resCandidat.length === 0) return callback(null);
 
-      // Vérification si une demande identique existe déjà
-      dco.read(id_can, siren, (result) => {
-        if (result && result.length > 0) return callback(null);
+      // Vérifier que le siren n'existe pas déjà dans Organisation
+      const sqlVerifSiren = "SELECT 1 FROM Organisation WHERE siren = ?";
+      db.query(sqlVerifSiren, [siren], (err, resSiren) => {
+        if (err) throw err;
+        if (resSiren.length > 0) return callback(null);
 
-        // Insertion de la nouvelle demande
-        const sql =
-          "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO) VALUES (?, ?, ?, ?, ?)";
-        const dateDemandeCrO = new Date().toISOString().split("T")[0];
-        db.query(
-          sql,
-          [id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO],
-          (err, results) => {
-            if (err) throw err;
-            callback(results.insertId);
-          }
-        );
+        // Vérification si une demande identique existe déjà
+        dco.read(id_can, siren, (result) => {
+          if (result && result.length > 0) return callback(null);
+
+          // Insertion de la nouvelle demande
+          const sql =
+            "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO) VALUES (?, ?, ?, ?, ?)";
+          const dateDemandeCrO = new Date().toISOString().split("T")[0];
+          db.query(
+            sql,
+            [id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO],
+            (err, results) => {
+              if (err) throw err;
+              callback(results.insertId);
+            }
+          );
+        });
       });
     });
   },
