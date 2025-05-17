@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const orga = require("../model/organisation.js");
+const fp = require("../model/fiche_poste.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,8 +12,8 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read Organisation", (done) => {
-    orga.read(1, (resultat) => {
+  test("read FichePoste", (done) => {
+    fp.read(1, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -25,7 +25,6 @@ describe("Model Tests", () => {
       }
     });
   });
-  /*
   test("readall Fiche Poste", (done) => {
     fp.readall((resultat) => {
       try {
@@ -56,7 +55,7 @@ describe("Model Tests", () => {
       "10h/j",
       "1500e net",
       "recherche d'un commercial pour vendre du Ricard",
-      "123456789",
+      "775620326",
       (resultat) => {
         try {
           if (resultat === null) {

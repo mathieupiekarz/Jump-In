@@ -5,7 +5,6 @@ const fp = {
     let sql = "SELECT * FROM Fiche_Poste WHERE id_fiche = ?";
     db.query(sql, [id_fiche], (err, results) => {
       if (err) throw err;
-      console.log("oui");
       callback(results);
     });
   },
@@ -24,7 +23,10 @@ const fp = {
     `;
     db.query(sql, [siren], (err, results) => {
       if (err) {
-        console.error("Erreur lors de la récupération des fiches de poste:", err);
+        console.error(
+          "Erreur lors de la récupération des fiches de poste:",
+          err
+        );
         callback([]);
       } else {
         callback(results);
@@ -66,17 +68,17 @@ const fp = {
     }
 
     //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
+    // console.log(siren);
+
     if (!/^\d{9}$/.test(siren)) return callback(null);
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
-      if (i % 2 === 0) digit *= 2;
+      if (i % 2 === 1) digit *= 2;
       if (digit > 9) digit -= 9;
       sum += digit;
     }
     if (sum % 10 !== 0) return callback(null);
-
-    console.log("oui");
 
     // vérification du json lieu_mission
     const champsValides = [

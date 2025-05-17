@@ -55,7 +55,7 @@ const recruteur = {
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
-      if (i % 2 === 0) digit *= 2;
+      if (i % 2 === 1) digit *= 2;
       if (digit > 9) digit -= 9;
       sum += digit;
     }
@@ -125,11 +125,11 @@ const recruteur = {
 
           //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
           if ("siren" in nvdict) {
-            if (!/^\d{9}$/.test(nvdict.siren)) return callback(null);
+            if (!/^\d{9}$/.test(siren)) return callback(null);
             let sum = 0;
             for (let i = 0; i < 9; i++) {
-              let digit = parseInt(nvdict.siren[i], 10);
-              if (i % 2 === 0) digit *= 2;
+              let digit = parseInt(siren[i], 10);
+              if (i % 2 === 1) digit *= 2;
               if (digit > 9) digit -= 9;
               sum += digit;
             }
