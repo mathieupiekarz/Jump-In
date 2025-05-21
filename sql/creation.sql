@@ -96,7 +96,8 @@ nom varchar(100) NOT NULL,
 type enum('pdf', 'jpeg', 'png', 'xlsx', 'docx') NOT NULL,
 id_can int, 
 num_OE int,
-FOREIGN KEY (id_can, num_OE) REFERENCES Candidature(id_can, num_OE) ON DELETE CASCADE
+FOREIGN KEY (id_can) REFERENCES Candidature(id_can) ON DELETE CASCADE
+FOREIGN KEY (num_OE) REFERENCES Offre_Emploi(num_OE) ON DELETE CASCADE
 );
 
 CREATE TABLE Recruteur(
