@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">59.13% </span>
+                <span class="strong">57.28% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>55/93</span>
+                <span class='fraction'>59/103</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">51.42% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>36/70</span>
+                <span class='fraction'>40/80</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68% </span>
+                <span class="strong">68.75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>51/75</span>
+                <span class='fraction'>55/80</span>
             </div>
         
             
@@ -269,10 +269,16 @@
 <a name='L204'></a><a href='#L204'>204</a>
 <a name='L205'></a><a href='#L205'>205</a>
 <a name='L206'></a><a href='#L206'>206</a>
-<a name='L207'></a><a href='#L207'>207</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -291,12 +297,14 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -310,6 +318,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -336,6 +345,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -482,7 +492,8 @@ const offre = {
     let sql = "SELECT * FROM Offre_Emploi WHERE numero = ?";
     db.query(sql, [numero], (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      callback(results);
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      else callback(results);
     });
   },
   readWithFicheAndOrganisation: <span class="fstat-no" title="function not covered" >(n</span>umero, callback) =&gt; {
@@ -496,13 +507,15 @@ const offre = {
       WHERE o.numero = ?`;
 <span class="cstat-no" title="statement not covered" >    db.query(sql, [numero], <span class="fstat-no" title="function not covered" >(e</span>rr, results) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      if (err) <span class="cstat-no" title="statement not covered" >throw err;</span></span>
-<span class="cstat-no" title="statement not covered" >      callback(results);</span>
+<span class="cstat-no" title="statement not covered" >      if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span></span>
+      else <span class="cstat-no" title="statement not covered" >callback(results);</span>
     });
   },
   readall: (callback) =&gt; {
     db.query("SELECT * FROM Offre_Emploi", (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      callback(results);
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      else callback(results);
     });
   },
   readAllWithFicheAndOrganisation: (callback) =&gt; {
@@ -518,7 +531,8 @@ const offre = {
     `;
     db.query(sql, (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      callback(results);
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      else callback(results);
     });
   },
   // Récupère toutes les offres d'emploi d'une organisation spécifique
@@ -542,7 +556,8 @@ const offre = {
         );
 <span class="cstat-no" title="statement not covered" >        callback([]);</span>
       } else {
-        callback(results);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+        else callback(results);
       }
     });
   },
@@ -667,7 +682,7 @@ const offre = {
       [numero],
       (err, results) =&gt; {
         <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-        <span class="missing-if-branch" title="else path not taken" >E</span>if (results.length == 0) return callback(null);
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (results.length === 0) return callback(null);
 &nbsp;
         // suppression
         let sql = <span class="cstat-no" title="statement not covered" >"DELETE FROM Offre_Emploi WHERE numero = ?";</span>
@@ -688,7 +703,7 @@ module.exports = offre;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-21T16:21:00.176Z
+                at 2025-05-22T15:01:47.407Z
             </div>
         <script src="prettify.js"></script>
         <script>

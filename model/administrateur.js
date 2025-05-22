@@ -12,7 +12,7 @@ const admin = {
   readall: (callback) => {
     db.query("SELECT * FROM Administrateur", (err, results) => {
       if (err) throw err;
-      if (results.lenght === 0) return callback(null);
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -61,7 +61,7 @@ const admin = {
 
     // vérification si un admin existant a déjà le même email
     admin.read(email, (result) => {
-      if (result.length > 0) return callback(null);
+      if (result && result.length > 0) return callback(null);
       else {
         let sql =
           "INSERT INTO Administrateur (email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -141,7 +141,7 @@ const admin = {
             if (!regex.test(nvdict.email)) return callback(null);
 
             admin.read(nvdict.email, (result) => {
-              if (result !== null && result.length > 1) return callback(null);
+              if (result && result.length > 1) return callback(null);
               // mise à jour de la BDD
               db.query(sql, [...values, id_admin], (err, results) => {
                 if (err) throw err;
@@ -178,6 +178,15 @@ const admin = {
         });
       }
     );
+  },
+  // vérification si l'admin existe
+  connect: (email, mdp, callback) => {
+    let sql = "SELECT email FROM Administrateur WHERE email = ? AND mdp = ?";
+    db.query(sql, [email, mdp], (err, results) => {
+      if (err) throw err;
+      if (results.length === 0) return callback(null);
+      callback(results);
+    });
   },
 };
 

@@ -5,14 +5,14 @@ const organisation = {
     let sql = "SELECT * FROM Organisation WHERE siren = ?";
     db.query(sql, [siren], (err, results) => {
       if (err) throw err;
-      if (results.lenght === 0) return callback(null);
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Organisation", (err, results) => {
       if (err) throw err;
-      if (results.lenght === 0) return callback(null);
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -90,7 +90,7 @@ const organisation = {
 
     // vérification si une Organisation existante a déjà le même siren
     organisation.read(siren, (result) => {
-      if (result.length > 0) return callback(null);
+      if (result) return callback(null);
       else {
         let sql =
           "INSERT INTO Organisation (siren, nom, type, siege_social, statut) VALUES (?, ?, ?, ?, ?)";
