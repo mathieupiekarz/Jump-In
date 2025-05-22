@@ -8,6 +8,13 @@ const recruteur = {
       callback(results);
     });
   },
+  readById: (id_rec, callback) => {
+    let sql = "SELECT * FROM Recruteur WHERE id_rec = ?";
+    db.query(sql, [id_rec], (err, results) => {
+      if (err) throw err;
+      callback(results);
+    });
+  },
   readall: (callback) => {
     db.query("SELECT * FROM Recruteur", (err, results) => {
       if (err) throw err;

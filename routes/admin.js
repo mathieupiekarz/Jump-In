@@ -216,10 +216,10 @@ router.post("/request/changement/:id_rec/:siren/approve", function (req, res, ne
   const siren = req.params.siren;
   
   // 1. Mettre à jour le statut de la demande
-  demandeChangement.update(id_rec, siren, { statutChO: "validee" }, (updateResult) => {
+  demandeChangement.update(id_rec, siren, siren, { statutChO: "validee" }, (updateResult) => {
     if (updateResult) {
       // 2. Mettre à jour le SIREN du recruteur
-      recruteur.read(id_rec, (recruteurInfo) => {
+      recruteur.readById(id_rec, (recruteurInfo) => {
         if (recruteurInfo.length > 0) {
           recruteur.update(id_rec, { siren: siren }, (updateRecruteurResult) => {
             res.redirect("/admin/requests?tab=changement");
@@ -239,7 +239,7 @@ router.post("/request/changement/:id_rec/:siren/reject", function (req, res, nex
   const id_rec = req.params.id_rec;
   const siren = req.params.siren;
   
-  demandeChangement.update(id_rec, siren, { statutChO: "refusee" }, (result) => {
+  demandeChangement.update(id_rec, siren, siren,{ statutChO: "refusee" }, (result) => {
     if (result) {
       res.redirect("/admin/requests?tab=changement");
     } else {
