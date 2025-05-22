@@ -60,7 +60,7 @@ const organisation = {
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
-      if (i % 2 === 0) digit *= 2;
+      if (i % 2 === 1) digit *= 2;
       if (digit > 9) digit -= 9;
       sum += digit;
     }
@@ -117,91 +117,124 @@ const organisation = {
 
         // vérification si dictUpdate est du bon format
         const champsValides = ["nom", "type", "siege_social", "statut"];
-        const keyslist = Object.keys(dictUpdate);
-        if (!keyslist.every((k) => champsValides.includes(k)))
-          return callback(null);
-        const nvdict = Object.fromEntries(
-          Object.entries(dictUpdate).filter(([_, valeur]) => valeur !== null)
-        );
+        const nv = Object.entries(dictUpdate)
+          .filter(([k, v]) => champsValides.includes(k) && v !== null)
+          .reduce((o, [k, v]) => {
+            o[k] = v;
+            return o;
+          }, {});
 
-        if (Object.keys(nvdict).length !== 0) {
-          // vérification si nom est un string
-          if ("nom" in nvdict && typeof nvdict.nom !== "string")
-            return callback(null);
-
-          // vérification si type est dans le bon format
-          if (
-            "type" in nvdict &&
-            ![
-              "association",
-              "EURL",
-              "SA",
-              "SAS",
-              "SASU",
-              "ONG",
-              "SARL",
-              "SNC",
-              "SCS",
-              "SCA",
-              "SCI",
-              "SCP",
-              "SCM",
-              "SCEA",
-              "SCCV",
-              "SCPa",
-              "EARL",
-              "GAEC",
-              "SCIC",
-              "SCOP",
-              "GIE",
-              "GEIE",
-              "GE",
-            ].includes(nvdict.type)
-          )
-            return callback(null);
-
-          // vérification si siege_social est dans le bon format
-          if ("siege_social" in nvdict) {
-            const champsValides = [
-              "nom",
-              "adresse",
-              "complement",
-              "code_postal",
-              "ville",
-              "pays",
-            ];
-            const keylist = Object.keys(nvdict.siege_social);
-            if (!keylist.every((k) => champsValides.includes(k)))
-              return callback(null);
-            const valueslist = Object.values(nvdict.siege_social);
-            if (
-              typeof valueslist[0] !== "string" ||
-              typeof valueslist[1] !== "string" ||
-              (typeof valueslist[2] !== "string" && valueslist[2] !== null) ||
-              typeof valueslist[3] !== "string" ||
-              typeof valueslist[4] !== "string" ||
-              typeof valueslist[5] !== "string"
-            )
-              return callback(null);
-          }
-
-          // vérification si statut est dans le bon format
-          if (
-            "statut" in nvdict &&
-            !["inactive", "en_cours", "active"].includes(nvdict.statut)
-          )
-            return callback(null);
-
-          // mise à jour de la BDD
-          const champs = Object.keys(nvdict);
-          const values = Object.values(nvdict);
-          const clause = champs.map((k) => `${k} = ?`).join(", ");
-          const sql = `UPDATE Organisation SET ${clause} WHERE siren = ?`;
-          db.query(sql, [...values, siren], (err, results) => {
-            if (err) throw err;
-            callback(results.affectedRows);
-          });
+        // si rien à mettre à jour, on renvoie 0 lignes affectées
+        if (Object.keys(nv).length === 0) {
+          return callback(null, 0);
         }
+
+        // vérification si nom est un string
+        if ("nom" in nv && typeof nv.nom !== "string") return callback(null);
+
+        // vérification si type est dans le bon format
+        if (
+          "type" in nv &&
+          ![
+            "association",
+            "EURL",
+            "SA",
+            "SAS",
+            "SASU",
+            "ONG",
+            "SARL",
+            "SNC",
+            "SCS",
+            "SCA",
+            "SCI",
+            "SCP",
+            "SCM",
+            "SCEA",
+            "SCCV",
+            "SCPa",
+            "EARL",
+            "GAEC",
+            "SCIC",
+            "SCOP",
+            "GIE",
+            "GEIE",
+            "GE",
+          ].includes(nv.type)
+        )
+          return callback(null);
+
+        // vérification si siege_social est dans le bon format
+        if ("siege_social" in nv) {
+          if (typeof nv.siege_social !== "object") {
+            return callback(null);
+          }
+          const champsSiege = [
+            "nom",
+            "adresse",
+            "complement",
+            "code_postal",
+            "ville",
+            "pays",
+          ];
+          const clefs = Object.keys(nv.siege_social);
+          // chaque clé doit être autorisée
+          if (!clefs.every((k) => champsSiege.includes(k))) {
+            return callback(null);
+          }
+          // types : nom, adresse, code_postal, ville, pays => string ; complement => string ou null
+          const vals = nv.siege_social;
+          if (
+            typeof vals.nom !== "string" ||
+            typeof vals.adresse !== "string" ||
+            !(
+              typeof vals.complement === "string" || vals.complement === null
+            ) ||
+            typeof vals.code_postal !== "string" ||
+            typeof vals.ville !== "string" ||
+            typeof vals.pays !== "string"
+          ) {
+            return callback(null);
+          }
+        }
+
+        // Construction dynamique de la requête
+        if (
+          "statut" in nv &&
+          !["inactive", "en_cours", "active"].includes(nv.statut)
+        )
+          return callback(null);
+
+        // mise à jour de la BDD
+        const updates = [];
+        const params = [];
+
+        if ("nom" in nv) {
+          updates.push("nom = ?");
+          params.push(nv.nom);
+        }
+        if ("type" in nv) {
+          updates.push("type = ?");
+          params.push(nv.type);
+        }
+        if ("statut" in nv) {
+          updates.push("statut = ?");
+          params.push(nv.statut);
+        }
+        if ("siege_social" in nv) {
+          // fusionne l'existant et la partie modifiée
+          updates.push("siege_social = JSON_MERGE_PATCH(siege_social, ?)");
+          params.push(JSON.stringify(nv.siege_social));
+        }
+
+        // vérification si statut est dans le bon format
+        const sql = `UPDATE Organisation SET ${updates.join(
+          ", "
+        )} WHERE siren = ?`;
+        db.query(sql, [...params, siren], (err, result) => {
+          if (err) throw err;
+          // affectedRows = nombre de lignes modifiées
+          callback(result.affectedRows);
+        });
       }
     );
   },

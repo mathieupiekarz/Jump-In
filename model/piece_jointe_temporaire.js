@@ -33,13 +33,32 @@ const pjt = {
 
     // vérification si une piece jointe existante a déjà le même chemin
     pjt.read(chemin, (result) => {
-      if (result.length > 0) return callback(null);
+      if (result.length > 1) return callback(null);
       else {
-        let sql =
-          "INSERT INTO Piece_Jointe_Durable (chemin, nom, type, id_can, num_OE) VALUES (?, ?, ?, ?, ?)";
-        db.query(sql, [chemin, nom, type, id_can, num_OE], (err, results) => {
+        // vérification si le candidat existe
+        let sql_can = "SELECT * FROM Candidat WHERE id_can = ?";
+        db.query(sql_can, [id_can], (err, results) => {
           if (err) throw err;
-          callback(results.insertId);
+          if (results.length === 0) return callback(null);
+
+          /// vérification si l'offre existe
+          let sql_numero = "SELECT * FROM Offre_Emploi WHERE numero = ?";
+          db.query(sql_numero, [num_OE], (err, results) => {
+            if (err) throw err;
+            if (results.length === 0) return callback(null);
+
+            // insertion
+            let sql =
+              "INSERT INTO Piece_Jointe_Temporaire (chemin, nom, type, id_can, num_OE) VALUES (?, ?, ?, ?, ?)";
+            db.query(
+              sql,
+              [chemin, nom, type, id_can, num_OE],
+              (err, results) => {
+                if (err) throw err;
+                callback(results.insertId);
+              }
+            );
+          });
         });
       }
     });
@@ -53,6 +72,7 @@ const pjt = {
       (err, results) => {
         if (err) throw err;
         if (results.length === 0) return callback(null);
+
         // vérification si dict est du bon format
         const champsValides = ["nom", "type"];
         const keyslist = Object.keys(dictUpdate);

@@ -33,11 +33,17 @@ const pjd = {
     pjd.read(chemin, (result) => {
       if (result.length > 0) return callback(null);
       else {
-        let sql =
-          "INSERT INTO Piece_Jointe_Durable (chemin, nom, type, id_can) VALUES (?, ?, ?, ?)";
-        db.query(sql, [chemin, nom, type, id_can], (err, results) => {
+        // vérification si le candidat existe bien dans la table Candidat
+        let sql_can = "SELECT * FROM Candidat WHERE id_can = ?";
+        db.query(sql_can, [id_can], (err, results) => {
           if (err) throw err;
-          callback(results.insertId);
+          if (results.length === 0) return callback(null);
+          let sql =
+            "INSERT INTO Piece_Jointe_Durable (chemin, nom, type, id_can) VALUES (?, ?, ?, ?)";
+          db.query(sql, [chemin, nom, type, id_can], (err, results) => {
+            if (err) throw err;
+            callback(results.insertId);
+          });
         });
       }
     });
@@ -51,6 +57,7 @@ const pjd = {
       (err, results) => {
         if (err) throw err;
         if (results.length === 0) return callback(null);
+
         // vérification si dict est du bon format
         const champsValides = ["nom", "type"];
         const keyslist = Object.keys(dictUpdate);

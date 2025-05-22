@@ -38,7 +38,22 @@ describe("Model Tests", () => {
       }
     });
   });
+  test("readByOrganisation Fiche Poste", (done) => {
+    fp.readByOrganisation("407751858", (resultat) => {
+      try {
+        if (resultat === null) {
+          done();
+        } else {
+          expect(resultat[0].organisation_nom).toBe("Ricard");
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
   test("create Fiche Poste", (done) => {
+    // le numéro de siren 999999999 est volontairement faux pour éviter de créer à chaque fois une nouvelle fiche de poste
     fp.creat(
       "commercial",
       "salarié",
@@ -55,7 +70,7 @@ describe("Model Tests", () => {
       "10h/j",
       "1500e net",
       "recherche d'un commercial pour vendre du Ricard",
-      "123456789",
+      "999999999",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -70,13 +85,26 @@ describe("Model Tests", () => {
       }
     );
   });
-  /*
-  test("update demandeR", (done) => {
+  test("update Fiche Poste", (done) => {
     var dico = {
-      descriptionDR: "aimerait boire du Ricard",
-      statutDR: "refusee",
+      intitule: "data scientist",
+      statut_de_poste: "manager",
+      responsable_hierarchique: "Patrick Eboué",
+      type_metier: "data analyst",
+      lieu_mission: {
+        nom: "Maison rose",
+        adresse: "3 rue des cactus blonds",
+        complement: null,
+        code_postal: "75",
+        ville: "Paris",
+        pays: "France",
+      },
+      rythme: "18h/j",
+      fourchette_salaire: "10000e net",
+      description:
+        "recherche d'un data analyst pour analyser les données issues des nouveaux processeurs INTEL",
     };
-    demandeR.update(9, "123456789", "123456789", dico, (resultat) => {
+    fp.update(7, dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -88,8 +116,9 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeR", (done) => {
-    demandeR.delete(1, "939393931", (resultat) => {
+  test("delete Fiche Poste", (done) => {
+    // id_fiche 400 inexistant pris exrès pour ne rien supprimer
+    fp.delete(400, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -101,5 +130,4 @@ describe("Model Tests", () => {
       }
     });
   });
-  */
 });

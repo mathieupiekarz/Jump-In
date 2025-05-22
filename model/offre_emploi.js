@@ -59,7 +59,10 @@ const offre = {
     `;
     db.query(sql, [siren], (err, results) => {
       if (err) {
-        console.error("Erreur lors de la récupération des offres de l'organisation:", err);
+        console.error(
+          "Erreur lors de la récupération des offres de l'organisation:",
+          err
+        );
         callback([]);
       } else {
         callback(results);
@@ -100,16 +103,22 @@ const offre = {
     if (nb_pieces_demandees < 0) return callback(null);
 
     // insertion dans BDD
-    let sql =
-      "INSERT INTO Offre_Emploi (etat, date_validite, indication, nb_pieces_demandees, id_fiche) VALUES (?, ?, ?, ?, ?)";
-    db.query(
-      sql,
-      [etat, date_validite, indication, nb_pieces_demandees, id_fiche],
-      (err, results) => {
-        if (err) throw err;
-        callback(results.insertId);
-      }
-    );
+    let sql_fp = "SELECT * FROM Fiche_Poste WHERE id_fiche = ?";
+    db.query(sql_fp, [id_fiche], (err, results) => {
+      if (err) throw err;
+      if (results.length === 0) return callback(null);
+
+      let sql =
+        "INSERT INTO Offre_Emploi (etat, date_validite, indication, nb_pieces_demandees, id_fiche) VALUES (?, ?, ?, ?, ?)";
+      db.query(
+        sql,
+        [etat, date_validite, indication, nb_pieces_demandees, id_fiche],
+        (err, results) => {
+          if (err) throw err;
+          callback(results.insertId);
+        }
+      );
+    });
   },
   // prend en argument un dictionnaire qui contient tous les arguments d'Offre_Emploi en clé
   update: (numero, dictUpdate, callback) => {
@@ -184,7 +193,7 @@ const offre = {
         if (results.length == 0) return callback(null);
 
         // suppression
-        let sql = "DELETE FROM Offre_Emploi WHERE nuemro = ?";
+        let sql = "DELETE FROM Offre_Emploi WHERE numero = ?";
         db.query(sql, [numero], (err, results) => {
           if (err) throw err;
           callback(results.affectedRows);

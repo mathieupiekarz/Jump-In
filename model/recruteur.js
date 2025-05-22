@@ -21,22 +21,15 @@ const recruteur = {
       callback(results);
     });
   },
-  areValide: (pwd, callback) => {
-    // vérification de la composition du mot de passe
-    let regex =
-      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-    if (!regex.test(pwd)) return callback(null);
-    const sql = "SELECT * FROM Recruteur WHERE mdp = ?";
-    db.query(sql, [pwd], (err, results) => {
-      if (err) throw err;
-      if (results.length == 1 && results[0].mdp === pwd) {
-        callback(true);
-      } else {
-        callback(false);
-      }
+  areValide: (pwd) => {
+    return new Promise((resolve) => {
+      // vérification de la composition du mot de passe
+      const regex =
+        /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+      resolve(regex.test(pwd));
     });
   },
-  creat: (siren, email, mdp, nom, prenom, num, statut, callback) => {
+  creat: async (siren, email, mdp, nom, prenom, num, statut, callback) => {
     // vérification non null et types cohérents
     if (
       !siren ||
@@ -62,7 +55,7 @@ const recruteur = {
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
-      if (i % 2 === 0) digit *= 2;
+      if (i % 2 === 1) digit *= 2;
       if (digit > 9) digit -= 9;
       sum += digit;
     }
@@ -132,11 +125,11 @@ const recruteur = {
 
           //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
           if ("siren" in nvdict) {
-            if (!/^\d{9}$/.test(nvdict.siren)) return callback(null);
+            if (!/^\d{9}$/.test(siren)) return callback(null);
             let sum = 0;
             for (let i = 0; i < 9; i++) {
-              let digit = parseInt(nvdict.siren[i], 10);
-              if (i % 2 === 0) digit *= 2;
+              let digit = parseInt(siren[i], 10);
+              if (i % 2 === 1) digit *= 2;
               if (digit > 9) digit -= 9;
               sum += digit;
             }

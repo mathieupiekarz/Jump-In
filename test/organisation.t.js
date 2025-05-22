@@ -13,11 +13,11 @@ describe("Model Tests", () => {
     DB.end(callback);
   });
   test("read Organisation", (done) => {
-    orga.read(1, (resultat) => {
+    orga.read("775620326", (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statut_de_poste).toBe("cadre");
+          expect(resultat[0].nom).toBe("Ricard");
           done();
         }
       } catch (err) {
@@ -25,9 +25,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  /*
-  test("readall Fiche Poste", (done) => {
-    fp.readall((resultat) => {
+  test("readall Organisation", (done) => {
+    orga.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -39,24 +38,20 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create Fiche Poste", (done) => {
-    fp.creat(
-      "commercial",
-      "salarié",
-      "Navarre Titouan",
-      "marketing",
+  test("create Organisation", (done) => {
+    orga.creat(
+      "343134763",
+      "JBL",
+      "SA",
       {
         nom: "Building 1",
         adresse: "4 rue des ibis bleus",
         complement: null,
-        code_postal: "13",
-        ville: "Marseille",
+        code_postal: "75",
+        ville: "Paris",
         pays: "France",
       },
-      "10h/j",
-      "1500e net",
-      "recherche d'un commercial pour vendre du Ricard",
-      "123456789",
+      "active",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -71,13 +66,21 @@ describe("Model Tests", () => {
       }
     );
   });
-  /*
-  test("update demandeR", (done) => {
+  test("update Organisation", (done) => {
     var dico = {
-      descriptionDR: "aimerait boire du Ricard",
-      statutDR: "refusee",
+      nom: "INTEL",
+      type: null,
+      siege_social: {
+        nom: "Building 4",
+        adresse: "18 avenue des pigeons jaunes",
+        complement: null,
+        code_postal: "92",
+        ville: "Montrouge",
+        pays: "France",
+      },
+      statut: "en_cours",
     };
-    demandeR.update(9, "123456789", "123456789", dico, (resultat) => {
+    orga.update("941615692", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -89,8 +92,10 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeR", (done) => {
-    demandeR.delete(1, "939393931", (resultat) => {
+
+  test("delete Organisation", (done) => {
+    // siren volontairement faux pour éviter de supprimer une organisation
+    orga.delete("343134763", (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -102,5 +107,4 @@ describe("Model Tests", () => {
       }
     });
   });
-  */
 });
