@@ -14,22 +14,15 @@ const recruteur = {
       callback(results);
     });
   },
-  areValide: (pwd, callback) => {
-    // vérification de la composition du mot de passe
-    let regex =
-      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-    if (!regex.test(pwd)) return callback(null);
-    const sql = "SELECT * FROM Recruteur WHERE mdp = ?";
-    db.query(sql, [pwd], (err, results) => {
-      if (err) throw err;
-      if (results.length == 1 && results[0].mdp === pwd) {
-        callback(true);
-      } else {
-        callback(false);
-      }
+  areValide: (pwd) => {
+    return new Promise((resolve) => {
+      // vérification de la composition du mot de passe
+      const regex =
+        /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+      resolve(regex.test(pwd));
     });
   },
-  creat: (siren, email, mdp, nom, prenom, num, statut, callback) => {
+  creat: async (siren, email, mdp, nom, prenom, num, statut, callback) => {
     // vérification non null et types cohérents
     if (
       !siren ||

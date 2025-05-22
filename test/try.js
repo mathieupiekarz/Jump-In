@@ -37,7 +37,7 @@ else console.log("valide");
 
 732829320 --> APPLE
 552100554 --> MICROSOFT
-775620326 --> RICARD --> 941615692
+407751858 --> RICARD 
 343134763 --> JBL
 
 941615692
@@ -64,7 +64,7 @@ else console.log("valide");
 
 */
 
-const siren = "775620326";
+const siren = "407751858";
 
 if (!/^\d{9}$/.test(siren)) console.log("ERREUR");
 

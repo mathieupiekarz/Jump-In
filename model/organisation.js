@@ -225,7 +225,6 @@ const organisation = {
           updates.push("siege_social = JSON_MERGE_PATCH(siege_social, ?)");
           params.push(JSON.stringify(nv.siege_social));
         }
-        console.log(params);
 
         // vérification si statut est dans le bon format
         const sql = `UPDATE Organisation SET ${updates.join(
