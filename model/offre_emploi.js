@@ -5,7 +5,8 @@ const offre = {
     let sql = "SELECT * FROM Offre_Emploi WHERE numero = ?";
     db.query(sql, [numero], (err, results) => {
       if (err) throw err;
-      callback(results);
+      if (results.length === 0) return callback(null);
+      else callback(results);
     });
   },
   readWithFicheAndOrganisation: (numero, callback) => {
@@ -19,13 +20,15 @@ const offre = {
       WHERE o.numero = ?`;
     db.query(sql, [numero], (err, results) => {
       if (err) throw err;
-      callback(results);
+      if (results.length === 0) return callback(null);
+      else callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Offre_Emploi", (err, results) => {
       if (err) throw err;
-      callback(results);
+      if (results.length === 0) return callback(null);
+      else callback(results);
     });
   },
   readAllWithFicheAndOrganisation: (callback) => {
@@ -41,7 +44,8 @@ const offre = {
     `;
     db.query(sql, (err, results) => {
       if (err) throw err;
-      callback(results);
+      if (results.length === 0) return callback(null);
+      else callback(results);
     });
   },
   // Récupère toutes les offres d'emploi d'une organisation spécifique
@@ -65,7 +69,8 @@ const offre = {
         );
         callback([]);
       } else {
-        callback(results);
+        if (results.length === 0) return callback(null);
+        else callback(results);
       }
     });
   },
@@ -190,7 +195,7 @@ const offre = {
       [numero],
       (err, results) => {
         if (err) throw err;
-        if (results.length == 0) return callback(null);
+        if (results.length === 0) return callback(null);
 
         // suppression
         let sql = "DELETE FROM Offre_Emploi WHERE numero = ?";

@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">56.45% </span>
+                <span class="strong">58.06% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>35/62</span>
+                <span class='fraction'>36/62</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">52.38% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>21/42</span>
+                <span class='fraction'>22/42</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">71.73% </span>
+                <span class="strong">73.91% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>33/46</span>
+                <span class='fraction'>34/46</span>
             </div>
         
             
@@ -248,6 +248,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -291,7 +292,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -337,7 +337,7 @@ const candidature = {
   readall: (callback) =&gt; {
     db.query("SELECT * FROM Candidature", (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.lenght === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
       callback(results);
     });
   },
@@ -353,9 +353,9 @@ const candidature = {
         JOIN Candidature c ON o.numero = c.num_OE
         WHERE o.numero = ? AND c.id_can = ?`;
     db.query(sql, [numero, id_can], (err, results) =&gt; {
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.lenght === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      callback(results);
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      else callback(results);
     });
   },
 &nbsp;
@@ -377,7 +377,8 @@ const candidature = {
 <span class="cstat-no" title="statement not covered" >        console.error("Erreur lors de la récupération des candidatures:", err);</span>
 <span class="cstat-no" title="statement not covered" >        callback([]);</span>
       } else {
-        callback(results);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+        else callback(results);
       }
     });
   },
@@ -411,7 +412,7 @@ const candidature = {
 &nbsp;
             // Vérification si une candidature existe déjà
             candidature.read(id_can, num_OE, (result) =&gt; {
-              <span class="missing-if-branch" title="else path not taken" >E</span>if (result !== null &amp;&amp; result.length &gt; 0) return callback(null);
+              <span class="missing-if-branch" title="else path not taken" >E</span>if (result &amp;&amp; result.length &gt; 0) return callback(null);
 &nbsp;
               // Insertion si tout est valide
               const sql =
@@ -422,7 +423,6 @@ const candidature = {
                 [id_can, num_OE, date_candidature],
 <span class="fstat-no" title="function not covered" >                (e</span>rr, results) =&gt; {
 <span class="cstat-no" title="statement not covered" >                  if (err) <span class="cstat-no" title="statement not covered" >throw err;</span></span>
-<span class="cstat-no" title="statement not covered" >                  if (results.lenght === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span></span>
 <span class="cstat-no" title="statement not covered" >                  callback(results.insertId);</span>
                 }
               );
@@ -460,7 +460,7 @@ module.exports = candidature;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-15T13:10:15.705Z
+                at 2025-05-22T15:01:47.407Z
             </div>
         <script src="prettify.js"></script>
         <script>

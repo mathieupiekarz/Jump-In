@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const admin = require("../model/administrateur.js");
+const demandeChO = require("../model/demande_changer_organisation.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read admin", (done) => {
-    admin.read("barrau.12@non.com", (resultat) => {
+  test("read demandeChO", (done) => {
+    demandeChO.read(1, "552100554", (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].prenom).toBe("maxence");
+          expect(resultat[0].statutChO).toBe("refusee");
           done();
         }
       } catch (err) {
@@ -25,8 +25,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall admin", (done) => {
-    admin.readall((resultat) => {
+  test("readall demandeChO", (done) => {
+    demandeChO.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -38,18 +38,12 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("arevalide admin", async () => {
-    const isValid = await admin.areValide("AB123test@?test");
-    expect(isValid).toBe(true);
-  });
-  test("create admin", (done) => {
-    admin.creat(
-      "antoine.trouve@oui.com",
-      "AB123test@?test",
-      "trouve",
-      "antoire",
-      "+33611121314",
-      "actif",
+  test("create demandeChO", (done) => {
+    demandeChO.creat(
+      1,
+      "732829320",
+      "demande de rejoindre Apple",
+      "en_attente",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -64,16 +58,12 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update admin", (done) => {
+  test("update demandeChO", (done) => {
     var dico = {
-      email: "mathieu.12@oui.fr",
-      mdp: "ttAA11#*izgoaajivza",
-      nom: "piekarz",
-      prenom: "mathieu",
-      numero_telephone: "+33667654578",
-      statut: "inactif",
+      descriptionChO: "voudrait rejoindre apple",
+      statutChO: "validee",
     };
-    admin.update(1, dico, (resultat) => {
+    demandeChO.update(1, "732829320", "732829320", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -85,8 +75,9 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete admin", (done) => {
-    admin.delete(5, (resultat) => {
+  test("delete demandeChO", (done) => {
+    // id_rec 400 volontairement pour éviter de supprimer une demande à chaque appel
+    demandeChO.delete(400, "552100554", (resultat) => {
       try {
         if (resultat === null) done();
         else {

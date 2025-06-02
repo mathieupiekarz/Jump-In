@@ -25,6 +25,19 @@ describe("Model Tests", () => {
       }
     });
   });
+  test("readByIdrecruteur", (done) => {
+    rec.readById(1, (resultat) => {
+      try {
+        if (resultat === null) done();
+        else {
+          expect(resultat[0].nom).toBe("liquois");
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
   test("readall recruteur", (done) => {
     rec.readall((resultat) => {
       try {
@@ -44,20 +57,19 @@ describe("Model Tests", () => {
   });
   test("create recruteur", (done) => {
     rec.creat(
+      "552100554",
       "mael.lozach@outlook.fr",
       "AB123test@?test",
       "lozach",
       "mael",
-      "+33612121212",
-      "inactif",
+      "+33611111111",
+      "actif",
       (resultat) => {
         try {
           if (resultat === null) {
             done();
           } else {
-            console.log(resultat);
-
-            //expect(typeof resultat).toBe("number");
+            expect(typeof resultat).toBe("number");
             done();
           }
         } catch (err) {
@@ -66,17 +78,17 @@ describe("Model Tests", () => {
       }
     );
   });
-  /*s
-  test("update user", (done) => {
+  test("update recruteur", (done) => {
     var dico = {
-      email: "mathieu.piekarz@outlook.fr",
+      siren: "732829320",
+      email: "gaetan.pireprénom@outlook.fr",
       mdp: "ttAA11#*izgoaajivza",
-      nom: "piekarz",
-      prenom: "mathieu",
-      numero_telephone: "+33667654578",
-      statut: "actif",
+      nom: "gaetan",
+      prenom: "pireprénom",
+      numero_telephone: "+33612121212",
+      statut: "inactif",
     };
-    candidat.update(1, dico, (resultat) => {
+    rec.update(5, dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -88,8 +100,9 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete user", (done) => {
-    candidat.delete(2, (resultat) => {
+  test("delete recruteur", (done) => {
+    // id-rec : 400 volontairement pour éviter de supprimer un recruteur à chaque appel
+    rec.delete(400, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -101,15 +114,15 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("connexion user", (done) => {
-    candidat.connect(
-      "benoit.demiscault@outlook.fr",
-      "AB123test@?test",
+  test("connexion recruteur", (done) => {
+    rec.connect(
+      "pierre.liquois@yahoo.fr",
+      "lazoneenpersonne12AB##",
       (resultat) => {
         try {
           if (resultat === null) done();
           else {
-            expect(resultat[0].email).toBe("benoit.demiscault@outlook.fr");
+            expect(resultat[0].email).toBe("pierre.liquois@yahoo.fr");
             done();
           }
         } catch (err) {
@@ -118,5 +131,4 @@ describe("Model Tests", () => {
       }
     );
   });
-  */
 });

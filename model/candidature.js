@@ -12,7 +12,7 @@ const candidature = {
   readall: (callback) => {
     db.query("SELECT * FROM Candidature", (err, results) => {
       if (err) throw err;
-      if (results.lenght === 0) return callback(null);
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -28,9 +28,9 @@ const candidature = {
         JOIN Candidature c ON o.numero = c.num_OE
         WHERE o.numero = ? AND c.id_can = ?`;
     db.query(sql, [numero, id_can], (err, results) => {
-      if (results.lenght === 0) return callback(null);
       if (err) throw err;
-      callback(results);
+      if (results.length === 0) return callback(null);
+      else callback(results);
     });
   },
 
@@ -52,7 +52,8 @@ const candidature = {
         console.error("Erreur lors de la récupération des candidatures:", err);
         callback([]);
       } else {
-        callback(results);
+        if (results.length === 0) return callback(null);
+        else callback(results);
       }
     });
   },
@@ -86,7 +87,7 @@ const candidature = {
 
             // Vérification si une candidature existe déjà
             candidature.read(id_can, num_OE, (result) => {
-              if (result !== null && result.length > 0) return callback(null);
+              if (result && result.length > 0) return callback(null);
 
               // Insertion si tout est valide
               const sql =
@@ -97,7 +98,6 @@ const candidature = {
                 [id_can, num_OE, date_candidature],
                 (err, results) => {
                   if (err) throw err;
-                  if (results.lenght === 0) return callback(null);
                   callback(results.insertId);
                 }
               );

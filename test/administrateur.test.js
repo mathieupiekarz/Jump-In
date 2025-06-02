@@ -1,5 +1,5 @@
 const DB = require("../model/db.js");
-const demandeCrO = require("../model/demande_creation_organisation.js");
+const admin = require("../model/administrateur.js");
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -12,12 +12,12 @@ describe("Model Tests", () => {
     }
     DB.end(callback);
   });
-  test("read demandeCrO", (done) => {
-    demandeCrO.read(1, "787878781", (resultat) => {
+  test("read admin", (done) => {
+    admin.read("barrau.12@non.com", (resultat) => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutCrO).toBe("refusee");
+          expect(resultat[0].prenom).toBe("maxence");
           done();
         }
       } catch (err) {
@@ -25,8 +25,8 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("readall demandeCrO", (done) => {
-    demandeCrO.readall((resultat) => {
+  test("readall admin", (done) => {
+    admin.readall((resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -38,12 +38,18 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("create demandeCrO", (done) => {
-    demandeCrO.creat(
-      1,
-      "939393931",
-      "demande de créer Lamborghini",
-      "en_attente",
+  test("arevalide admin", async () => {
+    const isValid = await admin.areValide("AB123test@?test");
+    expect(isValid).toBe(true);
+  });
+  test("create admin", (done) => {
+    admin.creat(
+      "antoine.trouve@oui.com",
+      "AB123test@?test",
+      "trouve",
+      "antoire",
+      "+33611121314",
+      "actif",
       (resultat) => {
         try {
           if (resultat === null) {
@@ -58,12 +64,16 @@ describe("Model Tests", () => {
       }
     );
   });
-  test("update demandeCrO", (done) => {
+  test("update admin", (done) => {
     var dico = {
-      descriptionCrO: "voudrait créer ESCOM",
-      statutCrO: "refusee",
+      email: "mathieu.12@oui.fr",
+      mdp: "ttAA11#*izgoaajivza",
+      nom: "piekarz",
+      prenom: "mathieu",
+      numero_telephone: "+33667654578",
+      statut: "inactif",
     };
-    demandeCrO.update(1, "787878781", dico, (resultat) => {
+    admin.update(1, dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -75,12 +85,25 @@ describe("Model Tests", () => {
       }
     });
   });
-  test("delete demandeCrO", (done) => {
-    demandeCrO.delete(1, "939393931", (resultat) => {
+  test("delete admin", (done) => {
+    admin.delete(5, (resultat) => {
       try {
         if (resultat === null) done();
         else {
           expect([0, 1]).toContain(resultat);
+          done();
+        }
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+  test("connexion admin", (done) => {
+    admin.connect("mathieu.12@oui.fr", "ttAA11#*izgoaajivza", (resultat) => {
+      try {
+        if (resultat === null) done();
+        else {
+          expect(resultat[0].email).toBe("mathieu.12@oui.fr");
           done();
         }
       } catch (err) {

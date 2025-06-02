@@ -12,7 +12,7 @@ const candidat = {
   readall: (callback) => {
     db.query("SELECT * FROM Candidat", (err, results) => {
       if (err) throw err;
-      if (results.lenght === 0) return callback(null);
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -64,7 +64,7 @@ const candidat = {
 
     // vérification si un candidat existant a déjà le même email
     candidat.read(email, (result) => {
-      if (result !== null) return callback(null);
+      if (result && result.length > 0) return callback(null);
       else {
         let sql =
           "INSERT INTO Candidat (email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -144,7 +144,7 @@ const candidat = {
             if (!regex.test(nvdict.email)) return callback(null);
 
             candidat.read(nvdict.email, (result) => {
-              if (result !== null && result.length > 1) return callback(null);
+              if (result && result.length > 1) return callback(null);
               // mise à jour de la BDD
               db.query(sql, [...values, id_can], (err, results) => {
                 if (err) throw err;
@@ -187,7 +187,7 @@ const candidat = {
     let sql = "SELECT email FROM Candidat WHERE email = ? AND mdp = ?";
     db.query(sql, [email, mdp], (err, results) => {
       if (err) throw err;
-      if (results.lenght === 0) return callback(null);
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },

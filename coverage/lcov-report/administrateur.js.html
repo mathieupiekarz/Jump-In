@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">63.26% </span>
+                <span class="strong">63.8% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>62/98</span>
+                <span class='fraction'>67/105</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">56.94% </span>
+                <span class="strong">57.69% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>41/72</span>
+                <span class='fraction'>45/78</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">86.95% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>18/21</span>
+                <span class='fraction'>20/23</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">74.02% </span>
+                <span class="strong">75.6% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>57/77</span>
+                <span class='fraction'>62/82</span>
             </div>
         
             
@@ -247,7 +247,16 @@
 <a name='L182'></a><a href='#L182'>182</a>
 <a name='L183'></a><a href='#L183'>183</a>
 <a name='L184'></a><a href='#L184'>184</a>
-<a name='L185'></a><a href='#L185'>185</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -426,6 +435,15 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -445,7 +463,7 @@ const admin = {
   readall: (callback) =&gt; {
     db.query("SELECT * FROM Administrateur", (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.lenght === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
       callback(results);
     });
   },
@@ -494,7 +512,7 @@ const admin = {
 &nbsp;
     // vérification si un admin existant a déjà le même email
     admin.read(email, (result) =&gt; {
-      if (result.length &gt; 0) return callback(null);
+      if (result &amp;&amp; result.length &gt; 0) return callback(null);
       else <span class="missing-if-branch" title="else path not taken" >E</span>{
         let sql =
 <span class="cstat-no" title="statement not covered" >          "INSERT INTO Administrateur (email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";</span>
@@ -574,7 +592,7 @@ const admin = {
             <span class="missing-if-branch" title="if path not taken" >I</span>if (!regex.test(nvdict.email)) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
 &nbsp;
             admin.read(nvdict.email, (result) =&gt; {
-              <span class="missing-if-branch" title="if path not taken" >I</span>if (result !== null &amp;&amp; result.length &gt; 1) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+              <span class="missing-if-branch" title="if path not taken" >I</span>if (result &amp;&amp; result.length &gt; 1) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
               // mise à jour de la BDD
               db.query(sql, [...values, id_admin], (err, results) =&gt; {
                 <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
@@ -612,6 +630,15 @@ const admin = {
       }
     );
   },
+  // vérification si l'admin existe
+  connect: (email, mdp, callback) =&gt; {
+    let sql = "SELECT email FROM Administrateur WHERE email = ? AND mdp = ?";
+    db.query(sql, [email, mdp], (err, results) =&gt; {
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+      callback(results);
+    });
+  },
 };
 &nbsp;
 module.exports = admin;
@@ -622,7 +649,7 @@ module.exports = admin;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-15T13:10:15.705Z
+                at 2025-05-22T15:01:47.407Z
             </div>
         <script src="prettify.js"></script>
         <script>

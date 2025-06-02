@@ -63,7 +63,7 @@ else console.log("valide");
 
 
 */
-
+/*
 const siren = "407751858";
 
 if (!/^\d{9}$/.test(siren)) console.log("ERREUR");
@@ -77,3 +77,8 @@ for (let i = 0; i < 9; i++) {
 }
 if (sum % 10 !== 0) console.log("ERREUR");
 else console.log("valide");
+*/
+
+let tab = ["atada"];
+if (tab) console.log(tab);
+else console.log("caca");

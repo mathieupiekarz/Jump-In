@@ -13,7 +13,7 @@ describe("Model Tests", () => {
     DB.end(callback);
   });
   test("read demandeR", (done) => {
-    demandeR.read(1, "123456789", (resultat) => {
+    demandeR.read(1, "407751858", (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -41,7 +41,7 @@ describe("Model Tests", () => {
   test("create demandeR", (done) => {
     demandeR.creat(
       9,
-      "121212121",
+      "732829320",
       "demande recruteur pour APPLE",
       "en_attente",
       (resultat) => {
@@ -63,7 +63,7 @@ describe("Model Tests", () => {
       descriptionDR: "aimerait boire du Ricard",
       statutDR: "refusee",
     };
-    demandeR.update(9, "123456789", "123456789", dico, (resultat) => {
+    demandeR.update(9, "407751858", "407751858", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -76,7 +76,8 @@ describe("Model Tests", () => {
     });
   });
   test("delete demandeR", (done) => {
-    demandeR.delete(1, "939393931", (resultat) => {
+    // id_can 400 volontairement pour éviter de supprimer à chaque fois
+    demandeR.delete(400, "407751858", (resultat) => {
       try {
         if (resultat === null) done();
         else {

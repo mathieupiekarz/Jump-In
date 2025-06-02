@@ -5,12 +5,14 @@ const fp = {
     let sql = "SELECT * FROM Fiche_Poste WHERE id_fiche = ?";
     db.query(sql, [id_fiche], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Fiche_Poste", (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -29,7 +31,8 @@ const fp = {
         );
         callback([]);
       } else {
-        callback(results);
+        if (results.length === 0) return callback(null);
+        else callback(results);
       }
     });
   },
@@ -67,18 +70,6 @@ const fp = {
       return callback(null);
     }
 
-    //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
-
-    if (!/^\d{9}$/.test(siren)) return callback(null);
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      let digit = parseInt(siren[i], 10);
-      if (i % 2 === 1) digit *= 2;
-      if (digit > 9) digit -= 9;
-      sum += digit;
-    }
-    if (sum % 10 !== 0) return callback(null);
-
     // vérification du json lieu_mission
     const champsValides = [
       "nom",
@@ -100,6 +91,17 @@ const fp = {
       typeof valueslist[5] !== "string"
     )
       return callback(null);
+
+    //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
+    if (!/^\d{9}$/.test(siren)) return callback(null);
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      let digit = parseInt(siren[i], 10);
+      if (i % 2 === 1) digit *= 2;
+      if (digit > 9) digit -= 9;
+      sum += digit;
+    }
+    if (sum % 10 !== 0) return callback(null);
 
     // vérificatuon que l'organisatione existe bien
     let sql_org = "SELECT * FROM Organisation WHERE siren = ?";
@@ -266,7 +268,6 @@ const fp = {
           updates.push("description = ?");
           params.push(nv.description);
         }
-        console.log(params);
 
         // vérification si statut est dans le bon format
         const sql = `UPDATE Fiche_Poste SET ${updates.join(

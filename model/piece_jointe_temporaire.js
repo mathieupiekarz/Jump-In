@@ -5,12 +5,14 @@ const pjt = {
     let sql = "SELECT * FROM Piece_Jointe_Temporaire WHERE chemin = ?";
     db.query(sql, [chemin], (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
   readall: (callback) => {
     db.query("SELECT * FROM Piece_Jointe_Temporaire", (err, results) => {
       if (err) throw err;
+      if (results.length === 0) return callback(null);
       callback(results);
     });
   },
@@ -33,7 +35,7 @@ const pjt = {
 
     // vérification si une piece jointe existante a déjà le même chemin
     pjt.read(chemin, (result) => {
-      if (result.length > 1) return callback(null);
+      if (result && result.length > 1) return callback(null);
       else {
         // vérification si le candidat existe
         let sql_can = "SELECT * FROM Candidat WHERE id_can = ?";

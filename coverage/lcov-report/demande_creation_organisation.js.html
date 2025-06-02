@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75.32% </span>
+                <span class="strong">64.93% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>58/77</span>
+                <span class='fraction'>50/77</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">61.11% </span>
+                <span class="strong">57.4% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>33/54</span>
+                <span class='fraction'>31/54</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>19/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.1% </span>
+                <span class="strong">77.58% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>54/58</span>
+                <span class='fraction'>45/58</span>
             </div>
         
             
@@ -205,7 +205,7 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -248,14 +248,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -318,10 +318,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -337,7 +337,7 @@ const dco = {
       "SELECT * FROM DemandeCreationOrganisation WHERE id_can = ? AND siren = ?";
     db.query(sql, [id_can, siren], (err, results) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-      if (results.length === 0) return callback(null);
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length === 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
       callback(results);
     });
   },
@@ -377,18 +377,18 @@ const dco = {
 &nbsp;
         // Vérification si une demande identique existe déjà
         dco.read(id_can, siren, (result) =&gt; {
-          <span class="missing-if-branch" title="if path not taken" >I</span>if (result &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >result.length &gt; 0)</span> <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+          <span class="missing-if-branch" title="else path not taken" >E</span>if (result &amp;&amp; result.length &gt; 0) return callback(null);
 &nbsp;
           // Insertion de la nouvelle demande
           const sql =
-            "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO) VALUES (?, ?, ?, ?, ?)";
-          const dateDemandeCrO = new Date().toISOString().split("T")[0];
-          db.query(
+<span class="cstat-no" title="statement not covered" >            "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO) VALUES (?, ?, ?, ?, ?)";</span>
+          const dateDemandeCrO = <span class="cstat-no" title="statement not covered" >new Date().toISOString().split("T")[0];</span>
+<span class="cstat-no" title="statement not covered" >          db.query(</span>
             sql,
             [id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO],
-            (err, results) =&gt; {
-              <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-              callback(results.insertId);
+<span class="fstat-no" title="function not covered" >            (e</span>rr, results) =&gt; {
+<span class="cstat-no" title="statement not covered" >              if (err) <span class="cstat-no" title="statement not covered" >throw err;</span></span>
+<span class="cstat-no" title="statement not covered" >              callback(results.insertId);</span>
             }
           );
         });
@@ -447,14 +447,14 @@ const dco = {
       [id_can, siren],
       (err, results) =&gt; {
         <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (results.length == 0) <span class="cstat-no" title="statement not covered" >return callback(null);</span>
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (results.length == 0) return callback(null);
 &nbsp;
         // suppression
         let sql =
-          "DELETE FROM DemandeCreationOrganisation WHERE id_can = ? AND siren = ?";
-        db.query(sql, [id_can, siren], (err, results) =&gt; {
-          <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >throw err;</span>
-          callback(results.affectedRows);
+<span class="cstat-no" title="statement not covered" >          "DELETE FROM DemandeCreationOrganisation WHERE id_can = ? AND siren = ?";</span>
+<span class="cstat-no" title="statement not covered" >        db.query(sql, [id_can, siren], <span class="fstat-no" title="function not covered" >(e</span>rr, results) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >          if (err) <span class="cstat-no" title="statement not covered" >throw err;</span></span>
+<span class="cstat-no" title="statement not covered" >          callback(results.affectedRows);</span>
         });
       }
     );
@@ -469,7 +469,7 @@ module.exports = dco;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-15T13:10:15.705Z
+                at 2025-05-22T15:01:47.407Z
             </div>
         <script src="prettify.js"></script>
         <script>
