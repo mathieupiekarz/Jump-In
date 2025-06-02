@@ -721,7 +721,7 @@
             background-color: #f0f0f0;
         }
 
-        .save-btn-profile {
+        .save-btn-profile, .save-btn {
             background-color: #4CAF50;
             color: white;
         }
@@ -907,6 +907,10 @@
             display: block;
             font-size: 12px;
             color: #666;
+        }
+        
+        .cancel-btn {
+            background-color: #e43e3e;
         }
         
         .create-fiche-btn {

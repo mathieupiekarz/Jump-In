@@ -48,31 +48,87 @@ router.get("/:entreprise_id/NosOffres", function (req, res, next) {
   });
 });
 
-// Route pour voir les candidats d'une offre spécifique (à implémenter)
+// Route pour voir les candidats d'une offre spécifique
 router.get("/:entreprise_id/offre/:offre_id/candidats", function (req, res, next) {
   const siren = req.params.entreprise_id;
   const offre_id = req.params.offre_id;
   
-  // À implémenter plus tard
-  res.send("Affichage des candidats pour l'offre " + offre_id + " de l'organisation " + siren);
+  // Vérifier si l'organisation existe
+  organisation.read(siren, function(orgResult) {
+    if (!orgResult || orgResult.length === 0) {
+      return res.status(404).send("Organisation non trouvée.");
+    }
+
+    // Récupérer les détails de l'offre avec la fiche de poste
+    offre.readWithFicheAndOrganisation(parseInt(offre_id), function(offreResult) {
+      if (!offreResult || offreResult.length === 0) {
+        return res.status(404).send("Offre non trouvée.");
+      }
+
+      // Récupérer toutes les candidatures pour cette offre
+      candidature.readByOffreWithCandidat(parseInt(offre_id), function(candidatures) {
+        res.render("OffreCandidatures", {
+          title: "Candidatures - " + offreResult[0].intitule,
+          offre: offreResult[0],
+          organisation: orgResult[0],
+          candidatures: candidatures
+        });
+      });
+    });
+  });
 });
 
-// Route pour modifier une offre (à implémenter)
-router.get("/:entreprise_id/offre/:offre_id/modifier", function (req, res, next) {
+// Route pour modifier une offre
+router.post("/:entreprise_id/offre/:offre_id/modifier", function (req, res, next) {
   const siren = req.params.entreprise_id;
   const offre_id = req.params.offre_id;
+  const { etat, date_validite, indication, nb_pieces_demandees } = req.body;
   
-  // À implémenter plus tard
-  res.send("Modification de l'offre " + offre_id + " de l'organisation " + siren);
+  // Vérifier si l'organisation existe
+  organisation.read(siren, function(orgResult) {
+    if (!orgResult || orgResult.length === 0) {
+      return res.status(404).send("Organisation non trouvée.");
+    }
+
+    // Créer l'objet de mise à jour avec les champs modifiés
+    const updateData = {
+      etat: etat,
+      date_validite: date_validite,
+      indication: indication || null,
+      nb_pieces_demandees: parseInt(nb_pieces_demandees)
+    };
+
+    // Mettre à jour l'offre
+    offre.update(parseInt(offre_id), updateData, function(result) {
+      if (!result) {
+        return res.status(400).send("Erreur lors de la modification de l'offre. Veuillez vérifier les données saisies.");
+      }
+      // Rediriger vers la page des offres
+      res.redirect(`/recruteur/${siren}/NosOffres`);
+    });
+  });
 });
 
-// Route pour supprimer une offre (à implémenter)
+// Route pour supprimer une offre
 router.post("/:entreprise_id/offre/:offre_id/supprimer", function (req, res, next) {
   const siren = req.params.entreprise_id;
   const offre_id = req.params.offre_id;
   
-  // À implémenter plus tard
-  res.send("Suppression de l'offre " + offre_id + " de l'organisation " + siren);
+  // Vérifier si l'organisation existe
+  organisation.read(siren, function(orgResult) {
+    if (!orgResult || orgResult.length === 0) {
+      return res.status(404).send("Organisation non trouvée.");
+    }
+
+    // Supprimer l'offre
+    offre.delete(parseInt(offre_id), function(result) {
+      if (!result) {
+        return res.status(400).send("Erreur lors de la suppression de l'offre. L'offre n'existe peut-être pas.");
+      }
+      // Rediriger vers la page des offres
+      res.redirect(`/recruteur/${siren}/NosOffres`);
+    });
+  });
 });
 
 // Route pour modifier une fiche de poste (à implémenter)
@@ -116,6 +172,76 @@ router.post("/:entreprise_id/fiche/creer", function (req, res, next) {
   
   // À implémenter plus tard - Récupération des données du formulaire et création de la fiche
   res.send("Création d'une fiche de poste pour l'organisation " + siren);
+});
+
+// Route pour traiter la création d'une offre d'emploi
+router.post("/:entreprise_id/offre/creer", function (req, res, next) {
+  const siren = req.params.entreprise_id;
+  const { id_fiche, etat, date_validite, indication, nb_pieces_demandees } = req.body;
+
+  // Vérifier si l'organisation existe
+  organisation.read(siren, function(orgResult) {
+    if (!orgResult || orgResult.length === 0) {
+      return res.status(404).send("Organisation non trouvée.");
+    }
+
+    // Créer l'offre d'emploi
+    offre.creat(
+      etat,
+      date_validite,
+      indication || null,
+      parseInt(nb_pieces_demandees),
+      parseInt(id_fiche),
+      function(result) {
+        if (!result) {
+          return res.status(400).send("Erreur lors de la création de l'offre. Veuillez vérifier les données saisies.");
+        }
+        // Rediriger vers la page des offres
+        res.redirect(`/recruteur/${siren}/NosOffres`);
+      }
+    );
+  });
+});
+
+// Route pour traiter la création d'une offre à partir d'une fiche
+router.post("/:entreprise_id/fiche/:fiche_id/creer-offre", function (req, res, next) {
+  const siren = req.params.entreprise_id;
+  const fiche_id = req.params.fiche_id;
+  const { etat, date_validite, indication, nb_pieces_demandees } = req.body;
+
+  // Vérifier si l'organisation existe
+  organisation.read(siren, function(orgResult) {
+    if (!orgResult || orgResult.length === 0) {
+      return res.status(404).send("Organisation non trouvée.");
+    }
+
+    // Vérifier si la fiche de poste existe et appartient à l'organisation
+    fp.read(parseInt(fiche_id), function(ficheResult) {
+      if (!ficheResult || ficheResult.length === 0) {
+        return res.status(404).send("Fiche de poste non trouvée.");
+      }
+
+      if (ficheResult[0].siren !== siren) {
+        return res.status(403).send("Vous n'avez pas accès à cette fiche de poste.");
+      }
+
+      // Créer l'offre d'emploi
+      offre.creat(
+        etat,
+        date_validite,
+        indication || null,
+        parseInt(nb_pieces_demandees),
+        parseInt(fiche_id),
+        function(result) {
+          if (!result) {
+            return res.status(400).send("Erreur lors de la création de l'offre. Veuillez vérifier les données saisies.");
+          }
+          // Rediriger vers la page des offres
+          res.redirect(`/recruteur/${siren}/NosOffres`);
+        }
+      );
+    });
+  });
 });
 
 module.exports = router; 

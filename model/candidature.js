@@ -125,6 +125,24 @@ const candidature = {
       }
     );
   },
+  readByOffreWithCandidat: (num_OE, callback) => {
+    const sql = `
+      SELECT c.*, cd.nom, cd.prenom, cd.email, cd.numero_telephone, cd.statut as statut_candidat
+      FROM Candidature c
+      JOIN Candidat cd ON c.id_can = cd.id_can
+      WHERE c.num_OE = ?
+      ORDER BY c.date_candidature DESC
+    `;
+    
+    db.query(sql, [num_OE], (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la récupération des candidatures:", err);
+        callback([]);
+      } else {
+        callback(results);
+      }
+    });
+  },
 };
 
 module.exports = candidature;
