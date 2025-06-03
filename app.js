@@ -26,31 +26,20 @@ app.use(session.init()); //Initialiser les sessions
 
 // check user before app.use (path, router)
 app.all("*", function (req, res, next) {
-  console.log("Session actuelle :", req.session);
   const nonSecurePaths = ["/users/login", "/users/inscription"];
-  const adminPaths = ["/admin/dashboard", "/admin/dashboard?tab=candidats", "/admin/dashboard?tab=recruteurs", "/admin/dashboard?tab=organisations", "/admin/dashboard?tab=admins"]; //list des urls admin
   
-  // Désactiver temporairement la vérification de session pour les routes recruteur
-  if (req.path.startsWith('/recruteur') || req.path.match(/^\/\d{9}\//)) {
+  // Autoriser l'accès aux chemins non sécurisés
+  if (nonSecurePaths.includes(req.path)) {
     return next();
   }
-  
-  // Désactiver temporairement la vérification de session pour les routes admin
-  if (req.path.startsWith('/admin')) {
+
+  // Vérifier l'accès selon le rôle et le chemin
+  if (session.hasAccess(req.session, req.path)) {
     return next();
   }
-  
-  if (nonSecurePaths.includes(req.path)) return next();
-  //authenticate user
-  if (adminPaths.includes(req.path)) {
-    if (session.isConnected(req.session, "admin")) return next();
-    else
-      res.status(403).render("error", { message: " Unauthorized access", error: {} });
-  } else {
-    if (session.isConnected(req.session)) return next();
-    // not authenticated
-    else res.redirect("/users/login");
-  }
+
+  // Rediriger vers la page de connexion si non autorisé
+  res.redirect("/users/login");
 });
 
 app.use("/", indexRouter);
