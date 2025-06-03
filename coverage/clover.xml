@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1747926107490" clover="3.2.0">
-  <project timestamp="1747926107490" name="All files">
-    <metrics statements="915" coveredstatements="700" conditionals="908" coveredconditionals="535" methods="246" coveredmethods="215" elements="2069" coveredelements="1450" complexity="0" loc="915" ncloc="915" packages="1" files="13" classes="13"/>
+<coverage generated="1748953158127" clover="3.2.0">
+  <project timestamp="1748953158127" name="All files">
+    <metrics statements="921" coveredstatements="700" conditionals="910" coveredconditionals="535" methods="248" coveredmethods="215" elements="2079" coveredelements="1450" complexity="0" loc="921" ncloc="921" packages="1" files="13" classes="13"/>
     <file name="administrateur.js" path="C:\Users\mathi\projet-sr10\model\administrateur.js">
       <metrics statements="82" coveredstatements="62" conditionals="78" coveredconditionals="45" methods="23" coveredmethods="20"/>
       <line num="1" count="1" type="stmt"/>
@@ -176,7 +176,7 @@
       <line num="196" count="1" type="stmt"/>
     </file>
     <file name="candidature.js" path="C:\Users\mathi\projet-sr10\model\candidature.js">
-      <metrics statements="46" coveredstatements="34" conditionals="42" coveredconditionals="22" methods="16" coveredmethods="14"/>
+      <metrics statements="52" coveredstatements="34" conditionals="44" coveredconditionals="22" methods="18" coveredmethods="14"/>
       <line num="1" count="1" type="stmt"/>
       <line num="3" count="1" type="stmt"/>
       <line num="5" count="2" type="stmt"/>
@@ -222,7 +222,13 @@
       <line num="121" count="0" type="stmt"/>
       <line num="122" count="0" type="cond" truecount="0" falsecount="2"/>
       <line num="123" count="0" type="stmt"/>
-      <line num="130" count="1" type="stmt"/>
+      <line num="129" count="0" type="stmt"/>
+      <line num="137" count="0" type="stmt"/>
+      <line num="138" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="139" count="0" type="stmt"/>
+      <line num="140" count="0" type="stmt"/>
+      <line num="142" count="0" type="stmt"/>
+      <line num="148" count="1" type="stmt"/>
     </file>
     <file name="db.js" path="C:\Users\mathi\projet-sr10\model\db.js">
       <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>

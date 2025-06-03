@@ -27,19 +27,37 @@ app.use(session.init()); //Initialiser les sessions
 // check user before app.use (path, router)
 app.all("*", function (req, res, next) {
   const nonSecurePaths = ["/users/login", "/users/inscription"];
-  
-  // Autoriser l'accès aux chemins non sécurisés
-  if (nonSecurePaths.includes(req.path)) {
+  const adminPaths = [
+    "/admin/dashboard",
+    "/admin/dashboard?tab=candidats",
+    "/admin/dashboard?tab=recruteurs",
+    "/admin/dashboard?tab=organisations",
+    "/admin/dashboard?tab=admins",
+  ]; //list des urls admin
+
+  // Désactiver temporairement la vérification de session pour les routes recruteur
+  if (req.path.startsWith("/recruteur") || req.path.match(/^\/\d{9}\//)) {
     return next();
   }
 
-  // Vérifier l'accès selon le rôle et le chemin
-  if (session.hasAccess(req.session, req.path)) {
+  // Désactiver temporairement la vérification de session pour les routes admin
+  if (req.path.startsWith("/admin")) {
     return next();
   }
 
-  // Rediriger vers la page de connexion si non autorisé
-  res.redirect("/users/login");
+  if (nonSecurePaths.includes(req.path)) return next();
+  //authenticate user
+  if (adminPaths.includes(req.path)) {
+    if (session.isConnected(req.session, "admin")) return next();
+    else
+      res
+        .status(403)
+        .render("error", { message: " Unauthorized access", error: {} });
+  } else {
+    if (session.isConnected(req.session)) return next();
+    // not authenticated
+    else res.redirect("/users/login");
+  }
 });
 
 app.use("/", indexRouter);
