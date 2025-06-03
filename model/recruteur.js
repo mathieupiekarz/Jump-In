@@ -67,7 +67,6 @@ const recruteur = {
     // vérification de la composition du mot de passe
     const isValide = await recruteur.areValide(mdp);
     if (!isValide) {
-      console.log("Erreur : mot de passe invalide !");
       return callback(null);
     }
 
@@ -78,7 +77,6 @@ const recruteur = {
     // vérification du format de l'email
     regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
     if (!regex.test(email)) {
-      console.log("Erreur : e-mail invalide !");
       return callback(null);
     }
 
@@ -161,7 +159,6 @@ const recruteur = {
           if ("mdp" in nvdict) {
             const isValide = await recruteur.areValide(nvdict.mdp);
             if (!isValide) {
-              console.log("Erreur : mot de passe invalide !");
               return callback(null);
             }
           }
