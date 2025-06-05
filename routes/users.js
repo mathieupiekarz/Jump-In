@@ -213,11 +213,6 @@ router.get("/Profile", function (req, res, next) {
         successMessage: successMessage,
         organisations: activeOrganisations
       });
-
-    res.render("Profile", {
-      title: "Informations Personnelles",
-      candidat: result[0],
-      successMessage: successMessage,
     });
   });
 });
