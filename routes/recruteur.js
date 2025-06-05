@@ -431,11 +431,6 @@ router.get("/mon-compte", function (req, res, next) {
           organisations: otherOrgs
         };
 
-        // Ajouter le message de succès si présent dans l'URL
-        if (req.query.success === '1') {
-          viewData.successMessage = "Votre demande de changement d'organisation a été envoyée avec succès.";
-        }
-
         res.render("CompteRecruteur", viewData);
       });
     });
@@ -454,22 +449,36 @@ router.post("/changer-organisation", function (req, res, next) {
   if (!nouveau_siren || !description || description.length < 10) {
     return res.redirect('/recruteur/mon-compte');
   }
-  
-  // Créer la demande de changement
-  dcho.creat(
-    parseInt(req.session.id_rec),
-    nouveau_siren,
-    description,
-    'en_attente',
-    function(result) {
-      if (!result) {
-        return res.redirect('/recruteur/mon-compte');
-      }
-      
-      // Rediriger vers la page mon-compte
-      res.redirect('/recruteur/mon-compte');
+
+  // Vérifier que le recruteur existe et récupérer son SIREN actuel
+  rec.readById(req.session.id_rec, function(recruteurResult) {
+    if (!recruteurResult || recruteurResult.length === 0) {
+      return res.redirect('/login');
     }
-  );
+
+    const siren_actuel = recruteurResult[0].siren;
+    
+    // Vérifier que le nouveau SIREN est différent de l'actuel
+    if (nouveau_siren === siren_actuel) {
+      return res.redirect('/recruteur/mon-compte');
+    }
+  
+    // Créer la demande de changement
+    dcho.creat(
+      parseInt(req.session.id_rec),
+      nouveau_siren,
+      description,
+      'en_attente',
+      function(result) {
+        if (!result) {
+          return res.redirect('/recruteur/mon-compte');
+        }
+        
+        // Rediriger vers la page mon-compte
+        res.redirect('/recruteur/mon-compte');
+      }
+    );
+  });
 });
 
 module.exports = router; 

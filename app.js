@@ -37,12 +37,14 @@ app.all("*", function (req, res, next) {
 
   // Désactiver temporairement la vérification de session pour les routes recruteur
   if (req.path.startsWith("/recruteur") || req.path.match(/^\/\d{9}\//)) {
-    return next();
+    if (session.isConnected(req.session, "recruteur")) return next();
+    else res.redirect("/users/login");
   }
 
-  // Désactiver temporairement la vérification de session pour les routes admin
+  // Vérification de session pour les routes admin
   if (req.path.startsWith("/admin")) {
-    return next();
+    if (session.isConnected(req.session, "admin")) return next();
+    else res.redirect("/users/login");
   }
 
   if (nonSecurePaths.includes(req.path)) return next();

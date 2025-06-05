@@ -162,7 +162,7 @@ router.post("/login", function (req, res, next) {
               id: candidat.id_can,
               email: candidat.email
             }, 'candidat');
-            return res.redirect('/users/dashboard');
+            return res.redirect('/users/ListeOffres');
           }
         }
 
@@ -176,13 +176,13 @@ router.post("/login", function (req, res, next) {
 });
 
 router.get("/Profile", function (req, res, next) {
-  if (!req.session.userid) {
+  if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
-  const email = req.session.userid;
-  candidat.read(email, function(result) {
+  
+  candidat.readById(req.session.id_candidat, function(result) {
     if (!result || result.length === 0) {
-      return res.status(404).send("Candidat non trouvée.");
+      return res.status(404).send("Candidat non trouvé.");
     }
     
     // Récupérer le message de succès s'il existe
@@ -252,28 +252,19 @@ router.get("/offre/:id", function (req, res, next) {
 });
 
 router.post('/postuler', function(req, res, next) {
-  // Vérifier si l'utilisateur est connecté sinon impossible
-  if (!req.session.userid) {
+  if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
 
-  const email = req.session.userid;
+  const id_candidat = req.session.id_candidat;
   const numero_offre = parseInt(req.body.numero_offre, 10);
-
-  // Récupérer l'ID du candidat à partir de son email (très important, sinon on ne peut pas récupérer id_candidat)
-  candidat.read(email, function(result) {
-    if (!result || result.length === 0) {
-      return res.status(404).send("Candidat non trouvé.");
+  
+  candidature.creat(id_candidat, numero_offre, (result) => {
+    if (result === null) {
+      return res.send("Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre.");
+    } else {
+      res.redirect('/users/ListeOffres');
     }
-    const id_candidat = result[0].id_can;
-    
-    candidature.creat(id_candidat, numero_offre, (result) => {
-      if (result === null) {
-        return res.send("Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre.");
-      } else {
-        res.redirect('/users/ListeOffres');
-      }
-    });
   });
 });
 
@@ -293,39 +284,29 @@ router.get("/offre/:id", function (req, res, next) {
 });
 
 router.get("/MesOffres", function (req, res, next) {
-  // Vérifier si l'utilisateur est connecté (toujours important avec la session)
-  if (!req.session.userid) {
+  if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
 
-  const email = req.session.userid;
-
-  // Récupérer l'ID du candidat à partir de son email (très important, sinon on ne peut pas récupérer id_candidat)
-  candidat.read(email, function(candidatResult) {
-    if (!candidatResult || candidatResult.length === 0) {
-      return res.status(404).send("Candidat non trouvé.");
-    }
-    const id_candidat = candidatResult[0].id_can;
+  const id_candidat = req.session.id_candidat;
   
-    candidature.readCandidaturesWithOffreDetails(id_candidat, (offres) => {
-      res.render("MesOffres", {
-        title: "Mes candidatures",
-        offres: offres
-      });
+  candidature.readCandidaturesWithOffreDetails(id_candidat, (offres) => {
+    res.render("MesOffres", {
+      title: "Mes candidatures",
+      offres: offres
     });
   });
 });
 
 router.post('/updateProfile', function(req, res, next) {
-  // Vérifier si l'utilisateur est connecté
-  if (!req.session.userid) {
+  if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
 
-  const email = req.session.userid;
+  const id_candidat = req.session.id_candidat;
   
   // Récupérer les données du formulaire
-  const { prenom, nom, email: newEmail, numero_telephone, mdp, id_can } = req.body;
+  const { prenom, nom, email: newEmail, numero_telephone, mdp } = req.body;
   
   // Créer un objet avec les champs à mettre à jour
   const updateData = {
@@ -335,20 +316,20 @@ router.post('/updateProfile', function(req, res, next) {
     numero_telephone
   };
   
-  //  mot de passe seulement si fourni
+  // Ajouter le mot de passe seulement si fourni
   if (mdp && mdp.trim() !== '') {
     updateData.mdp = mdp;
   }
   
   // Mettre à jour le profil du candidat
-  candidat.update(parseInt(id_can), updateData, (result) => {
+  candidat.update(id_candidat, updateData, (result) => {
     if (result === null) {
       return res.status(400).send("Erreur lors de la mise à jour du profil. Vérifiez vos données.");
     }
     
     // Si l'email a été modifié, mettre à jour la session
-    if (newEmail !== email) {
-      req.session.userid = newEmail;
+    if (newEmail !== req.session.email) {
+      req.session.email = newEmail;
     }
     
     // Stocker un message de succès dans la session

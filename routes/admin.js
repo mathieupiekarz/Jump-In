@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var db = require("../model/db.js");
+var session = require("../session.js");
 
 var candidat = require("../model/candidat.js");
 var recruteur = require("../model/recruteur.js");
@@ -163,93 +164,87 @@ router.get("/admins", function (req, res) {
 });
 
 // Route pour approuver une demande de création
-router.post(
-  "/request/creation/:id_can/:siren/approve",
-  function (req, res, next) {
-    const id_can = req.params.id_can;
-    const siren = req.params.siren;
+router.post("/request/creation/:id_can/:siren/approve", function (req, res, next) {
+  const id_can = parseInt(req.params.id_can);
+  const siren = req.params.siren;
 
-    // 1. Mettre à jour le statut de la demande
-    demandeCreation.update(
-      id_can,
-      siren,
-      { statutCrO: "validee" },
-      (updateResult) => {
-        if (updateResult) {
-          // 2. Créer l'organisation si elle n'existe pas déjà
-          organisation.read(siren, (existingOrg) => {
-            if (existingOrg.length === 0) {
-              // L'organisation n'existe pas, on doit la créer avec des valeurs par défaut
-              const newOrg = {
-                siren: siren,
-                nom: "Nouvelle Organisation", // Valeur par défaut
-                type: "Entreprise", // Valeur par défaut
-                siege_social: JSON.stringify({
-                  adresse: "À renseigner",
-                  ville: "",
-                  code_postal: "",
-                }),
-                statut: "active",
-              };
+  // 1. Mettre à jour le statut de la demande
+  demandeCreation.update(
+    id_can,
+    siren,
+    { statutCrO: "validee" },
+    (updateResult) => {
+      if (updateResult) {
+        // 2. Créer l'organisation si elle n'existe pas déjà
+        organisation.read(siren, (existingOrg) => {
+          if (existingOrg.length === 0) {
+            // L'organisation n'existe pas, on doit la créer avec des valeurs par défaut
+            const newOrg = {
+              siren: siren,
+              nom: "Nouvelle Organisation", // Valeur par défaut
+              type: "Entreprise", // Valeur par défaut
+              siege_social: JSON.stringify({
+                adresse: "À renseigner",
+                ville: "",
+                code_postal: "",
+              }),
+              statut: "active",
+            };
 
-              organisation.creat(
-                newOrg.siren,
-                newOrg.nom,
-                newOrg.type,
-                newOrg.siege_social,
-                newOrg.statut,
-                (createResult) => {
-                  res.redirect("/admin/requests?tab=creation");
-                }
-              );
-            } else {
-              // L'organisation existe déjà, on met simplement son statut à active
-              organisation.update(
-                siren,
-                { statut: "active" },
-                (updateOrgResult) => {
-                  res.redirect("/admin/requests?tab=creation");
-                }
-              );
-            }
-          });
-        } else {
-          res
-            .status(400)
-            .send("Échec de la mise à jour du statut de la demande");
-        }
+            organisation.creat(
+              newOrg.siren,
+              newOrg.nom,
+              newOrg.type,
+              newOrg.siege_social,
+              newOrg.statut,
+              (createResult) => {
+                res.redirect("/admin/requests?tab=creation");
+              }
+            );
+          } else {
+            // L'organisation existe déjà, on met simplement son statut à active
+            organisation.update(
+              siren,
+              { statut: "active" },
+              (updateOrgResult) => {
+                res.redirect("/admin/requests?tab=creation");
+              }
+            );
+          }
+        });
+      } else {
+        res
+          .status(400)
+          .send("Échec de la mise à jour du statut de la demande");
       }
-    );
-  }
-);
+    }
+  );
+});
 
 // Route pour rejeter une demande de création
-router.post(
-  "/request/creation/:id_can/:siren/reject",
-  function (req, res, next) {
-    const id_can = req.params.id_can;
-    const siren = req.params.siren;
+router.post("/request/creation/:id_can/:siren/reject", function (req, res, next) {
+  const id_can = parseInt(req.params.id_can);
+  const siren = req.params.siren;
 
-    demandeCreation.update(
-      id_can,
-      siren,
-      { statutCrO: "refusee" },
-      (result) => {
-        if (result) {
-          res.redirect("/admin/requests?tab=creation");
-        } else {
-          res
-            .status(400)
-            .send("Échec de la mise à jour du statut de la demande");
-        }
+  demandeCreation.update(
+    id_can,
+    siren,
+    { statutCrO: "refusee" },
+    (result) => {
+      if (result) {
+        res.redirect("/admin/requests?tab=creation");
+      } else {
+        res
+          .status(400)
+          .send("Échec de la mise à jour du statut de la demande");
       }
-    );
-  }
-);
+    }
+  );
+});
 
 // Route pour approuver une demande de changement
 router.post("/request/changement/:id_rec/:siren/approve", function (req, res, next) {
-  const id_rec = req.params.id_rec;
+  const id_rec = parseInt(req.params.id_rec);
   const siren = req.params.siren;
   
   // 1. Mettre à jour le statut de la demande
@@ -257,7 +252,7 @@ router.post("/request/changement/:id_rec/:siren/approve", function (req, res, ne
     if (updateResult) {
       // 2. Mettre à jour le SIREN du recruteur
       recruteur.readById(id_rec, (recruteurInfo) => {
-        if (recruteurInfo.length > 0) {
+        if (recruteurInfo && recruteurInfo.length > 0) {
           recruteur.update(id_rec, { siren: siren }, (updateRecruteurResult) => {
             res.redirect("/admin/requests?tab=changement");
           });
@@ -273,10 +268,10 @@ router.post("/request/changement/:id_rec/:siren/approve", function (req, res, ne
 
 // Route pour rejeter une demande de changement
 router.post("/request/changement/:id_rec/:siren/reject", function (req, res, next) {
-  const id_rec = req.params.id_rec;
+  const id_rec = parseInt(req.params.id_rec);
   const siren = req.params.siren;
   
-  demandeChangement.update(id_rec, siren, siren,{ statutChO: "refusee" }, (result) => {
+  demandeChangement.update(id_rec, siren, siren, { statutChO: "refusee" }, (result) => {
     if (result) {
       res.redirect("/admin/requests?tab=changement");
     } else {
@@ -287,7 +282,7 @@ router.post("/request/changement/:id_rec/:siren/reject", function (req, res, nex
 
 // Route pour activer/désactiver un candidat
 router.post("/candidat/:id/toggleStatus", function (req, res, next) {
-  const id = req.params.id;
+  const id = parseInt(req.params.id);
   const newStatus = req.body.newStatus;
 
   if (newStatus && (newStatus === "actif" || newStatus === "inactif")) {
@@ -305,7 +300,7 @@ router.post("/candidat/:id/toggleStatus", function (req, res, next) {
 
 // Route pour activer/désactiver un recruteur
 router.post("/recruteur/:id/toggleStatus", function (req, res, next) {
-  const id = req.params.id;
+  const id = parseInt(req.params.id);
   const newStatus = req.body.newStatus;
 
   if (newStatus && (newStatus === "actif" || newStatus === "inactif")) {
@@ -341,7 +336,7 @@ router.post("/organisation/:siren/toggleStatus", function (req, res, next) {
 
 // Route pour activer/désactiver un administrateur
 router.post("/admin/:id/toggleStatus", function (req, res, next) {
-  const id = req.params.id;
+  const id = parseInt(req.params.id);
   const newStatus = req.body.newStatus;
 
   if (newStatus && (newStatus === "actif" || newStatus === "inactif")) {

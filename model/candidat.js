@@ -9,6 +9,14 @@ const candidat = {
       callback(results);
     });
   },
+  readById: (id_can, callback) => {
+    let sql = "SELECT * FROM Candidat WHERE id_can = ?";
+    db.query(sql, [id_can], (err, results) => {
+      if (err) throw err;
+      if (results.length === 0) return callback(null);
+      callback(results);
+    });
+  },
   readall: (callback) => {
     db.query("SELECT * FROM Candidat", (err, results) => {
       if (err) throw err;
