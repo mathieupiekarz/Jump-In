@@ -359,7 +359,40 @@ router.post("/updateProfile", function (req, res, next) {
     req.session.successMessage = "Modifications apportées avec succès !";
 
     // Rediriger vers la page profil
-    res.redirect('/users/Profile');
+    res.redirect("/users/Profile");
+  });
+});
+
+// Route pour demander un changement d'organisation
+router.post("/demande-recruteur", function (req, res, next) {
+  if (!req.session.id_candidat) {
+    return res.redirect("/login");
+  }
+
+  const { nouveau_siren, description } = req.body;
+
+  // Vérifications basiques
+  if (!nouveau_siren || !description || description.length < 10) {
+    return res.redirect("/users/Profile");
+  }
+
+  // Vérifier que le candidat existe
+  candidat.readById(req.session.id_candidat, function (candidatResult) {
+    if (!candidatResult || candidatResult.length === 0) {
+      return res.redirect("/login");
+    }
+    demandeR(
+      id_candidat,
+      nouveau_siren,
+      description,
+      "en_attente",
+      (result) => {
+        if (!result) {
+          return res.redirect("/users/Profile");
+        }
+        res.redirect("/users/Profile");
+      }
+    );
   });
 });
 
