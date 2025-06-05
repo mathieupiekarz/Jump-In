@@ -78,20 +78,20 @@ demande CrO :
 
 
 
-RESTE : 
-
+MATHIEU : 
 test routes 
 filtres et barre de recherche
 vulnérabilités 3 --> injection SQL/Cross-Site Scripting/mdp hachage/Contrôle d'accès
-
-ajout d'admin
-
-bouton deconnection 
-téléchargement json document
-page erreur/accueil
-mail pour demande validée
 demande recruteur
 
 
+MATHEO : 
+bouton deconnection 
+téléchargement json document
+mail pour demande validée
+donner droits admin à candidat et recruteur
+
+RESTE :
+page erreur/accueil
+Admin peut modifier les caractéristiques des recruteurs et  
 message saisie erreur 
-Recruteur - modifier profil + changer mot de passe

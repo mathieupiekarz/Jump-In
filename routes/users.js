@@ -127,48 +127,60 @@ router.post("/login", function (req, res, next) {
   const { email, password } = req.body;
 
   // Vérifier d'abord si c'est un admin
-  admin.read(email, function(adminResult) {
+  admin.read(email, function (adminResult) {
     if (adminResult && adminResult.length > 0) {
       const adminUser = adminResult[0];
       if (adminUser.mdp === password) {
-        session.creatSession(req.session, {
-          id: adminUser.id_admin,
-          email: adminUser.email
-        }, 'admin');
-        return res.redirect('/admin/dashboard');
+        session.creatSession(
+          req.session,
+          {
+            id: adminUser.id_admin,
+            email: adminUser.email,
+          },
+          "admin"
+        );
+        return res.redirect("/admin/dashboard");
       }
     }
 
     // Vérifier si c'est un recruteur
-    rec.read(email, function(recruteurResult) {
+    rec.read(email, function (recruteurResult) {
       if (recruteurResult && recruteurResult.length > 0) {
         const recruteur = recruteurResult[0];
         if (recruteur.mdp === password) {
-          session.creatSession(req.session, {
-            id: recruteur.id_rec,
-            email: recruteur.email,
-            siren: recruteur.siren
-          }, 'recruteur');
+          session.creatSession(
+            req.session,
+            {
+              id: recruteur.id_rec,
+              email: recruteur.email,
+              siren: recruteur.siren,
+            },
+            "recruteur"
+          );
           return res.redirect(`/recruteur/${recruteur.siren}/NosOffres`);
         }
       }
 
       // Vérifier si c'est un candidat
-      candidat.read(email, function(candidatResult) {
+      candidat.read(email, function (candidatResult) {
         if (candidatResult && candidatResult.length > 0) {
           const candidat = candidatResult[0];
           if (candidat.mdp === password) {
-            session.creatSession(req.session, {
-              id: candidat.id_can,
-              email: candidat.email
-            }, 'candidat');
-            return res.redirect('/users/ListeOffres');
+            session.creatSession(
+              req.session,
+              {
+                id: candidat.id_can,
+                email: candidat.email,
+              },
+              "candidat"
+            );
+            return res.redirect("/users/ListeOffres");
           }
         }
 
         // Si aucun utilisateur n'est trouvé ou le mot de passe est incorrect
-        res.render('Login', {
-          error: 'Email ou mot de passe incorrect'
+        res.render("Login", {
+          error: "Email ou mot de passe incorrect",
         });
       });
     });
@@ -179,21 +191,21 @@ router.get("/Profile", function (req, res, next) {
   if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
-  
-  candidat.readById(req.session.id_candidat, function(result) {
+
+  candidat.readById(req.session.id_candidat, function (result) {
     if (!result || result.length === 0) {
       return res.status(404).send("Candidat non trouvé.");
     }
-    
+
     // Récupérer le message de succès s'il existe
     const successMessage = req.session.successMessage;
     // Supprimer le message de la session pour qu'il ne s'affiche qu'une fois
     delete req.session.successMessage;
-    
+
     res.render("Profile", {
       title: "Informations Personnelles",
       candidat: result[0],
-      successMessage: successMessage
+      successMessage: successMessage,
     });
   });
 });
@@ -202,7 +214,7 @@ router.get("/ListeOffres", function (req, res, next) {
   offre.readAllWithFicheAndOrganisation((result) => {
     res.render("ListeOffres", {
       title: "Liste des Offres d'Emploi",
-      offres: result
+      offres: result,
     });
   });
 });
@@ -211,7 +223,7 @@ router.get("/inscription", function (req, res, next) {
   res.render("inscription", { title: "Créer un compte" });
 });
 
-router.post('/inscription', function(req, res, next) {
+router.post("/inscription", function (req, res, next) {
   const { nom, prenom, num, email, password, password2 } = req.body;
 
   // Exemple de simple validation pour le moment
@@ -231,7 +243,7 @@ router.post('/inscription', function(req, res, next) {
     if (!result) {
       return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
     } else {
-      res.redirect('/users/userlist'); // après inscription, retour à la liste des utilisateurs (à enlever ensuite car c'est pour tester)
+      res.redirect("/users/userlist"); // après inscription, retour à la liste des utilisateurs (à enlever ensuite car c'est pour tester)
     }
   });
 });
@@ -251,19 +263,21 @@ router.get("/offre/:id", function (req, res, next) {
   });
 });
 
-router.post('/postuler', function(req, res, next) {
+router.post("/postuler", function (req, res, next) {
   if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
 
   const id_candidat = req.session.id_candidat;
   const numero_offre = parseInt(req.body.numero_offre, 10);
-  
+
   candidature.creat(id_candidat, numero_offre, (result) => {
     if (result === null) {
-      return res.send("Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre.");
+      return res.send(
+        "Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre."
+      );
     } else {
-      res.redirect('/users/ListeOffres');
+      res.redirect("/users/ListeOffres");
     }
   });
 });
@@ -289,54 +303,100 @@ router.get("/MesOffres", function (req, res, next) {
   }
 
   const id_candidat = req.session.id_candidat;
-  
+
   candidature.readCandidaturesWithOffreDetails(id_candidat, (offres) => {
     res.render("MesOffres", {
       title: "Mes candidatures",
-      offres: offres
+      offres: offres,
     });
   });
 });
 
-router.post('/updateProfile', function(req, res, next) {
+router.post("/updateProfile", function (req, res, next) {
   if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
 
   const id_candidat = req.session.id_candidat;
-  
+
   // Récupérer les données du formulaire
   const { prenom, nom, email: newEmail, numero_telephone, mdp } = req.body;
-  
+
   // Créer un objet avec les champs à mettre à jour
   const updateData = {
     prenom,
     nom,
     email: newEmail,
-    numero_telephone
+    numero_telephone,
   };
-  
+
   // Ajouter le mot de passe seulement si fourni
-  if (mdp && mdp.trim() !== '') {
+  if (mdp && mdp.trim() !== "") {
     updateData.mdp = mdp;
   }
-  
+
   // Mettre à jour le profil du candidat
   candidat.update(id_candidat, updateData, (result) => {
     if (result === null) {
-      return res.status(400).send("Erreur lors de la mise à jour du profil. Vérifiez vos données.");
+      return res
+        .status(400)
+        .send("Erreur lors de la mise à jour du profil. Vérifiez vos données.");
     }
-    
+
     // Si l'email a été modifié, mettre à jour la session
     if (newEmail !== req.session.email) {
       req.session.email = newEmail;
     }
-    
+
     // Stocker un message de succès dans la session
     req.session.successMessage = "Modifications apportées avec succès !";
-    
+
     // Rediriger vers la page profil
-    res.redirect('/users/Profile');
+    res.redirect("/users/Profile");
+  });
+});
+
+// Route pour demander un changement d'organisation
+router.post("/demande-recruteur", function (req, res, next) {
+  if (!req.session.id_candidat) {
+    return res.redirect("/login");
+  }
+
+  const { nouveau_siren, description } = req.body;
+
+  // Vérifications basiques
+  if (!nouveau_siren || !description || description.length < 10) {
+    return res.redirect("/user/Profile");
+  }
+
+  // Vérifier que le recruteur existe et récupérer son SIREN actuel
+  candidat.readById(req.session.id_candidat, function (candidatResult) {
+    if (!candidatResult || candidatResult.length === 0) {
+      return res.redirect("/login");
+    }
+
+    const siren_actuel = recruteurResult[0].siren;
+
+    // Vérifier que le nouveau SIREN est différent de l'actuel
+    if (nouveau_siren === siren_actuel) {
+      return res.redirect("/recruteur/mon-compte");
+    }
+
+    // Créer la demande de changement
+    dcho.creat(
+      parseInt(req.session.id_rec),
+      nouveau_siren,
+      description,
+      "en_attente",
+      function (result) {
+        if (!result) {
+          return res.redirect("/recruteur/mon-compte");
+        }
+
+        // Rediriger vers la page mon-compte
+        res.redirect("/recruteur/mon-compte");
+      }
+    );
   });
 });
 
