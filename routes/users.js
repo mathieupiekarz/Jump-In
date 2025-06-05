@@ -369,32 +369,21 @@ router.post("/demande-recruteur", function (req, res, next) {
     return res.redirect("/user/Profile");
   }
 
-  // Vérifier que le recruteur existe et récupérer son SIREN actuel
+  // Vérifier que le candidat existe
   candidat.readById(req.session.id_candidat, function (candidatResult) {
     if (!candidatResult || candidatResult.length === 0) {
       return res.redirect("/login");
     }
-
-    const siren_actuel = recruteurResult[0].siren;
-
-    // Vérifier que le nouveau SIREN est différent de l'actuel
-    if (nouveau_siren === siren_actuel) {
-      return res.redirect("/recruteur/mon-compte");
-    }
-
-    // Créer la demande de changement
-    dcho.creat(
-      parseInt(req.session.id_rec),
+    demandeR(
+      id_candidat,
       nouveau_siren,
       description,
       "en_attente",
-      function (result) {
+      (result) => {
         if (!result) {
-          return res.redirect("/recruteur/mon-compte");
+          return res.redirect("/candidat/Profile");
         }
-
-        // Rediriger vers la page mon-compte
-        res.redirect("/recruteur/mon-compte");
+        res.redirect("/candidat/Profile");
       }
     );
   });

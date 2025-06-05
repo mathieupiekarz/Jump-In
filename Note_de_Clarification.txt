@@ -79,6 +79,7 @@ demande CrO :
 
 
 MATHIEU : 
+rajouter NOM, TYPE, siege_social dans demandeCrO
 test routes 
 filtres et barre de recherche
 vulnérabilités 3 --> injection SQL/Cross-Site Scripting/mdp hachage/Contrôle d'accès
