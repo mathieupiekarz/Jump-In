@@ -90,7 +90,7 @@
                     </div>
                     <span>
                     <a href="#"><i class="bi bi-pencil" style="color: #333;"></i></a>
-                    <button class="btn2">Rejoindre</button>
+                    <button class="btn2" id="joinBtn">Rejoindre</button>
                     <button class="btn" id="modifyBtn">Modifier</button>
                     </span>
                 </div>
@@ -167,6 +167,37 @@
         </div>
     </div>
 
+    <!-- Modal de demande de recrutement -->
+    <div id="joinModal" class="modal-profile">
+        <div class="modal-content-profile">
+            <div class="modal-header-profile">
+                <h3>Demande de recrutement</h3>
+                <span class="close-profile" id="closeJoinModal">&times;</span>
+            </div>
+            <form id="joinForm" action="/users/demande-recruteur" method="POST">
+                <div class="form-group">
+                    <label for="siren">Organisation</label>
+                    <select id="siren" name="siren" required>
+                        <option value="">Sélectionner une organisation</option>
+                        <% organisations.forEach(function(org) { %>
+                            <option value="<%= org.siren %>"><%= org.nom %> (SIREN: <%= org.siren %>)</option>
+                        <% }); %>
+                    </select>
+                    <small>Sélectionnez l'organisation que vous souhaitez rejoindre</small>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description de votre demande</label>
+                    <input type="text" id="description" name="description" required minlength="10" placeholder="Expliquez pourquoi vous souhaitez rejoindre cette organisation">
+                    <small>Minimum 10 caractères</small>
+                </div>
+                <div class="form-buttons-profile">
+                    <button type="button" class="cancel-btn-profile" id="cancelJoinBtn">Annuler</button>
+                    <button type="submit" class="save-btn-profile">Envoyer la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Gestion du modal de modification
         const modal = document.getElementById("editProfileModal");
@@ -176,6 +207,13 @@
         const form = document.getElementById("editProfileForm");
         const mdpInput = document.getElementById("mdp");
         const mdpConfirmInput = document.getElementById("mdp_confirm");
+
+        // Gestion du modal de demande de recrutement
+        const joinModal = document.getElementById("joinModal");
+        const joinBtn = document.getElementById("joinBtn");
+        const closeJoinModal = document.getElementById("closeJoinModal");
+        const cancelJoinBtn = document.getElementById("cancelJoinBtn");
+        const joinForm = document.getElementById("joinForm");
 
         // Ouvrir le modal
         modifyBtn.onclick = function() {
@@ -191,14 +229,51 @@
             modal.style.display = "none";
         }
 
+        // Ouvrir le modal de demande de recrutement
+        joinBtn.onclick = function() {
+            joinModal.style.display = "block";
+        }
+
+        // Fermer le modal de demande de recrutement
+        closeJoinModal.onclick = function() {
+            joinModal.style.display = "none";
+        }
+
+        cancelJoinBtn.onclick = function() {
+            joinModal.style.display = "none";
+        }
+
         // Fermer si on clique en dehors du modal
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = "none";
             }
+            if (event.target == joinModal) {
+                joinModal.style.display = "none";
+            }
         }
 
-        // Validation du formulaire
+        // Validation du formulaire de demande de recrutement
+        joinForm.onsubmit = function(e) {
+            const siren = document.getElementById("siren").value;
+            const description = document.getElementById("description").value;
+
+            if (!/^[0-9]{9}$/.test(siren)) {
+                e.preventDefault();
+                alert("Le SIREN doit contenir exactement 9 chiffres.");
+                return false;
+            }
+
+            if (description.length < 10) {
+                e.preventDefault();
+                alert("La description doit contenir au moins 10 caractères.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Validation du formulaire de modification
         form.onsubmit = function(e) {
             // Vérifier que les mots de passe correspondent
             if (mdpInput.value && mdpInput.value !== mdpConfirmInput.value) {

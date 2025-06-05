@@ -189,11 +189,18 @@ router.get("/Profile", function (req, res, next) {
     const successMessage = req.session.successMessage;
     // Supprimer le message de la session pour qu'il ne s'affiche qu'une fois
     delete req.session.successMessage;
-    
-    res.render("Profile", {
-      title: "Informations Personnelles",
-      candidat: result[0],
-      successMessage: successMessage
+
+    // Récupérer toutes les organisations actives
+    organisation.readall(function(organisations) {
+      // Filtrer pour ne garder que les organisations actives
+      const activeOrganisations = organisations.filter(org => org.statut === 'active');
+      
+      res.render("Profile", {
+        title: "Informations Personnelles",
+        candidat: result[0],
+        successMessage: successMessage,
+        organisations: activeOrganisations
+      });
     });
   });
 });
