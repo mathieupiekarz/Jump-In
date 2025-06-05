@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1748953158127" clover="3.2.0">
-  <project timestamp="1748953158127" name="All files">
+<coverage generated="1748954136041" clover="3.2.0">
+  <project timestamp="1748954136041" name="All files">
     <metrics statements="921" coveredstatements="700" conditionals="910" coveredconditionals="535" methods="248" coveredmethods="215" elements="2079" coveredelements="1450" complexity="0" loc="921" ncloc="921" packages="1" files="13" classes="13"/>
     <file name="administrateur.js" path="C:\Users\mathi\projet-sr10\model\administrateur.js">
       <metrics statements="82" coveredstatements="62" conditionals="78" coveredconditionals="45" methods="23" coveredmethods="20"/>
