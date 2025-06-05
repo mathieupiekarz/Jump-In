@@ -74,3 +74,24 @@ Numero SIREN possible :
 
 demande CrO :
 390989580
+
+
+
+
+MATHIEU : 
+test routes 
+filtres et barre de recherche
+vulnérabilités 3 --> injection SQL/Cross-Site Scripting/mdp hachage/Contrôle d'accès
+demande recruteur
+
+
+MATHEO : 
+bouton deconnection 
+téléchargement json document
+mail pour demande validée
+donner droits admin à candidat et recruteur
+
+RESTE :
+page erreur/accueil
+Admin peut modifier les caractéristiques des recruteurs et  
+message saisie erreur 

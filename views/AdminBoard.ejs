@@ -1,348 +1,455 @@
 <!DOCTYPE html>
 <html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %> - Jump'In</title>
 
     <link rel="stylesheet" href="/stylesheets/style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-</head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+  </head>
 
-<body>
+  <body>
     <header class="header">
-        <div>
-            <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80">
-        </div>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="/admin/dashboard" class="active">Administration</a></li>
-                <li><a href="/admin/requests">Demandes</a></li>
-                <li><div class="btn-connexion"><i class="bi bi-shield-check" style="color: #ffffff; font-size: 25px;"></i>Admin</div></li>
-            </ul>
-
-            <div class="burger" onclick="toggleMenu()">
-                <div></div>
-                <div></div>
-                <div></div>
+      <div>
+        <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80" />
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/admin/dashboard" class="active">Administration</a></li>
+          <li><a href="/admin/requests">Demandes</a></li>
+          <li>
+            <div class="btn-connexion">
+              <i
+                class="bi bi-shield-check"
+                style="color: #ffffff; font-size: 25px"
+              ></i
+              >Admin
             </div>
-        </nav>
+          </li>
+        </ul>
+
+        <div class="burger" onclick="toggleMenu()">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </nav>
     </header>
 
     <script>
-        function toggleMenu() {
-            document.querySelector(".nav-links").classList.toggle("active");
-        }
+      function toggleMenu() {
+        document.querySelector(".nav-links").classList.toggle("active");
+      }
     </script>
 
     <div class="container">
-        <main class="job-list">
-            <div class="admin-header">
-                <h2>Tableau de bord administrateur</h2>
-                <div class="admin-actions">
-                    <a href="/admin/requests" class="action-button">
-                        <i class="bi bi-envelope"></i> Gérer les demandes
-                    </a>
-                    <button class="action-button">
-                        <i class="bi bi-plus-circle"></i> Nouvel administrateur
-                    </button>
-                </div>
-            </div>
+      <main class="job-list">
+        <div class="admin-header">
+          <h2>Tableau de bord administrateur</h2>
+          <div class="admin-actions">
+            <a href="/admin/requests" class="action-button">
+              <i class="bi bi-envelope"></i> Gérer les demandes
+            </a>
+            <button class="action-button">
+              <i class="bi bi-plus-circle"></i> Nouvel administrateur
+            </button>
+          </div>
+        </div>
 
-            <div class="admin-cards-row">
-                <div class="admin-card">
-                    <div class="admin-card-title">Candidats</div>
-                    <div class="admin-count"><%= candidats ? candidats.length : 0 %></div>
-                    <div class="admin-card-content">Membres inscrits</div>
-                </div>
-                <div class="admin-card">
-                    <div class="admin-card-title">Recruteurs</div>
-                    <div class="admin-count"><%= recruteurs ? recruteurs.length : 0 %></div>
-                    <div class="admin-card-content">Recruteurs inscrits</div>
-                </div>
-                <div class="admin-card">
-                    <div class="admin-card-title">Organisations</div>
-                    <div class="admin-count"><%= organisations ? organisations.length : 0 %></div>
-                    <div class="admin-card-content">Entreprises enregistrées</div>
-                </div>
-                <div class="admin-card">
-                    <div class="admin-card-title">Administrateurs</div>
-                    <div class="admin-count"><%= admins ? admins.length : 0 %></div>
-                    <div class="admin-card-content">Administrateurs système</div>
-                </div>
+        <div class="admin-cards-row">
+          <div class="admin-card">
+            <div class="admin-card-title">Candidats</div>
+            <div class="admin-count">
+              <%= candidats ? candidats.length : 0 %>
             </div>
-            
-            <div class="tabs">
-                <a href="/admin/dashboard?tab=candidats" class="tab <%= !activeTab || activeTab === 'candidats' ? 'active' : '' %>" data-tab="candidats">
-                    Liste des membres (<%= candidats ? candidats.length : 0 %>)
-                </a>
-                <a href="/admin/dashboard?tab=recruteurs" class="tab <%= activeTab === 'recruteurs' ? 'active' : '' %>" data-tab="recruteurs">
-                    Liste des recruteurs (<%= recruteurs ? recruteurs.length : 0 %>)
-                </a>
-                <a href="/admin/dashboard?tab=organisations" class="tab <%= activeTab === 'organisations' ? 'active' : '' %>" data-tab="organisations">
-                    Liste des organisations (<%= organisations ? organisations.length : 0 %>)
-                </a>
-                <a href="/admin/dashboard?tab=admins" class="tab <%= activeTab === 'admins' ? 'active' : '' %>" data-tab="admins">
-                    Liste des admins (<%= admins ? admins.length : 0 %>)
-                </a>
+            <div class="admin-card-content">Membres inscrits</div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Recruteurs</div>
+            <div class="admin-count">
+              <%= recruteurs ? recruteurs.length : 0 %>
             </div>
-            
-            <div id="candidats" class="tab-content <%= !activeTab || activeTab === 'candidats' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher un membre...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (candidats && candidats.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Email</th>
-                                <th>Téléphone</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% candidats.forEach(candidat => { %>
-                                <tr>
-                                    <td><%= candidat.id_can %></td>
-                                    <td><%= candidat.nom %></td>
-                                    <td><%= candidat.prenom %></td>
-                                    <td><%= candidat.email %></td>
-                                    <td><%= candidat.numero_telephone %></td>
-                                    <td>
-                                        <span class="status-badge <%= candidat.statut === 'actif' ? 'status-active' : 'status-inactive' %>">
-                                            <%= candidat.statut %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="actions-buttons">
-                                            <form action="/admin/candidat/<%= candidat.id_can %>/toggleStatus" method="POST" style="display: inline;">
-                                                <input type="hidden" name="newStatus" value="<%= candidat.statut === 'actif' ? 'inactif' : 'actif' %>">
-                                                <button type="submit" class="action-button <%= candidat.statut === 'actif' ? 'danger' : 'status-active' %>">
-                                                    <i class="bi bi-<%= candidat.statut === 'actif' ? 'x-circle' : 'check-circle' %>"></i>
-                                                    <%= candidat.statut === 'actif' ? 'Désactiver' : 'Activer' %>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucun membre inscrit</h3>
-                        <p>Il n'y a pas encore de candidats inscrits sur la plateforme.</p>
-                    </div>
-                <% } %>
+            <div class="admin-card-content">Recruteurs inscrits</div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Organisations</div>
+            <div class="admin-count">
+              <%= organisations ? organisations.length : 0 %>
             </div>
-            
-            <div id="recruteurs" class="tab-content <%= activeTab === 'recruteurs' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher un recruteur...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (recruteurs && recruteurs.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Email</th>
-                                <th>Organisation</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% recruteurs.forEach(recruteur => { %>
-                                <tr>
-                                    <td><%= recruteur.id_rec %></td>
-                                    <td><%= recruteur.nom %></td>
-                                    <td><%= recruteur.prenom %></td>
-                                    <td><%= recruteur.email %></td>
-                                    <td>
-                                        <% if (recruteur.organisation) { %>
-                                            <%= recruteur.organisation.nom %> (<%= recruteur.siren %>)
-                                        <% } else { %>
-                                            <%= recruteur.siren %> (Non trouvée)
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge <%= recruteur.statut === 'actif' ? 'status-active' : 'status-inactive' %>">
-                                            <%= recruteur.statut %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="actions-buttons">
-                                            <form action="/admin/recruteur/<%= recruteur.id_rec %>/toggleStatus" method="POST" style="display: inline;">
-                                                <input type="hidden" name="newStatus" value="<%= recruteur.statut === 'actif' ? 'inactif' : 'actif' %>">
-                                                <button type="submit" class="action-button <%= recruteur.statut === 'actif' ? 'danger' : 'status-active' %>">
-                                                    <i class="bi bi-<%= recruteur.statut === 'actif' ? 'x-circle' : 'check-circle' %>"></i>
-                                                    <%= recruteur.statut === 'actif' ? 'Désactiver' : 'Activer' %>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucun recruteur inscrit</h3>
-                        <p>Il n'y a pas encore de recruteurs inscrits sur la plateforme.</p>
-                    </div>
-                <% } %>
-            </div>
-            
-            <div id="organisations" class="tab-content <%= activeTab === 'organisations' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher une organisation...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (organisations && organisations.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>SIREN</th>
-                                <th>Nom</th>
-                                <th>Type</th>
-                                <th>Siège social</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% organisations.forEach(organisation => { %>
-                                <tr>
-                                    <td><%= organisation.siren %></td>
-                                    <td><%= organisation.nom %></td>
-                                    <td><%= organisation.type %></td>
-                                    <td>
-                                        <% 
-                                        let siege;
-                                        try {
-                                            siege = JSON.parse(organisation.siege_social);
-                                        } catch(e) {
-                                            siege = { adresse: "Non disponible", ville: "", code_postal: "" };
-                                        }
-                                        %>
-                                        <%= siege.adresse %>, <%= siege.code_postal %> <%= siege.ville %>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge 
-                                            <%= organisation.statut === 'active' ? 'status-active' : 
-                                               (organisation.statut === 'inactive' ? 'status-inactive' : 'status-pending') %>">
-                                            <%= organisation.statut %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="actions-buttons">
-                                            <div class="dropdown">
-                                                <form action="/admin/organisation/<%= organisation.siren %>/toggleStatus" method="POST" style="display: inline;">
-                                                    <% if (organisation.statut === 'active') { %>
-                                                        <input type="hidden" name="newStatus" value="inactive">
-                                                        <button type="submit" class="action-button danger">
-                                                            <i class="bi bi-x-circle"></i> Désactiver
-                                                        </button>
-                                                    <% } else if (organisation.statut === 'inactive') { %>
-                                                        <input type="hidden" name="newStatus" value="en_cours">
-                                                        <button type="submit" class="action-button warning">
-                                                            <i class="bi bi-clock"></i> En cours
-                                                        </button>
-                                                    <% } else { %>
-                                                        <input type="hidden" name="newStatus" value="active">
-                                                        <button type="submit" class="action-button status-active">
-                                                            <i class="bi bi-check-circle"></i> Activer
-                                                        </button>
-                                                    <% } %>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucune organisation</h3>
-                        <p>Il n'y a pas encore d'organisations enregistrées sur la plateforme.</p>
-                    </div>
-                <% } %>
-            </div>
-            
-            <div id="admins" class="tab-content <%= activeTab === 'admins' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher un administrateur...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (admins && admins.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Email</th>
-                                <th>Téléphone</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% admins.forEach(admin => { %>
-                                <tr>
-                                    <td><%= admin.id_admin %></td>
-                                    <td><%= admin.nom %></td>
-                                    <td><%= admin.prenom %></td>
-                                    <td><%= admin.email %></td>
-                                    <td><%= admin.numero_telephone %></td>
-                                    <td>
-                                        <span class="status-badge <%= admin.statut === 'actif' ? 'status-active' : 'status-inactive' %>">
-                                            <%= admin.statut %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <% if (admin.statut !== 'actif' || admins.filter(a => a.statut === 'actif').length > 1) { %>
-                                            <div class="actions-buttons">
-                                                <form action="/admin/admin/<%= admin.id_admin %>/toggleStatus" method="POST" style="display: inline;">
-                                                    <input type="hidden" name="newStatus" value="<%= admin.statut === 'actif' ? 'inactif' : 'actif' %>">
-                                                    <button type="submit" class="action-button <%= admin.statut === 'actif' ? 'danger' : 'status-active' %>">
-                                                        <i class="bi bi-<%= admin.statut === 'actif' ? 'x-circle' : 'check-circle' %>"></i>
-                                                        <%= admin.statut === 'actif' ? 'Désactiver' : 'Activer' %>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        <% } else { %>
-                                            <em>Dernier admin actif</em>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucun administrateur</h3>
-                        <p>Il n'y a pas encore d'administrateurs enregistrés sur la plateforme.</p>
-                    </div>
-                <% } %>
-            </div>
-        </main>
+            <div class="admin-card-content">Entreprises enregistrées</div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Administrateurs</div>
+            <div class="admin-count"><%= admins ? admins.length : 0 %></div>
+            <div class="admin-card-content">Administrateurs système</div>
+          </div>
+        </div>
 
+        <div class="tabs">
+          <a
+            href="/admin/dashboard?tab=candidats"
+            class="tab <%= !activeTab || activeTab === 'candidats' ? 'active' : '' %>"
+            data-tab="candidats"
+          >
+            Liste des membres (<%= candidats ? candidats.length : 0 %>)
+          </a>
+          <a
+            href="/admin/dashboard?tab=recruteurs"
+            class="tab <%= activeTab === 'recruteurs' ? 'active' : '' %>"
+            data-tab="recruteurs"
+          >
+            Liste des recruteurs (<%= recruteurs ? recruteurs.length : 0 %>)
+          </a>
+          <a
+            href="/admin/dashboard?tab=organisations"
+            class="tab <%= activeTab === 'organisations' ? 'active' : '' %>"
+            data-tab="organisations"
+          >
+            Liste des organisations (<%= organisations ? organisations.length :
+            0 %>)
+          </a>
+          <a
+            href="/admin/dashboard?tab=admins"
+            class="tab <%= activeTab === 'admins' ? 'active' : '' %>"
+            data-tab="admins"
+          >
+            Liste des admins (<%= admins ? admins.length : 0 %>)
+          </a>
+        </div>
+
+        <div
+          id="candidats"
+          class="tab-content <%= !activeTab || activeTab === 'candidats' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher un membre..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (candidats && candidats.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% candidats.forEach(candidat => { %>
+              <tr>
+                <td><%= candidat.id_can %></td>
+                <td><%= candidat.nom %></td>
+                <td><%= candidat.prenom %></td>
+                <td><%= candidat.email %></td>
+                <td><%= candidat.numero_telephone %></td>
+                <td>
+                  <span
+                    class="status-badge <%= candidat.statut === 'actif' ? 'status-active' : 'status-inactive' %>"
+                  >
+                    <%= candidat.statut %>
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-buttons">
+                    <form
+                      action="/admin/candidat/<%= candidat.id_can %>/toggleStatus"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <input
+                        type="hidden"
+                        name="newStatus"
+                        value="<%= candidat.statut === 'actif' ? 'inactif' : 'actif' %>"
+                      />
+                      <button
+                        type="submit"
+                        class="action-button <%= candidat.statut === 'actif' ? 'danger' : 'status-active' %>"
+                      >
+                        <i
+                          class="bi bi-<%= candidat.statut === 'actif' ? 'x-circle' : 'check-circle' %>"
+                        ></i>
+                        <%= candidat.statut === 'actif' ? 'Désactiver' :
+                        'Activer' %>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucun membre inscrit</h3>
+            <p>Il n'y a pas encore de candidats inscrits sur la plateforme.</p>
+          </div>
+          <% } %>
+        </div>
+
+        <div
+          id="recruteurs"
+          class="tab-content <%= activeTab === 'recruteurs' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher un recruteur..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (recruteurs && recruteurs.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Organisation</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recruteurs.forEach(recruteur => { %>
+              <tr>
+                <td><%= recruteur.id_rec %></td>
+                <td><%= recruteur.nom %></td>
+                <td><%= recruteur.prenom %></td>
+                <td><%= recruteur.email %></td>
+                <td>
+                  <% if (recruteur.organisation) { %> <%=
+                  recruteur.organisation.nom %> (<%= recruteur.siren %>) <% }
+                  else { %> <%= recruteur.siren %> (Non trouvée) <% } %>
+                </td>
+                <td>
+                  <span
+                    class="status-badge <%= recruteur.statut === 'actif' ? 'status-active' : 'status-inactive' %>"
+                  >
+                    <%= recruteur.statut %>
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-buttons">
+                    <form
+                      action="/admin/recruteur/<%= recruteur.id_rec %>/toggleStatus"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <input
+                        type="hidden"
+                        name="newStatus"
+                        value="<%= recruteur.statut === 'actif' ? 'inactif' : 'actif' %>"
+                      />
+                      <button
+                        type="submit"
+                        class="action-button <%= recruteur.statut === 'actif' ? 'danger' : 'status-active' %>"
+                      >
+                        <i
+                          class="bi bi-<%= recruteur.statut === 'actif' ? 'x-circle' : 'check-circle' %>"
+                        ></i>
+                        <%= recruteur.statut === 'actif' ? 'Désactiver' :
+                        'Activer' %>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucun recruteur inscrit</h3>
+            <p>Il n'y a pas encore de recruteurs inscrits sur la plateforme.</p>
+          </div>
+          <% } %>
+        </div>
+
+        <div
+          id="organisations"
+          class="tab-content <%= activeTab === 'organisations' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher une organisation..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (organisations && organisations.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>SIREN</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Siège social</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% organisations.forEach(organisation => { %>
+              <tr>
+                <td><%= organisation.siren %></td>
+                <td><%= organisation.nom %></td>
+                <td><%= organisation.type %></td>
+                <td>
+                  <% let siege; try { siege =
+                  JSON.parse(organisation.siege_social); } catch(e) { siege = {
+                  adresse: "Non disponible", ville: "", code_postal: "" }; } %>
+                  <%= siege.adresse %>, <%= siege.code_postal %> <%= siege.ville
+                  %>
+                </td>
+                <td>
+                  <span
+                    class="status-badge <%= organisation.statut === 'active' ? 'status-active' : (organisation.statut === 'inactive' ? 'status-inactive' : 'status-pending') %>"
+                  >
+                    <%= organisation.statut %>
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-buttons">
+                    <div class="dropdown">
+                      <form
+                        action="/admin/organisation/<%= organisation.siren %>/toggleStatus"
+                        method="POST"
+                        style="display: inline"
+                      >
+                        <% if (organisation.statut === 'active') { %>
+                        <input
+                          type="hidden"
+                          name="newStatus"
+                          value="inactive"
+                        />
+                        <button type="submit" class="action-button danger">
+                          <i class="bi bi-x-circle"></i> Désactiver
+                        </button>
+                        <% } else if (organisation.statut === 'inactive') { %>
+                        <input
+                          type="hidden"
+                          name="newStatus"
+                          value="en_cours"
+                        />
+                        <button type="submit" class="action-button warning">
+                          <i class="bi bi-clock"></i> En cours
+                        </button>
+                        <% } else { %>
+                        <input type="hidden" name="newStatus" value="active" />
+                        <button
+                          type="submit"
+                          class="action-button status-active"
+                        >
+                          <i class="bi bi-check-circle"></i> Activer
+                        </button>
+                        <% } %>
+                      </form>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucune organisation</h3>
+            <p>
+              Il n'y a pas encore d'organisations enregistrées sur la
+              plateforme.
+            </p>
+          </div>
+          <% } %>
+        </div>
+
+        <div
+          id="admins"
+          class="tab-content <%= activeTab === 'admins' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher un administrateur..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (admins && admins.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% admins.forEach(admin => { %>
+              <tr>
+                <td><%= admin.id_admin %></td>
+                <td><%= admin.nom %></td>
+                <td><%= admin.prenom %></td>
+                <td><%= admin.email %></td>
+                <td><%= admin.numero_telephone %></td>
+                <td>
+                  <span
+                    class="status-badge <%= admin.statut === 'actif' ? 'status-active' : 'status-inactive' %>"
+                  >
+                    <%= admin.statut %>
+                  </span>
+                </td>
+                <td>
+                  <% if (admin.statut !== 'actif' || admins.filter(a => a.statut
+                  === 'actif').length > 1) { %>
+                  <div class="actions-buttons">
+                    <form
+                      action="/admin/admin/<%= admin.id_admin %>/toggleStatus"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <input
+                        type="hidden"
+                        name="newStatus"
+                        value="<%= admin.statut === 'actif' ? 'inactif' : 'actif' %>"
+                      />
+                      <button
+                        type="submit"
+                        class="action-button <%= admin.statut === 'actif' ? 'danger' : 'status-active' %>"
+                      >
+                        <i
+                          class="bi bi-<%= admin.statut === 'actif' ? 'x-circle' : 'check-circle' %>"
+                        ></i>
+                        <%= admin.statut === 'actif' ? 'Désactiver' : 'Activer'
+                        %>
+                      </button>
+                    </form>
+                  </div>
+                  <% } else { %>
+                  <em>Dernier admin actif</em>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucun administrateur</h3>
+            <p>
+              Il n'y a pas encore d'administrateurs enregistrés sur la
+              plateforme.
+            </p>
+          </div>
+          <% } %>
+        </div>
+      </main>
     </div>
-</body>
-
-</html> 
+  </body>
+</html>
