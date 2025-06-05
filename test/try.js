@@ -78,7 +78,3 @@ for (let i = 0; i < 9; i++) {
 if (sum % 10 !== 0) console.log("ERREUR");
 else console.log("valide");
 */
-
-let tab = ["atada"];
-if (tab) console.log(tab);
-else console.log("caca");
