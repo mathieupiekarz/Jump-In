@@ -378,7 +378,7 @@ router.post("/demande-recruteur", function (req, res, next) {
 
   // Vérifications basiques
   if (!nouveau_siren || !description || description.length < 10) {
-    return res.redirect("/user/Profile");
+    return res.redirect("/users/Profile");
   }
 
   // Vérifier que le candidat existe
@@ -393,9 +393,9 @@ router.post("/demande-recruteur", function (req, res, next) {
       "en_attente",
       (result) => {
         if (!result) {
-          return res.redirect("/candidat/Profile");
+          return res.redirect("/users/Profile");
         }
-        res.redirect("/candidat/Profile");
+        res.redirect("/users/Profile");
       }
     );
   });
