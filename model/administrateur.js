@@ -47,7 +47,6 @@ const admin = {
     // vérification de la composition du mot de passe
     const isValide = await admin.areValide(mdp);
     if (!isValide) {
-      console.log("Erreur : mot de passe invalide !");
       return callback(null);
     }
 
@@ -119,7 +118,6 @@ const admin = {
           if ("mdp" in nvdict) {
             const isValide = await admin.areValide(nvdict.mdp);
             if (!isValide) {
-              console.log("Erreur : mot de passe invalide !");
               return callback(null);
             }
           }

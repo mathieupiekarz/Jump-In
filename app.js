@@ -26,7 +26,6 @@ app.use(session.init()); //Initialiser les sessions
 
 // check user before app.use (path, router)
 app.all("*", function (req, res, next) {
-  console.log("Session actuelle :", req.session);
   const nonSecurePaths = ["/users/login", "/users/inscription"];
   const adminPaths = [
     "/admin/dashboard",

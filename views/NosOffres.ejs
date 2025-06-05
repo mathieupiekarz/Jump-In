@@ -204,7 +204,7 @@
             <ul class="nav-links">
                 <li><a href="#">Tableau de bord</a></li>
                 <li><a href="/recruteur/<%= organisation.siren %>/NosOffres" class="active">Nos offres</a></li>
-                <li><a href="#" class="btn-connexion">Mon Compte</a></li>
+                <li><a href="/recruteur/mon-compte" class="btn-connexion">Mon Compte</a></li>
             </ul>
 
             <div class="burger" onclick="toggleMenu()">
@@ -296,7 +296,7 @@
                             </div>
 
                             <div class="caracteristiques">
-                                <p class="smallbox"><strong>Lieu:</strong> <%= offre.lieu_mission %></p>
+                                <p class="smallbox"><strong>Lieu:</strong> <%= offre.lieu_mission.ville %></p>
                                 <p class="smallbox"><strong>Type:</strong> <%= offre.type_metier %></p>
                                 <p class="smallbox"><strong>Salaire:</strong> <%= offre.fourchette_salaire %></p>
                                 <p class="smallbox"><strong>Statut:</strong> <%= offre.statut_de_poste %></p>
@@ -437,6 +437,7 @@
         function openCreateOffreFromFicheModal(ficheId, ficheTitle) {
             document.getElementById('selected_fiche_id').value = ficheId;
             document.getElementById('selectedFicheTitle').textContent = ficheTitle;
+            document.getElementById('createOffreFromFicheForm').action = '/recruteur/<%= organisation.siren %>/fiche/' + ficheId + '/creer-offre';
             openModal('createOffreFromFicheModal');
         }
         
@@ -445,8 +446,15 @@
             document.getElementById('editOffreTitle').textContent = offreTitle;
             document.getElementById('editOffreForm').action = '/recruteur/<%= organisation.siren %>/offre/' + offreId + '/modifier';
             
-            // Ici, vous pourriez charger les données actuelles de l'offre via AJAX
-            // Pour l'instant, on laisse les champs vides
+            // Charger les données de l'offre
+            fetch('/recruteur/<%= organisation.siren %>/offre/' + offreId + '/api')
+                .then(response => response.json())
+                .then(offre => {
+                    document.getElementById('edit_etat').value = offre.etat;
+                    document.getElementById('edit_date_validite').value = offre.date_validite;
+                    document.getElementById('edit_indication').value = offre.indication || '';
+                    document.getElementById('edit_nb_pieces_demandees').value = offre.nb_pieces_demandees;
+                });
             
             openModal('editOffreModal');
         }
@@ -456,7 +464,27 @@
             document.getElementById('editFicheTitle').textContent = ficheTitle;
             document.getElementById('editFicheForm').action = '/recruteur/<%= organisation.siren %>/fiche/' + ficheId + '/modifier';
             
-            // Ici, vous pourriez charger les données actuelles de la fiche via AJAX
+            // Charger les données de la fiche
+            fetch('/recruteur/<%= organisation.siren %>/fiche/' + ficheId + '/api')
+                .then(response => response.json())
+                .then(fiche => {
+                    document.getElementById('edit_intitule').value = fiche.intitule;
+                    document.getElementById('edit_statut_de_poste').value = fiche.statut_de_poste;
+                    document.getElementById('edit_responsable_hierarchique').value = fiche.responsable_hierarchique;
+                    document.getElementById('edit_type_metier').value = fiche.type_metier;
+                    document.getElementById('edit_rythme').value = fiche.rythme;
+                    document.getElementById('edit_fourchette_salaire').value = fiche.fourchette_salaire;
+                    document.getElementById('edit_description').value = fiche.description;
+                    
+                    // Remplir les champs du lieu de mission
+                    const lieuMission = JSON.parse(fiche.lieu_mission);
+                    document.getElementById('edit_lieu_nom').value = lieuMission.nom;
+                    document.getElementById('edit_lieu_adresse').value = lieuMission.adresse;
+                    document.getElementById('edit_lieu_complement').value = lieuMission.complement || '';
+                    document.getElementById('edit_lieu_code_postal').value = lieuMission.code_postal;
+                    document.getElementById('edit_lieu_ville').value = lieuMission.ville;
+                    document.getElementById('edit_lieu_pays').value = lieuMission.pays;
+                });
             
             openModal('editFicheModal');
         }
@@ -648,7 +676,7 @@
                 <h2 class="modal-title">Créer une offre d'emploi</h2>
                 <span class="close" onclick="closeModal('createOffreFromFicheModal')">&times;</span>
             </div>
-            <form action="/recruteur/:entreprise_id/fiche/:fiche_id/creer-offre" method="POST">
+            <form id="createOffreFromFicheForm" action="" method="POST">
                 <p>Création d'une offre basée sur la fiche de poste: <strong id="selectedFicheTitle"></strong></p>
                 
                 <input type="hidden" id="selected_fiche_id" name="id_fiche">
@@ -740,8 +768,92 @@
             <form id="editFicheForm" action="" method="POST">
                 <p>Modification de la fiche: <strong id="editFicheTitle"></strong></p>
                 
-                <!-- Contenu similaire au formulaire de création de fiche -->
-                <!-- À implémenter plus tard avec les champs pré-remplis -->
+                <div class="form-group">
+                    <label for="edit_intitule">Intitulé du poste *</label>
+                    <input type="text" id="edit_intitule" name="intitule" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_statut_de_poste">Statut du poste *</label>
+                        <select id="edit_statut_de_poste" name="statut_de_poste" required>
+                            <option value="">Sélectionner un statut</option>
+                            <option value="CDI">CDI</option>
+                            <option value="CDD">CDD</option>
+                            <option value="Intérim">Intérim</option>
+                            <option value="Stage">Stage</option>
+                            <option value="Alternance">Alternance</option>
+                            <option value="Freelance">Freelance</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_type_metier">Type de métier *</label>
+                        <input type="text" id="edit_type_metier" name="type_metier" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit_responsable_hierarchique">Responsable hiérarchique *</label>
+                    <input type="text" id="edit_responsable_hierarchique" name="responsable_hierarchique" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_rythme">Rythme de travail *</label>
+                        <input type="text" id="edit_rythme" name="rythme" placeholder="Ex: Temps plein, 35h/semaine" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_fourchette_salaire">Fourchette de salaire *</label>
+                        <input type="text" id="edit_fourchette_salaire" name="fourchette_salaire" placeholder="Ex: 35000€ - 45000€ brut annuel" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Lieu de mission *</label>
+                    <div class="adresse-section">
+                        <h4>Adresse</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_lieu_nom">Nom du site</label>
+                                <input type="text" id="edit_lieu_nom" name="lieu_mission[nom]" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit_lieu_adresse">Adresse</label>
+                                <input type="text" id="edit_lieu_adresse" name="lieu_mission[adresse]" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit_lieu_complement">Complément d'adresse</label>
+                            <input type="text" id="edit_lieu_complement" name="lieu_mission[complement]">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_lieu_code_postal">Code postal</label>
+                                <input type="text" id="edit_lieu_code_postal" name="lieu_mission[code_postal]" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit_lieu_ville">Ville</label>
+                                <input type="text" id="edit_lieu_ville" name="lieu_mission[ville]" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit_lieu_pays">Pays</label>
+                                <input type="text" id="edit_lieu_pays" name="lieu_mission[pays]" value="France" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit_description">Description du poste *</label>
+                    <textarea id="edit_description" name="description" required></textarea>
+                </div>
                 
                 <div class="form-buttons">
                     <button type="button" class="action-btn cancel-btn" onclick="closeModal('editFicheModal')">Annuler</button>

@@ -20,6 +20,9 @@ const offre = {
       WHERE o.numero = ?`;
     db.query(sql, [numero], (err, results) => {
       if (err) throw err;
+      for (const offre of results) {
+        offre.lieu_mission = JSON.parse(offre.lieu_mission);
+      }
       if (results.length === 0) return callback(null);
       else callback(results);
     });
@@ -44,6 +47,9 @@ const offre = {
     `;
     db.query(sql, (err, results) => {
       if (err) throw err;
+      for (const offre of results) {
+        offre.lieu_mission = JSON.parse(offre.lieu_mission);
+      }
       if (results.length === 0) return callback(null);
       else callback(results);
     });
@@ -69,6 +75,9 @@ const offre = {
         );
         callback([]);
       } else {
+        for (const offre of results) {
+          offre.lieu_mission = JSON.parse(offre.lieu_mission);
+        }
         if (results.length === 0) return callback(null);
         else callback(results);
       }

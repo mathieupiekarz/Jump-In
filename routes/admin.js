@@ -7,7 +7,7 @@ var recruteur = require("../model/recruteur.js");
 var organisation = require("../model/organisation.js");
 var admin = require("../model/administrateur.js");
 var demandeCreation = require("../model/demande_creation_organisation.js");
-var demandeChangement = require("../model/demande_changer_organisation.js");
+var demandeChangement = require("../model/Demande_changer_organisation.js");
 
 // Fonction utilitaire pour récupérer toutes les données nécessaires
 function fetchAllData() {

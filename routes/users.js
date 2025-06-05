@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var db = require("../model/db.js");
+var session = require("../session.js");
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -13,7 +14,7 @@ var offre = require("../model/offre_emploi.js");
 var candidature = require("../model/candidature.js");
 var pjt = require("../model/piece_jointe_temporaire.js");
 var rec = require("../model/recruteur.js");
-var demandeChO = require("../model/demande_changer_organisation.js");
+var demandeChO = require("../model/Demande_changer_organisation.js");
 
 router.get("/userlist", function (req, res, next) {
   result = candidat.readall((result) => {
@@ -122,26 +123,55 @@ router.get("/login", function (req, res, next) {
   res.render("Login", { title: "S'authentifier" });
 });
 
-router.post('/login', function(req, res, next) {
+router.post("/login", function (req, res, next) {
   const { email, password } = req.body;
-  console.log("email :", email);
-  console.log("password :", password);
 
-  candidat.connect(email, password, (result) => {
-    if (!result || result.length === 0) {
-      return res.send("Identifiants incorrects.");
-    }  
-    const utilisateur = result[0];
-    console.log("result :", utilisateur);
-    console.log("type :", typeof utilisateur);
-  
-    utilisateur.role = "candidat";
-    req.session.userid = utilisateur.email;
-    req.session.role = utilisateur.role;
+  // Vérifier d'abord si c'est un admin
+  admin.read(email, function(adminResult) {
+    if (adminResult && adminResult.length > 0) {
+      const adminUser = adminResult[0];
+      if (adminUser.mdp === password) {
+        session.creatSession(req.session, {
+          id: adminUser.id_admin,
+          email: adminUser.email
+        }, 'admin');
+        return res.redirect('/admin/dashboard');
+      }
+    }
 
-    console.log("Session enregistrée :", req.session);
+    // Vérifier si c'est un recruteur
+    rec.read(email, function(recruteurResult) {
+      if (recruteurResult && recruteurResult.length > 0) {
+        const recruteur = recruteurResult[0];
+        if (recruteur.mdp === password) {
+          session.creatSession(req.session, {
+            id: recruteur.id_rec,
+            email: recruteur.email,
+            siren: recruteur.siren
+          }, 'recruteur');
+          return res.redirect(`/recruteur/${recruteur.siren}/NosOffres`);
+        }
+      }
 
-    res.redirect("/users/ListeOffres");
+      // Vérifier si c'est un candidat
+      candidat.read(email, function(candidatResult) {
+        if (candidatResult && candidatResult.length > 0) {
+          const candidat = candidatResult[0];
+          if (candidat.mdp === password) {
+            session.creatSession(req.session, {
+              id: candidat.id_can,
+              email: candidat.email
+            }, 'candidat');
+            return res.redirect('/users/dashboard');
+          }
+        }
+
+        // Si aucun utilisateur n'est trouvé ou le mot de passe est incorrect
+        res.render('Login', {
+          error: 'Email ou mot de passe incorrect'
+        });
+      });
+    });
   });
 });
 

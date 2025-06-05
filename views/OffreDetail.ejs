@@ -72,7 +72,7 @@
           <div class="caracteristiques">
             <p class="smallbox"><strong>Type de poste :</strong> <%= offre.statut_de_poste %></p>
             <p class="smallbox"><strong>Début :</strong> <%= new Date(offre.date_validite).toLocaleDateString() %></p>
-            <p class="smallbox"><strong>Localisation :</strong> Voir fiche</p>
+            <p class="smallbox"><strong>Localisation :</strong> <%= offre.lieu_mission.ville %></p>
             <p class="smallbox"><strong>État :</strong> <%= offre.etat %></p>
             <p class="smallbox"><strong>Pièces demandées :</strong> <%= offre.nb_pieces_demandees %></p>
           </div>

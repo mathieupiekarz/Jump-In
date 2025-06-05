@@ -40,14 +40,6 @@ const candidat = {
       !statut ||
       !["actif", "inactif"].includes(statut)
     ) {
-      console.log("Erreur : format invalide !");
-      return callback(null);
-    }
-
-    // vérification de la composition du mot de passe
-    const isValide = await candidat.areValide(mdp);
-    if (!isValide) {
-      console.log("Erreur : mot de passe invalide !");
       return callback(null);
     }
 
@@ -55,10 +47,15 @@ const candidat = {
     const numValide = /^\+33\d{9}$/.test(num);
     if (!numValide) return callback(null);
 
+    // vérification de la composition du mot de passe
+    const isValide = await candidat.areValide(mdp);
+    if (!isValide) {
+      return callback(null);
+    }
+
     // vérification du format de l'email
     regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
     if (!regex.test(email)) {
-      console.log("Erreur : e-mail invalide !");
       return callback(null);
     }
 
@@ -122,7 +119,6 @@ const candidat = {
           if ("mdp" in nvdict) {
             const isValide = await candidat.areValide(nvdict.mdp);
             if (!isValide) {
-              console.log("Erreur : mot de passe invalide !");
               return callback(null);
             }
           }
