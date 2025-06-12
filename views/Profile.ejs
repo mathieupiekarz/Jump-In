@@ -89,9 +89,9 @@
                         </div>
                     </div>
                     <span>
-                    <a href="#"><i class="bi bi-pencil" style="color: #333;"></i></a>
-                    <button class="btn2" id="joinBtn">Rejoindre</button>
-                    <button class="btn" id="modifyBtn">Modifier</button>
+                        <a href="#"><i class="bi bi-plus-circle" style="color: #333;" id="createOrgBtn"></i></a>
+                        <button class="btn2" id="joinBtn">Rejoindre</button>
+                        <button class="btn" id="modifyBtn">Modifier</button>
                     </span>
                 </div>
             </div>
@@ -176,8 +176,8 @@
             </div>
             <form id="joinForm" action="/users/demande-recruteur" method="POST">
                 <div class="form-group">
-                    <label for="siren">Organisation</label>
-                    <select id="siren" name="siren" required>
+                    <label for="siren_join">Organisation</label>
+                    <select id="siren_join" name="siren" required>
                         <option value="">Sélectionner une organisation</option>
                         <% organisations.forEach(function(org) { %>
                             <option value="<%= org.siren %>"><%= org.nom %> (SIREN: <%= org.siren %>)</option>
@@ -192,6 +192,32 @@
                 </div>
                 <div class="form-buttons-profile">
                     <button type="button" class="cancel-btn-profile" id="cancelJoinBtn">Annuler</button>
+                    <button type="submit" class="save-btn-profile">Envoyer la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de création d'organisation -->
+    <div id="createOrgModal" class="modal-profile">
+        <div class="modal-content-profile">
+            <div class="modal-header-profile">
+                <h3>Créer une organisation</h3>
+                <span class="close-profile" id="closeCreateOrgModal">&times;</span>
+            </div>
+            <form id="createOrgForm" action="/users/demande-creation-organisation" method="POST">
+                <div class="form-group">
+                    <label for="siren_create">SIREN de l'organisation</label>
+                    <input type="text" id="siren_create" name="siren" required pattern="[0-9]{9}" maxlength="9" placeholder="Entrez le SIREN (9 chiffres)">
+                    <small>Le SIREN doit contenir exactement 9 chiffres</small>
+                </div>
+                <div class="form-group">
+                    <label for="description_create">Description de votre demande</label>
+                    <textarea id="description_create" name="description" required minlength="10" placeholder="Expliquez pourquoi vous souhaitez créer cette organisation" rows="4"></textarea>
+                    <small>Minimum 10 caractères</small>
+                </div>
+                <div class="form-buttons-profile">
+                    <button type="button" class="cancel-btn-profile" id="cancelCreateOrgBtn">Annuler</button>
                     <button type="submit" class="save-btn-profile">Envoyer la demande</button>
                 </div>
             </form>
@@ -214,6 +240,13 @@
         const closeJoinModal = document.getElementById("closeJoinModal");
         const cancelJoinBtn = document.getElementById("cancelJoinBtn");
         const joinForm = document.getElementById("joinForm");
+
+        // Gestion du modal de création d'organisation
+        const createOrgModal = document.getElementById("createOrgModal");
+        const createOrgBtn = document.getElementById("createOrgBtn");
+        const closeCreateOrgModal = document.getElementById("closeCreateOrgModal");
+        const cancelCreateOrgBtn = document.getElementById("cancelCreateOrgBtn");
+        const createOrgForm = document.getElementById("createOrgForm");
 
         // Ouvrir le modal
         modifyBtn.onclick = function() {
@@ -243,6 +276,20 @@
             joinModal.style.display = "none";
         }
 
+        // Ouvrir le modal de création d'organisation
+        createOrgBtn.onclick = function() {
+            createOrgModal.style.display = "block";
+        }
+
+        // Fermer le modal de création d'organisation
+        closeCreateOrgModal.onclick = function() {
+            createOrgModal.style.display = "none";
+        }
+
+        cancelCreateOrgBtn.onclick = function() {
+            createOrgModal.style.display = "none";
+        }
+
         // Fermer si on clique en dehors du modal
         window.onclick = function(event) {
             if (event.target == modal) {
@@ -251,11 +298,14 @@
             if (event.target == joinModal) {
                 joinModal.style.display = "none";
             }
+            if (event.target == createOrgModal) {
+                createOrgModal.style.display = "none";
+            }
         }
 
         // Validation du formulaire de demande de recrutement
         joinForm.onsubmit = function(e) {
-            const siren = document.getElementById("siren").value;
+            const siren = document.getElementById("siren_join").value;
             const description = document.getElementById("description").value;
 
             if (!/^[0-9]{9}$/.test(siren)) {
@@ -292,6 +342,26 @@
                 }
             }
             
+            return true;
+        }
+
+        // Validation du formulaire de création d'organisation
+        createOrgForm.onsubmit = function(e) {
+            const siren = document.getElementById("siren_create").value;
+            const description = document.getElementById("description_create").value;
+
+            if (!/^[0-9]{9}$/.test(siren)) {
+                e.preventDefault();
+                alert("Le SIREN doit contenir exactement 9 chiffres.");
+                return false;
+            }
+
+            if (description.length < 10) {
+                e.preventDefault();
+                alert("La description doit contenir au moins 10 caractères.");
+                return false;
+            }
+
             return true;
         }
     </script>

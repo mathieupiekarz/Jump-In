@@ -9,6 +9,7 @@ var organisation = require("../model/organisation.js");
 var admin = require("../model/administrateur.js");
 var demandeCreation = require("../model/demande_creation_organisation.js");
 var demandeChangement = require("../model/Demande_changer_organisation.js");
+var demandeRecrutement = require("../model/demande_recruteur.js");
 
 // Fonction utilitaire pour récupérer toutes les données nécessaires
 function fetchAllData() {
@@ -45,6 +46,12 @@ function fetchAllData() {
 
     getDemandesChangement: new Promise((resolve) => {
       demandeChangement.readall((results) => {
+        resolve(results);
+      });
+    }),
+
+    getDemandesRecrutement: new Promise((resolve) => {
+      demandeRecrutement.readall((results) => {
         resolve(results);
       });
     }),
@@ -111,10 +118,12 @@ router.get("/requests", function (req, res, next) {
   Promise.all([
     dataPromises.getDemandesCreation,
     dataPromises.getDemandesChangement,
+    dataPromises.getDemandesRecrutement,
     dataPromises.getCandidats,
     dataPromises.getRecruteurs,
+    dataPromises.getOrganisations,
   ])
-    .then(([demandesCreation, demandesChangement, candidats, recruteurs]) => {
+    .then(([demandesCreation, demandesChangement, demandesRecrutement, candidats, recruteurs, organisations]) => {
       // Enrichir les demandes de création avec les informations des candidats
       const enrichedDemandesCreation = demandesCreation.map((demande) => {
         const candidatInfo = candidats.find((c) => c.id_can == demande.id_can);
@@ -129,11 +138,19 @@ router.get("/requests", function (req, res, next) {
         return { ...demande, recruteur: recruteurInfo };
       });
 
+      // Enrichir les demandes de recrutement avec les informations des candidats et organisations
+      const enrichedDemandesRecrutement = demandesRecrutement.map((demande) => {
+        const candidatInfo = candidats.find((c) => c.id_can == demande.id_can);
+        const organisationInfo = organisations.find((o) => o.siren === demande.siren);
+        return { ...demande, candidat: candidatInfo, organisation: organisationInfo };
+      });
+
       // Préparer les données pour la vue
       const viewData = {
         title: "Gestion des demandes",
         demandesCreation: enrichedDemandesCreation,
         demandesChangement: enrichedDemandesChangement,
+        demandesRecrutement: enrichedDemandesRecrutement,
         activeTab: activeTab,
       };
 
@@ -350,6 +367,100 @@ router.post("/admin/:id/toggleStatus", function (req, res, next) {
   } else {
     res.status(400).send("Statut invalide");
   }
+});
+
+// Route pour approuver une demande de recrutement
+router.post("/request/recrutement/:id_can/:siren/approve", function (req, res, next) {
+  const id_can = parseInt(req.params.id_can);
+  const siren = req.params.siren;
+
+  // 1. Récupérer les informations du candidat
+  candidat.readById(id_can, function (candidatResult) {
+    if (!candidatResult || candidatResult.length === 0) {
+      return res.status(404).send("Candidat non trouvé");
+    }
+
+    const candidatInfo = candidatResult[0];
+    console.log("Informations du candidat:", {
+      siren,
+      email: candidatInfo.email,
+      nom: candidatInfo.nom,
+      prenom: candidatInfo.prenom,
+      numero_telephone: candidatInfo.numero_telephone
+    });
+
+    // Vérifier si l'organisation existe
+    organisation.read(siren, function(orgResult) {
+      if (!orgResult || orgResult.length === 0) {
+        console.log("Organisation non trouvée avec le SIREN:", siren);
+        return res.status(404).send("Organisation non trouvée");
+      }
+
+      console.log("Organisation trouvée:", orgResult[0]);
+
+      // 2. Créer le compte recruteur
+      recruteur.creat(
+        siren,
+        candidatInfo.email,
+        candidatInfo.mdp,
+        candidatInfo.nom,
+        candidatInfo.prenom,
+        candidatInfo.numero_telephone,
+        "actif",
+        function (recruteurResult) {
+          if (!recruteurResult) {
+            console.log("Échec de la création du compte recruteur");
+            return res.status(400).send("Erreur lors de la création du compte recruteur");
+          }
+
+          // 3. Mettre à jour le statut de la demande
+          demandeRecrutement.update(
+            id_can,
+            siren,
+            siren,
+            { statutDR: "validee" },
+            function (updateResult) {
+              if (!updateResult) {
+                console.log("Échec de la mise à jour du statut de la demande");
+                return res.status(400).send("Erreur lors de la mise à jour du statut de la demande");
+              }
+
+              // 4. Supprimer le compte candidat
+              candidat.delete(id_can, function (deleteResult) {
+                if (!deleteResult) {
+                  console.log("Échec de la suppression du compte candidat");
+                  return res.status(400).send("Erreur lors de la suppression du compte candidat");
+                }
+
+                console.log("Processus terminé avec succès");
+                return res.redirect("/admin/requests?tab=recrutement");
+              });
+            }
+          );
+        }
+      );
+    });
+  });
+});
+
+// Route pour rejeter une demande de recrutement
+router.post("/request/recrutement/:id_can/:siren/reject", function (req, res, next) {
+  const id_can = parseInt(req.params.id_can);
+  const siren = req.params.siren;
+
+  demandeRecrutement.update(
+    id_can,
+    siren,
+    siren,
+    { statutDR: "refusee" },
+    function (result) {
+      if (result) {
+        res.redirect("/admin/requests?tab=recrutement");
+      } else {
+        res.status(400).send("Échec de la mise à jour du statut de la demande");
+      }
+    }
+  );
 });
 
 module.exports = router;
