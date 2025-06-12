@@ -103,8 +103,7 @@ vérification format code postal
 afficher uniquement les offres auxquelles je ne postule pas pour un candidat  
 rajouter "autre" dans type entreprise
 ne pas repostuler à des candidatures déjà postulée
-API
-
+lorsqu'on créé une nouvelle organisation, vérifier que le siren n'existe pas déjà pour un autre organisation
 
 page erreur/accueil
 Admin peut modifier les caractéristiques des recruteurs et  

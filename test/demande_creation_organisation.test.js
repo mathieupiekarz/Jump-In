@@ -17,7 +17,7 @@ describe("Model Tests", () => {
       try {
         if (resultat === null) done();
         else {
-          expect(resultat[0].statutCrO).toBe("refusee");
+          expect(resultat[0].statutCrO).toBe("en_attente");
           done();
         }
       } catch (err) {
@@ -41,9 +41,19 @@ describe("Model Tests", () => {
   test("create demandeCrO", (done) => {
     demandeCrO.creat(
       9,
-      "390989580",
+      "116809831",
       "demande de créer Ferrari",
       "en_attente",
+      "Ferrari",
+      "SA",
+      {
+        nom: "Ferrari",
+        adresse: "45 boulevard des kways mouillés",
+        complement: null,
+        code_postal: "60200",
+        ville: "Venette",
+        pays: "France",
+      },
       (resultat) => {
         try {
           if (resultat === null) {

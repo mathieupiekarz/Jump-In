@@ -17,7 +17,16 @@ const dco = {
       callback(results);
     });
   },
-  creat: (id_can, siren, descriptionCrO, statutCrO, callback) => {
+  creat: (
+    id_can,
+    siren,
+    descriptionCrO,
+    statutCrO,
+    nom,
+    type,
+    siege_social,
+    callback
+  ) => {
     // vérification non null et types cohérents
     if (
       !id_can ||
@@ -27,10 +36,59 @@ const dco = {
       !descriptionCrO ||
       typeof descriptionCrO !== "string" ||
       !statutCrO ||
-      !["validee", "refusee", "en_attente"].includes(statutCrO)
+      !["validee", "refusee", "en_attente"].includes(statutCrO) ||
+      !nom ||
+      typeof nom !== "string" ||
+      !type ||
+      ![
+        "association",
+        "EURL",
+        "SA",
+        "SAS",
+        "SASU",
+        "ONG",
+        "SARL",
+        "SNC",
+        "SCS",
+        "SCA",
+        "SCI",
+        "SCP",
+        "SCM",
+        "SCEA",
+        "SCCV",
+        "SCPa",
+        "EARL",
+        "GAEC",
+        "SCIC",
+        "SCOP",
+        "GIE",
+        "GEIE",
+        "GE",
+      ].includes(type)
     ) {
       return callback(null);
     }
+    // vérification que le json siege social est dans le bon format
+    const champsValides = [
+      "nom",
+      "adresse",
+      "complement",
+      "code_postal",
+      "ville",
+      "pays",
+    ];
+    const keylist = Object.keys(siege_social);
+    if (!keylist.every((k) => champsValides.includes(k))) return callback(null);
+    const valueslist = Object.values(siege_social);
+    if (
+      typeof valueslist[0] !== "string" ||
+      typeof valueslist[1] !== "string" ||
+      (typeof valueslist[2] !== "string" && valueslist[2] !== null) ||
+      typeof valueslist[3] !== "string" ||
+      typeof valueslist[4] !== "string" ||
+      typeof valueslist[5] !== "string"
+    )
+      return callback(null);
 
     // Vérifier que le candidat existe
     const sqlVerifCandidat = "SELECT 1 FROM Candidat WHERE id_can = ?";
@@ -50,11 +108,20 @@ const dco = {
 
           // Insertion de la nouvelle demande
           const sql =
-            "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO DemandeCreationOrganisation (id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO, nom, type, siege_social) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
           const dateDemandeCrO = new Date().toISOString().split("T")[0];
           db.query(
             sql,
-            [id_can, siren, descriptionCrO, dateDemandeCrO, statutCrO],
+            [
+              id_can,
+              siren,
+              descriptionCrO,
+              dateDemandeCrO,
+              statutCrO,
+              nom,
+              type,
+              JSON.stringify(siege_social),
+            ],
             (err, results) => {
               if (err) throw err;
               callback(results.insertId);
