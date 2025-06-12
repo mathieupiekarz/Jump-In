@@ -463,4 +463,51 @@ router.post("/request/recrutement/:id_can/:siren/reject", function (req, res, ne
   );
 });
 
+// Route pour créer un nouvel administrateur à partir d'un candidat
+router.post("/create-admin", function (req, res, next) {
+  const id_candidat = parseInt(req.body.id_candidat);
+
+  // 1. Récupérer les informations du candidat
+  candidat.readById(id_candidat, function (candidatResult) {
+    if (!candidatResult || candidatResult.length === 0) {
+      return res.status(404).send("Candidat non trouvé");
+    }
+
+    const candidatInfo = candidatResult[0];
+    console.log("Informations du candidat:", {
+      email: candidatInfo.email,
+      nom: candidatInfo.nom,
+      prenom: candidatInfo.prenom,
+      numero_telephone: candidatInfo.numero_telephone
+    });
+
+    // 2. Créer le compte administrateur
+    admin.creat(
+      candidatInfo.email,
+      candidatInfo.mdp,
+      candidatInfo.nom,
+      candidatInfo.prenom,
+      candidatInfo.numero_telephone,
+      "actif",
+      function (adminResult) {
+        if (!adminResult) {
+          console.log("Échec de la création du compte administrateur");
+          return res.status(400).send("Erreur lors de la création du compte administrateur");
+        }
+
+        // 3. Supprimer le compte candidat
+        candidat.delete(id_candidat, function (deleteResult) {
+          if (!deleteResult) {
+            console.log("Échec de la suppression du compte candidat");
+            return res.status(400).send("Erreur lors de la suppression du compte candidat");
+          }
+
+          console.log("Processus terminé avec succès");
+          return res.redirect("/admin/dashboard?tab=admins");
+        });
+      }
+    );
+  });
+});
+
 module.exports = router;
