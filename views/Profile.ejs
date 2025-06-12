@@ -212,6 +212,60 @@
                     <small>Le SIREN doit contenir exactement 9 chiffres</small>
                 </div>
                 <div class="form-group">
+                    <label for="nom">Nom de l'organisation</label>
+                    <input type="text" id="nom" name="nom" required placeholder="Entrez le nom de l'organisation">
+                </div>
+                <div class="form-group">
+                    <label for="type">Type d'organisation</label>
+                    <select id="type" name="type" required>
+                        <option value="">Sélectionnez un type</option>
+                        <option value="association">Association</option>
+                        <option value="EURL">EURL</option>
+                        <option value="SA">SA</option>
+                        <option value="SAS">SAS</option>
+                        <option value="SASU">SASU</option>
+                        <option value="ONG">ONG</option>
+                        <option value="SARL">SARL</option>
+                        <option value="SNC">SNC</option>
+                        <option value="SCS">SCS</option>
+                        <option value="SCA">SCA</option>
+                        <option value="SCI">SCI</option>
+                        <option value="SCP">SCP</option>
+                        <option value="SCM">SCM</option>
+                        <option value="SCEA">SCEA</option>
+                        <option value="SCCV">SCCV</option>
+                        <option value="SCPa">SCPa</option>
+                        <option value="EARL">EARL</option>
+                        <option value="GAEC">GAEC</option>
+                        <option value="SCIC">SCIC</option>
+                        <option value="SCOP">SCOP</option>
+                        <option value="GIE">GIE</option>
+                        <option value="GEIE">GEIE</option>
+                        <option value="GE">GE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Siège social</label>
+                    <div class="form-group">
+                        <input type="text" name="siege_nom" required placeholder="Nom du siège social">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="siege_adresse" required placeholder="Adresse">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="siege_complement" placeholder="Complément d'adresse">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="siege_code_postal" required placeholder="Code postal">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="siege_ville" required placeholder="Ville">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="siege_pays" required placeholder="Pays">
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="description_create">Description de votre demande</label>
                     <textarea id="description_create" name="description" required minlength="10" placeholder="Expliquez pourquoi vous souhaitez créer cette organisation" rows="4"></textarea>
                     <small>Minimum 10 caractères</small>

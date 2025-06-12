@@ -98,7 +98,10 @@ const organisation = {
           sql,
           [siren, nom, type, JSON.stringify(siege_social), statut],
           (err, results) => {
-            if (err) throw err;
+            if (err) {
+              console.error("Erreur MySQL lors de la création de l'organisation:", err);
+              return callback(null, err);
+            }
             callback(results.insertId);
           }
         );
