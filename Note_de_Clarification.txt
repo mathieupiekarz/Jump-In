@@ -79,20 +79,33 @@ demande CrO :
 
 
 MATHIEU : 
-rajouter NOM, TYPE, siege_social dans demandeCrO
 test routes 
 filtres et barre de recherche
 vulnérabilités 3 --> injection SQL/Cross-Site Scripting/mdp hachage/Contrôle d'accès
-demande recruteur
+téléchargement json document
+
+
+RECRUTEUR --> téléchargement des documents
+CANDIDAT --> chargement de pièces jointes 
 
 
 MATHEO : 
 bouton deconnection 
-téléchargement json document
-mail pour demande validée
+demande création
 donner droits admin à candidat et recruteur
+mail pour demande validée
+
 
 RESTE :
+
+gestion actif/inactif 
+vérification format code postal
+afficher uniquement les offres auxquelles je ne postule pas pour un candidat  
+rajouter "autre" dans type entreprise
+ne pas repostuler à des candidatures déjà postulée
+API
+
+
 page erreur/accueil
 Admin peut modifier les caractéristiques des recruteurs et  
 message saisie erreur 

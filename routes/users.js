@@ -203,15 +203,17 @@ router.get("/Profile", function (req, res, next) {
     delete req.session.successMessage;
 
     // Récupérer toutes les organisations actives
-    organisation.readall(function(organisations) {
+    organisation.readall(function (organisations) {
       // Filtrer pour ne garder que les organisations actives
-      const activeOrganisations = organisations.filter(org => org.statut === 'active');
-      
+      const activeOrganisations = organisations.filter(
+        (org) => org.statut === "active"
+      );
+
       res.render("Profile", {
         title: "Informations Personnelles",
         candidat: result[0],
         successMessage: successMessage,
-        organisations: activeOrganisations
+        organisations: activeOrganisations,
       });
     });
   });
@@ -366,11 +368,10 @@ router.post("/updateProfile", function (req, res, next) {
 // Route pour demander un changement d'organisation
 router.post("/demande-recruteur", function (req, res, next) {
   if (!req.session.id_candidat) {
-    return res.redirect("/login");
+    return res.redirect("/users/Profile");
   }
 
   const { nouveau_siren, description } = req.body;
-
   // Vérifications basiques
   if (!nouveau_siren || !description || description.length < 10) {
     return res.redirect("/users/Profile");
@@ -379,10 +380,10 @@ router.post("/demande-recruteur", function (req, res, next) {
   // Vérifier que le candidat existe
   candidat.readById(req.session.id_candidat, function (candidatResult) {
     if (!candidatResult || candidatResult.length === 0) {
-      return res.redirect("/login");
+      return res.redirect("/users/Profile");
     }
-    demandeR(
-      id_candidat,
+    demandeR.creat(
+      req.session.id_candidat,
       nouveau_siren,
       description,
       "en_attente",

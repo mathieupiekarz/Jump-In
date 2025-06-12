@@ -78,3 +78,12 @@ for (let i = 0; i < 9; i++) {
 if (sum % 10 !== 0) console.log("ERREUR");
 else console.log("valide");
 */
+
+regex = /^[^@\s]+@([^@.\s]+\.)+[^@.\s]+$/;
+const email = "test@gmail.com";
+const email1 = "test.pi@gmail.com";
+const email2 = "@gmail.com";
+
+console.log(regex.test(email));
+console.log(regex.test(email1));
+console.log(regex.test(email2));
