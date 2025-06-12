@@ -54,7 +54,9 @@ const recruteur = {
     }
 
     //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
-    if (!/^\d{9}$/.test(siren)) return callback(null);
+    if (!/^\d{9}$/.test(siren)) {
+      return callback(null);
+    }
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
@@ -62,7 +64,9 @@ const recruteur = {
       if (digit > 9) digit -= 9;
       sum += digit;
     }
-    if (sum % 10 !== 0) return callback(null);
+    if (sum % 10 !== 0) {
+      return callback(null);
+    }
 
     // vérification de la composition du mot de passe
     const isValide = await recruteur.areValide(mdp);
@@ -72,10 +76,12 @@ const recruteur = {
 
     // vérification du format du numéro de téléphone
     const numValide = /^\+33\d{9}$/.test(num);
-    if (!numValide) return callback(null);
+    if (!numValide) {
+      return callback(null);
+    }
 
     // vérification du format de l'email
-    regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) {
       return callback(null);
     }
@@ -84,11 +90,15 @@ const recruteur = {
     let sql_siren = "SELECT * FROM Organisation WHERE siren = ?";
     db.query(sql_siren, [siren], (err, result) => {
       if (err) throw err;
-      if (result.length === 0) return callback(result);
+      if (result.length === 0) {
+        return callback(result);
+      }
 
       // vérification si un recruteur existant a déjà le même email
       recruteur.read(email, (result) => {
-        if (result && result.length > 0) return callback(null);
+        if (result && result.length > 0) {
+          return callback(null);
+        }
         else {
           let sql =
             "INSERT INTO Recruteur (siren, email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -182,7 +192,7 @@ const recruteur = {
 
             // vérification si le nouvel email existe déjà
             if ("email" in nvdict) {
-              const regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
+              const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
               if (!regex.test(nvdict.email)) return callback(null);
 
               recruteur.read(nvdict.email, (result) => {

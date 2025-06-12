@@ -314,7 +314,7 @@ router.get("/MesOffres", function (req, res, next) {
   candidature.readCandidaturesWithOffreDetails(id_candidat, (offres) => {
     res.render("MesOffres", {
       title: "Mes candidatures",
-      offres: offres,
+      offres: offres || [] // Si offres est null, on utilise un tableau vide
     });
   });
 });
@@ -366,30 +366,72 @@ router.post("/updateProfile", function (req, res, next) {
 // Route pour demander un changement d'organisation
 router.post("/demande-recruteur", function (req, res, next) {
   if (!req.session.id_candidat) {
-    return res.redirect("/login");
+    return res.redirect("/users/login");
   }
 
-  const { nouveau_siren, description } = req.body;
+  const { siren, description } = req.body;
 
   // Vérifications basiques
-  if (!nouveau_siren || !description || description.length < 10) {
+  if (!siren || !description || description.length < 10) {
+    req.session.errorMessage = "Veuillez remplir tous les champs correctement (description minimum 10 caractères)";
     return res.redirect("/users/Profile");
   }
 
   // Vérifier que le candidat existe
   candidat.readById(req.session.id_candidat, function (candidatResult) {
     if (!candidatResult || candidatResult.length === 0) {
-      return res.redirect("/login");
+      return res.redirect("/users/login");
     }
-    demandeR(
-      id_candidat,
-      nouveau_siren,
+
+    // Créer la demande de recruteur
+    demandeR.creat(
+      req.session.id_candidat,
+      siren,
       description,
       "en_attente",
       (result) => {
         if (!result) {
+          req.session.errorMessage = "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation.";
           return res.redirect("/users/Profile");
         }
+        req.session.successMessage = "Votre demande a été envoyée avec succès !";
+        res.redirect("/users/Profile");
+      }
+    );
+  });
+});
+
+router.post("/demande-creation-organisation", function (req, res, next) {
+  if (!req.session.id_candidat) {
+    return res.redirect("/users/login");
+  }
+
+  const { siren, description } = req.body;
+
+  // Vérifications basiques
+  if (!siren || !description || description.length < 10) {
+    req.session.errorMessage = "Veuillez remplir tous les champs correctement (description minimum 10 caractères)";
+    return res.redirect("/users/Profile");
+  }
+
+  // Vérifier que le candidat existe
+  candidat.readById(req.session.id_candidat, function (candidatResult) {
+    if (!candidatResult || candidatResult.length === 0) {
+      return res.redirect("/users/login");
+    }
+
+    // Créer la demande de création d'organisation
+    demandeCrO.creat(
+      req.session.id_candidat,
+      siren,
+      description,
+      "en_attente",
+      (result) => {
+        if (!result) {
+          req.session.errorMessage = "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation ou le SIREN existe déjà.";
+          return res.redirect("/users/Profile");
+        }
+        req.session.successMessage = "Votre demande de création d'organisation a été envoyée avec succès !";
         res.redirect("/users/Profile");
       }
     );
