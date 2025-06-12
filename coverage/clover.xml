@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1749736432769" clover="3.2.0">
-  <project timestamp="1749736432770" name="All files">
-    <metrics statements="934" coveredstatements="710" conditionals="929" coveredconditionals="548" methods="251" coveredmethods="216" elements="2114" coveredelements="1474" complexity="0" loc="934" ncloc="934" packages="1" files="13" classes="13"/>
+<coverage generated="1749738855056" clover="3.2.0">
+  <project timestamp="1749738855057" name="All files">
+    <metrics statements="960" coveredstatements="732" conditionals="965" coveredconditionals="573" methods="250" coveredmethods="215" elements="2175" coveredelements="1520" complexity="0" loc="960" ncloc="960" packages="1" files="13" classes="13"/>
     <file name="administrateur.js" path="C:\Users\mathi\projet-sr10\model\administrateur.js">
       <metrics statements="80" coveredstatements="62" conditionals="78" coveredconditionals="45" methods="23" coveredmethods="20"/>
       <line num="1" count="1" type="stmt"/>
@@ -307,7 +307,7 @@
       <line num="155" count="1" type="stmt"/>
     </file>
     <file name="demande_creation_organisation.js" path="C:\Users\mathi\projet-sr10\model\demande_creation_organisation.js">
-      <metrics statements="64" coveredstatements="50" conditionals="69" coveredconditionals="44" methods="20" coveredmethods="18"/>
+      <metrics statements="90" coveredstatements="72" conditionals="105" coveredconditionals="69" methods="19" coveredmethods="17"/>
       <line num="1" count="1" type="stmt"/>
       <line num="3" count="1" type="stmt"/>
       <line num="6" count="2" type="stmt"/>
@@ -346,32 +346,58 @@
       <line num="141" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="142" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="145" count="1" type="stmt"/>
-      <line num="146" count="1" type="stmt"/>
-      <line num="147" count="2" type="cond" truecount="1" falsecount="1"/>
-      <line num="148" count="0" type="stmt"/>
-      <line num="149" count="1" type="stmt"/>
-      <line num="150" count="2" type="stmt"/>
-      <line num="153" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="155" count="1" type="stmt"/>
-      <line num="156" count="2" type="cond" truecount="1" falsecount="1"/>
-      <line num="157" count="0" type="stmt"/>
+      <line num="152" count="1" type="stmt"/>
+      <line num="153" count="5" type="cond" truecount="2" falsecount="0"/>
+      <line num="155" count="5" type="stmt"/>
+      <line num="156" count="5" type="stmt"/>
       <line num="160" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="164" count="0" type="stmt"/>
-      <line num="167" count="1" type="stmt"/>
-      <line num="168" count="1" type="stmt"/>
-      <line num="169" count="2" type="stmt"/>
-      <line num="170" count="1" type="stmt"/>
-      <line num="171" count="1" type="stmt"/>
-      <line num="172" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="173" count="1" type="stmt"/>
-      <line num="181" count="1" type="stmt"/>
-      <line num="185" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="186" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="190" count="0" type="stmt"/>
-      <line num="191" count="0" type="stmt"/>
-      <line num="192" count="0" type="cond" truecount="0" falsecount="2"/>
-      <line num="193" count="0" type="stmt"/>
-      <line num="200" count="1" type="stmt"/>
+      <line num="161" count="0" type="stmt"/>
+      <line num="165" count="1" type="cond" truecount="3" falsecount="1"/>
+      <line num="166" count="0" type="stmt"/>
+      <line num="169" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="173" count="0" type="stmt"/>
+      <line num="176" count="1" type="cond" truecount="3" falsecount="1"/>
+      <line num="179" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="207" count="0" type="stmt"/>
+      <line num="210" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="211" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="212" count="0" type="stmt"/>
+      <line num="214" count="1" type="stmt"/>
+      <line num="222" count="1" type="stmt"/>
+      <line num="224" count="6" type="cond" truecount="1" falsecount="1"/>
+      <line num="225" count="0" type="stmt"/>
+      <line num="228" count="1" type="stmt"/>
+      <line num="229" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="239" count="0" type="stmt"/>
+      <line num="244" count="1" type="stmt"/>
+      <line num="245" count="1" type="stmt"/>
+      <line num="246" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="247" count="1" type="stmt"/>
+      <line num="248" count="1" type="stmt"/>
+      <line num="250" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="251" count="1" type="stmt"/>
+      <line num="252" count="1" type="stmt"/>
+      <line num="254" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="255" count="1" type="stmt"/>
+      <line num="256" count="1" type="stmt"/>
+      <line num="258" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="259" count="1" type="stmt"/>
+      <line num="260" count="1" type="stmt"/>
+      <line num="262" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="264" count="1" type="stmt"/>
+      <line num="265" count="1" type="stmt"/>
+      <line num="269" count="1" type="stmt"/>
+      <line num="272" count="1" type="stmt"/>
+      <line num="273" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="275" count="1" type="stmt"/>
+      <line num="282" count="1" type="stmt"/>
+      <line num="286" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="287" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="291" count="0" type="stmt"/>
+      <line num="292" count="0" type="stmt"/>
+      <line num="293" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="294" count="0" type="stmt"/>
+      <line num="301" count="1" type="stmt"/>
     </file>
     <file name="demande_recruteur.js" path="C:\Users\mathi\projet-sr10\model\demande_recruteur.js">
       <metrics statements="72" coveredstatements="51" conditionals="70" coveredconditionals="37" methods="22" coveredmethods="18"/>
@@ -712,34 +738,34 @@
       <line num="185" count="1" type="stmt"/>
       <line num="186" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="196" count="0" type="stmt"/>
-      <line num="201" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="205" count="0" type="stmt"/>
-      <line num="208" count="1" type="stmt"/>
+      <line num="201" count="1" type="cond" truecount="3" falsecount="1"/>
+      <line num="202" count="0" type="stmt"/>
+      <line num="205" count="1" type="stmt"/>
+      <line num="206" count="1" type="stmt"/>
+      <line num="208" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="209" count="1" type="stmt"/>
-      <line num="211" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="212" count="1" type="stmt"/>
-      <line num="213" count="1" type="stmt"/>
-      <line num="215" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="216" count="0" type="stmt"/>
-      <line num="217" count="0" type="stmt"/>
-      <line num="219" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="220" count="1" type="stmt"/>
-      <line num="221" count="1" type="stmt"/>
-      <line num="223" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="225" count="1" type="stmt"/>
-      <line num="226" count="1" type="stmt"/>
+      <line num="210" count="1" type="stmt"/>
+      <line num="212" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="213" count="0" type="stmt"/>
+      <line num="214" count="0" type="stmt"/>
+      <line num="216" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="217" count="1" type="stmt"/>
+      <line num="218" count="1" type="stmt"/>
+      <line num="220" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="222" count="1" type="stmt"/>
+      <line num="223" count="1" type="stmt"/>
+      <line num="227" count="1" type="stmt"/>
       <line num="230" count="1" type="stmt"/>
+      <line num="231" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="233" count="1" type="stmt"/>
-      <line num="234" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="236" count="1" type="stmt"/>
-      <line num="243" count="1" type="stmt"/>
-      <line num="247" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="248" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="240" count="1" type="stmt"/>
+      <line num="244" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="245" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="248" count="1" type="stmt"/>
+      <line num="249" count="1" type="stmt"/>
+      <line num="250" count="1" type="cond" truecount="1" falsecount="1"/>
       <line num="251" count="1" type="stmt"/>
-      <line num="252" count="1" type="stmt"/>
-      <line num="253" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="254" count="1" type="stmt"/>
-      <line num="261" count="1" type="stmt"/>
+      <line num="258" count="1" type="stmt"/>
     </file>
     <file name="piece_jointe_durable.js" path="C:\Users\mathi\projet-sr10\model\piece_jointe_durable.js">
       <metrics statements="53" coveredstatements="41" conditionals="50" coveredconditionals="29" methods="18" coveredmethods="16"/>
