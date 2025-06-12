@@ -98,8 +98,7 @@ const recruteur = {
       recruteur.read(email, (result) => {
         if (result && result.length > 0) {
           return callback(null);
-        }
-        else {
+        } else {
           let sql =
             "INSERT INTO Recruteur (siren, email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
           const dateC = new Date().toISOString().split("T")[0];

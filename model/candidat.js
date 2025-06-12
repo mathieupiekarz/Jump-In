@@ -62,7 +62,7 @@ const candidat = {
     }
 
     // vérification du format de l'email
-    regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
+    regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) {
       return callback(null);
     }
@@ -144,7 +144,7 @@ const candidat = {
 
           // vérification si le nouvel email existe déjà
           if ("email" in nvdict) {
-            const regex = /^[^@.\s]+\.{1}[^@.\s]+@([^@.\s]+\.)+[^@.\s]+$/;
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!regex.test(nvdict.email)) return callback(null);
 
             candidat.read(nvdict.email, (result) => {
