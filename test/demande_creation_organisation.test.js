@@ -71,9 +71,19 @@ describe("Model Tests", () => {
   test("update demandeCrO", (done) => {
     var dico = {
       descriptionCrO: "voudrait créer ESCOM",
-      statutCrO: "refusee",
+      statutCrO: "en_attente",
+      nom: "MatheoGros",
+      type: "ONG",
+      siege_social: {
+        nom: "matheo",
+        adresse: "45 boulevard des kways mouillés",
+        complement: "oui",
+        code_postal: "60200",
+        ville: "Venette",
+        pays: "France",
+      },
     };
-    demandeCrO.update(9, "390989580", dico, (resultat) => {
+    demandeCrO.update(9, "687994368", dico, (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -86,7 +96,7 @@ describe("Model Tests", () => {
     });
   });
   test("delete demandeCrO", (done) => {
-    // id_can 400 volontairement pour éviter de supprimer une demande à chaque appel
+    // id_can 400 et siren 939393931 saisi incorret volontairement pour éviter de supprimer une demande à chaque appel
     demandeCrO.delete(400, "939393931", (resultat) => {
       try {
         if (resultat === null) done();

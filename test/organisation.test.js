@@ -78,7 +78,7 @@ describe("Model Tests", () => {
         ville: "Montrouge",
         pays: "France",
       },
-      statut: "en_cours",
+      statut: "inactive",
     };
     orga.update("941615692", dico, (resultat) => {
       try {

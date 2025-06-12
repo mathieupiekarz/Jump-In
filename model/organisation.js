@@ -50,7 +50,7 @@ const organisation = {
         "GE",
       ].includes(type) ||
       !statut ||
-      !["inactive", "en_cours", "active"].includes(statut)
+      !["inactive", "active"].includes(statut)
     ) {
       return callback(null);
     }
@@ -201,10 +201,7 @@ const organisation = {
         }
 
         // Construction dynamique de la requête
-        if (
-          "statut" in nv &&
-          !["inactive", "en_cours", "active"].includes(nv.statut)
-        )
+        if ("statut" in nv && !["inactive", "active"].includes(nv.statut))
           return callback(null);
 
         // mise à jour de la BDD
@@ -229,7 +226,7 @@ const organisation = {
           params.push(JSON.stringify(nv.siege_social));
         }
 
-        // vérification si statut est dans le bon format
+        // création de la requête finale
         const sql = `UPDATE Organisation SET ${updates.join(
           ", "
         )} WHERE siren = ?`;

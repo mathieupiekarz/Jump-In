@@ -141,38 +141,139 @@ const dco = {
         if (err) throw err;
         if (results.length === 0) return callback(null);
 
-        // vérification si dict est du bon format
-        const champsValides = ["descriptionCrO", "statutCrO"];
-        const keyslist = Object.keys(dictUpdate);
-        if (!keyslist.every((k) => champsValides.includes(k)))
-          return callback(null);
-        const nvdict = Object.fromEntries(
-          Object.entries(dictUpdate).filter(([_, valeur]) => valeur !== null)
-        );
+        // vérification si dictUpdate est du bon format
+        const champsValides = [
+          "descriptionCrO",
+          "statutCrO",
+          "nom",
+          "type",
+          "siege_social",
+        ];
+        const nv = Object.entries(dictUpdate)
+          .filter(([k, v]) => champsValides.includes(k) && v !== null)
+          .reduce((o, [k, v]) => {
+            o[k] = v;
+            return o;
+          }, {});
 
-        if (Object.keys(nvdict) !== 0) {
-          // vérification si tous les types sont bien des strings
-          const valueslist = Object.values(nvdict);
-          if (!valueslist.every((valeur) => typeof valeur === "string"))
-            return callback(null);
-
-          // vérification si le nouveau statut est bien compris entre 'validee', 'refusee' et 'en_attente'
-          if (
-            "statutCrO" in nvdict &&
-            !["validee", "refusee", "en_attente"].includes(nvdict.statutCrO)
-          )
-            return callback(null);
-
-          // mise à jour de la BDD
-          const champs = Object.keys(nvdict);
-          const values = Object.values(nvdict);
-          const clause = champs.map((k) => `${k} = ?`).join(", ");
-          const sql = `UPDATE DemandeCreationOrganisation SET ${clause} WHERE id_can = ? AND siren = ?`;
-          db.query(sql, [...values, id_can, siren], (err, results) => {
-            if (err) throw err;
-            callback(results.affectedRows);
-          });
+        // si rien à mettre à jour, on renvoie 0 lignes affectées
+        if (Object.keys(nv).length === 0) {
+          return callback(null, 0);
         }
+
+        // vérification si descriptionCrO est un string
+        if ("descriptionCrO" in nv && typeof nv.descriptionCrO !== "string")
+          return callback(null);
+
+        // vérification si statutCrO est dans le bon format
+        if (
+          "statutCrO" in nv &&
+          !["inactive", "en_attente", "active"].includes(nv.statutCrO)
+        )
+          return callback(null);
+
+        // vérification si nom est un string
+        if ("nom" in nv && typeof nv.nom !== "string") return callback(null);
+
+        // vérification si type est dans le bon format
+        if (
+          "type" in nv &&
+          ![
+            "association",
+            "EURL",
+            "SA",
+            "SAS",
+            "SASU",
+            "ONG",
+            "SARL",
+            "SNC",
+            "SCS",
+            "SCA",
+            "SCI",
+            "SCP",
+            "SCM",
+            "SCEA",
+            "SCCV",
+            "SCPa",
+            "EARL",
+            "GAEC",
+            "SCIC",
+            "SCOP",
+            "GIE",
+            "GEIE",
+            "GE",
+          ].includes(nv.type)
+        )
+          return callback(null);
+
+        // vérification si siege_social est dans le bon format
+        if ("siege_social" in nv) {
+          if (typeof nv.siege_social !== "object") {
+            return callback(null);
+          }
+          const champsSiege = [
+            "nom",
+            "adresse",
+            "complement",
+            "code_postal",
+            "ville",
+            "pays",
+          ];
+          const clefs = Object.keys(nv.siege_social);
+          // chaque clé doit être autorisée
+          if (!clefs.every((k) => champsSiege.includes(k))) {
+            return callback(null);
+          }
+          // types : nom, adresse, code_postal, ville, pays => string ; complement => string ou null
+          const vals = nv.siege_social;
+          if (
+            typeof vals.nom !== "string" ||
+            typeof vals.adresse !== "string" ||
+            !(
+              typeof vals.complement === "string" || vals.complement === null
+            ) ||
+            typeof vals.code_postal !== "string" ||
+            typeof vals.ville !== "string" ||
+            typeof vals.pays !== "string"
+          ) {
+            return callback(null);
+          }
+        }
+
+        // Construction dynamique de la requête
+        const updates = [];
+        const params = [];
+        if ("descriptionCrO" in nv) {
+          updates.push("descriptionCrO = ?");
+          params.push(nv.descriptionCrO);
+        }
+        if ("statutCrO" in nv) {
+          updates.push("statutCrO = ?");
+          params.push(nv.statutCrO);
+        }
+        if ("nom" in nv) {
+          updates.push("nom = ?");
+          params.push(nv.nom);
+        }
+        if ("type" in nv) {
+          updates.push("type = ?");
+          params.push(nv.type);
+        }
+        if ("siege_social" in nv) {
+          // fusionne l'existant et la partie modifiée
+          updates.push("siege_social = JSON_MERGE_PATCH(siege_social, ?)");
+          params.push(JSON.stringify(nv.siege_social));
+        }
+
+        // mise à jour de la BDD
+        const sql = `UPDATE DemandeCreationOrganisation SET ${updates.join(
+          ", "
+        )} WHERE siren = ?`;
+        db.query(sql, [...params, siren], (err, result) => {
+          if (err) throw err;
+          // affectedRows = nombre de lignes modifiées
+          callback(result.affectedRows);
+        });
       }
     );
   },
