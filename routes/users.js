@@ -520,14 +520,39 @@ router.post("/demande-creation-organisation", function (req, res, next) {
     return res.redirect("/users/login");
   }
 
-  const { siren, description } = req.body;
+  const { 
+    siren, 
+    description, 
+    nom, 
+    type,
+    siege_nom,
+    siege_adresse,
+    siege_complement,
+    siege_code_postal,
+    siege_ville,
+    siege_pays
+  } = req.body;
 
   // Vérifications basiques
-  if (!siren || !description || description.length < 10) {
-    req.session.errorMessage =
-      "Veuillez remplir tous les champs correctement (description minimum 10 caractères)";
+  if (!siren || !description || !nom || !type || !siege_nom || !siege_adresse || !siege_code_postal || !siege_ville || !siege_pays) {
+    req.session.errorMessage = "Veuillez remplir tous les champs obligatoires";
     return res.redirect("/users/Profile");
   }
+
+  if (description.length < 10) {
+    req.session.errorMessage = "La description doit contenir au moins 10 caractères";
+    return res.redirect("/users/Profile");
+  }
+
+  // Création de l'objet siège social
+  const siege_social = {
+    nom: siege_nom,
+    adresse: siege_adresse,
+    complement: siege_complement || null,
+    code_postal: siege_code_postal,
+    ville: siege_ville,
+    pays: siege_pays
+  };
 
   // Vérifier que le candidat existe
   candidat.readById(req.session.id_candidat, function (candidatResult) {
@@ -541,14 +566,15 @@ router.post("/demande-creation-organisation", function (req, res, next) {
       siren,
       description,
       "en_attente",
+      nom,
+      type,
+      siege_social,
       (result) => {
         if (!result) {
-          req.session.errorMessage =
-            "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation ou le SIREN existe déjà.";
+          req.session.errorMessage = "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation ou le SIREN existe déjà.";
           return res.redirect("/users/Profile");
         }
-        req.session.successMessage =
-          "Votre demande de création d'organisation a été envoyée avec succès !";
+        req.session.successMessage = "Votre demande de création d'organisation a été envoyée avec succès !";
         res.redirect("/users/Profile");
       }
     );

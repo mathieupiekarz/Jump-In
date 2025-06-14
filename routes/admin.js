@@ -185,57 +185,96 @@ router.post("/request/creation/:id_can/:siren/approve", function (req, res, next
   const id_can = parseInt(req.params.id_can);
   const siren = req.params.siren;
 
-  // 1. Mettre à jour le statut de la demande
-  demandeCreation.update(
-    id_can,
-    siren,
-    { statutCrO: "validee" },
-    (updateResult) => {
-      if (updateResult) {
-        // 2. Créer l'organisation si elle n'existe pas déjà
-        organisation.read(siren, (existingOrg) => {
-          if (existingOrg.length === 0) {
-            // L'organisation n'existe pas, on doit la créer avec des valeurs par défaut
-            const newOrg = {
-              siren: siren,
-              nom: "Nouvelle Organisation", // Valeur par défaut
-              type: "Entreprise", // Valeur par défaut
-              siege_social: JSON.stringify({
-                adresse: "À renseigner",
-                ville: "",
-                code_postal: "",
-              }),
-              statut: "active",
-            };
-
-            organisation.creat(
-              newOrg.siren,
-              newOrg.nom,
-              newOrg.type,
-              newOrg.siege_social,
-              newOrg.statut,
-              (createResult) => {
-                res.redirect("/admin/requests?tab=creation");
-              }
-            );
-          } else {
-            // L'organisation existe déjà, on met simplement son statut à active
-            organisation.update(
-              siren,
-              { statut: "active" },
-              (updateOrgResult) => {
-                res.redirect("/admin/requests?tab=creation");
-              }
-            );
-          }
-        });
-      } else {
-        res
-          .status(400)
-          .send("Échec de la mise à jour du statut de la demande");
-      }
+  // 1. Récupérer les informations de la demande
+  demandeCreation.read(id_can, siren, function (demandeResult) {
+    if (!demandeResult || demandeResult.length === 0) {
+      return res.status(404).send("Demande non trouvée");
     }
-  );
+
+    const demande = demandeResult[0];
+    console.log("Informations de la demande:", demande);
+
+    // Parser le JSON du siège social
+    let siege_social;
+    try {
+      siege_social = JSON.parse(demande.siege_social);
+    } catch (error) {
+      console.error("Erreur lors du parsing du siège social:", error);
+      return res.status(400).send("Format de siège social invalide");
+    }
+
+    // 2. Récupérer les informations du candidat
+    candidat.readById(id_can, function (candidatResult) {
+      if (!candidatResult || candidatResult.length === 0) {
+        return res.status(404).send("Candidat non trouvé");
+      }
+
+      const candidatInfo = candidatResult[0];
+      console.log("Informations du candidat:", candidatInfo);
+
+      // 3. Créer l'organisation
+      organisation.creat(
+        siren,
+        demande.nom,
+        demande.type,
+        siege_social,
+        "active",
+        function (orgResult) {
+          if (orgResult === null) {
+            console.log("Échec de la création de l'organisation");
+            return res.status(400).send("Erreur lors de la création de l'organisation");
+          }
+
+          console.log("Organisation créée avec succès:", orgResult);
+
+          // 4. Créer le compte recruteur
+          recruteur.creat(
+            siren,
+            candidatInfo.email,
+            candidatInfo.mdp,
+            candidatInfo.nom,
+            candidatInfo.prenom,
+            candidatInfo.numero_telephone,
+            "actif",
+            function (recruteurResult) {
+              if (!recruteurResult) {
+                console.log("Échec de la création du compte recruteur");
+                return res.status(400).send("Erreur lors de la création du compte recruteur");
+              }
+
+              console.log("Compte recruteur créé avec succès:", recruteurResult);
+
+              // 5. Mettre à jour le statut de la demande
+              demandeCreation.update(
+                id_can,
+                siren,
+                { statutCrO: "validee" },
+                function (updateResult) {
+                  if (!updateResult) {
+                    console.log("Échec de la mise à jour du statut de la demande");
+                    return res.status(400).send("Erreur lors de la mise à jour du statut de la demande");
+                  }
+
+                  console.log("Statut de la demande mis à jour:", updateResult);
+
+                  // 6. Supprimer le compte candidat
+                  candidat.delete(id_can, function (deleteResult) {
+                    if (!deleteResult) {
+                      console.log("Échec de la suppression du compte candidat");
+                      return res.status(400).send("Erreur lors de la suppression du compte candidat");
+                    }
+
+                    console.log("Compte candidat supprimé avec succès:", deleteResult);
+                    return res.redirect("/admin/requests?tab=creation");
+                  });
+                }
+              );
+            }
+          );
+        }
+      );
+    });
+  });
 });
 
 // Route pour rejeter une demande de création

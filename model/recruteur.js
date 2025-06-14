@@ -91,22 +91,37 @@ const recruteur = {
     db.query(sql_siren, [siren], (err, result) => {
       if (err) throw err;
       if (result.length === 0) {
-        return callback(result);
+        console.log("Organisation non trouvée avec le SIREN:", siren);
+        return callback(null);
       }
 
       // vérification si un recruteur existant a déjà le même email
       recruteur.read(email, (result) => {
         if (result && result.length > 0) {
+          console.log("Un recruteur avec cet email existe déjà:", email);
           return callback(null);
         } else {
           let sql =
             "INSERT INTO Recruteur (siren, email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
           const dateC = new Date().toISOString().split("T")[0];
+          console.log("Tentative de création du recruteur avec les données:", {
+            siren,
+            email,
+            nom,
+            prenom,
+            num,
+            dateC,
+            statut
+          });
           db.query(
             sql,
             [siren, email, mdp, nom, prenom, num, dateC, statut],
             (err, results) => {
-              if (err) throw err;
+              if (err) {
+                console.error("Erreur MySQL lors de la création du recruteur:", err);
+                throw err;
+              }
+              console.log("Recruteur créé avec succès, ID:", results.insertId);
               callback(results.insertId);
             }
           );
