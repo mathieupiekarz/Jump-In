@@ -1,9 +1,17 @@
 var db = require("./db.js");
 
 const pjd = {
-  read: (chemin, callback) => {
-    let sql = "SELECT * FROM Piece_Jointe_Durable WHERE chemin = ?";
-    db.query(sql, [chemin], (err, results) => {
+  read: (nom, callback) => {
+    let sql = "SELECT * FROM Piece_Jointe_Durable WHERE nom = ?";
+    db.query(sql, [nom], (err, results) => {
+      if (err) throw err;
+      if (results.length === 0) return callback(null);
+      callback(results);
+    });
+  },
+  readById: (id_can, callback) => {
+    let sql = "SELECT * FROM Piece_Jointe_Durable WHERE id_can = ?";
+    db.query(sql, [nom], (err, results) => {
       if (err) throw err;
       if (results.length === 0) return callback(null);
       callback(results);
@@ -16,11 +24,8 @@ const pjd = {
       callback(results);
     });
   },
-  creat: (chemin, nom, type, id_can, callback) => {
-    // vérification non null et types cohérents
+  creat: (nom, type, id_can, callback) => {
     if (
-      !chemin ||
-      typeof chemin !== "string" ||
       !nom ||
       typeof nom !== "string" ||
       !type ||
@@ -31,31 +36,36 @@ const pjd = {
       return callback(null);
     }
 
-    // vérification si une piece jointe durable existante a déjà le même chemin
-    pjd.read(chemin, (result) => {
+    pjd.read(nom, (result) => {
       if (result && result.length > 0) return callback(null);
-      else {
-        // vérification si le candidat existe bien dans la table Candidat
-        let sql_can = "SELECT * FROM Candidat WHERE id_can = ?";
-        db.query(sql_can, [id_can], (err, results) => {
-          if (err) throw err;
-          if (results.length === 0) return callback(null);
-          let sql =
-            "INSERT INTO Piece_Jointe_Durable (chemin, nom, type, id_can) VALUES (?, ?, ?, ?)";
-          db.query(sql, [chemin, nom, type, id_can], (err, results) => {
-            if (err) throw err;
-            callback(results.insertId);
-          });
+
+      const sql_can = "SELECT * FROM Candidat WHERE id_can = ?";
+      db.query(sql_can, [id_can], (err, results) => {
+        if (err) {
+          console.error("Erreur SQL vérification candidat :", err);
+          return callback(null);
+        }
+
+        if (results.length === 0) return callback(null);
+
+        const sql =
+          "INSERT INTO Piece_Jointe_Durable (nom, type, id_can) VALUES (?, ?, ?)";
+        db.query(sql, [nom, type, id_can], (err, results) => {
+          if (err) {
+            console.error("Erreur SQL insertion PJ :", err);
+            return callback(null);
+          }
+          callback(results);
         });
-      }
+      });
     });
   },
   // prend en argument un dictionnaire qui contient tous les arguments de piece_jointe_durable en clé
-  update: (chemin, dictUpdate, callback) => {
+  update: (nom, dictUpdate, callback) => {
     // vérification si la piece jointe durable existe
     db.query(
-      "SELECT * FROM Piece_Jointe_Durable WHERE chemin = ?",
-      [chemin],
+      "SELECT * FROM Piece_Jointe_Durable WHERE nom = ?",
+      [nom],
       (err, results) => {
         if (err) throw err;
         if (results.length === 0) return callback(null);
@@ -86,8 +96,8 @@ const pjd = {
           const champs = Object.keys(nvdict);
           const values = Object.values(nvdict);
           const clause = champs.map((k) => `${k} = ?`).join(", ");
-          const sql = `UPDATE Piece_Jointe_Durable SET ${clause} WHERE chemin = ?`;
-          db.query(sql, [...values, chemin], (err, results) => {
+          const sql = `UPDATE Piece_Jointe_Durable SET ${clause} WHERE nom = ?`;
+          db.query(sql, [...values, nom], (err, results) => {
             if (err) throw err;
             callback(results.affectedRows);
           });
@@ -95,18 +105,18 @@ const pjd = {
       }
     );
   },
-  delete: (chemin, callback) => {
+  delete: (nom, callback) => {
     // vérification si la piece jointe durable existe
     db.query(
-      "SELECT * FROM Piece_Jointe_Durable WHERE chemin = ?",
-      [chemin],
+      "SELECT * FROM Piece_Jointe_Durable WHERE nom = ?",
+      [nom],
       (err, results) => {
         if (err) throw err;
         if (results.length == 0) return callback(null);
 
         // suppression
-        let sql = "DELETE FROM Piece_Jointe_Durable WHERE chemin = ?";
-        db.query(sql, [chemin], (err, results) => {
+        let sql = "DELETE FROM Piece_Jointe_Durable WHERE nom = ?";
+        db.query(sql, [nom], (err, results) => {
           if (err) throw err;
           callback(results.affectedRows);
         });

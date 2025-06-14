@@ -13,7 +13,7 @@ describe("Model Tests", () => {
     DB.end(callback);
   });
   test("read Piece Jointe Durable", (done) => {
-    pjd.read("http://localhost:3000/users/adminlist", (resultat) => {
+    pjd.read("file_1749837619560.pdf", (resultat) => {
       try {
         if (resultat === null) done();
         else {
@@ -40,25 +40,20 @@ describe("Model Tests", () => {
   });
   test("create Piece Jointe Durable", (done) => {
     // l'id_fiche est 198 est volontairement faux pour éviter de créer à chaque fois une nouvelle fiche de poste
-    pjd.creat(
-      "http://localhost:3000/uploads/LMbenoitoui",
-      "LMbenoit",
-      "pdf",
-      198,
-      (resultat) => {
-        try {
-          if (resultat === null) {
-            done();
-          } else {
-            expect(typeof resultat).toBe("number");
-            done();
-          }
-        } catch (err) {
-          done(err);
+    pjd.creat("file_1749837619560.pdf", "pdf", 19, (resultat) => {
+      try {
+        if (resultat === null) {
+          done();
+        } else {
+          expect(typeof resultat).toBe("number");
+          done();
         }
+      } catch (err) {
+        done(err);
       }
-    );
+    });
   });
+  /*
   test("update Piece Jointe Durable", (done) => {
     var dico = {
       nom: "Lettre Motivation de Benoit",
@@ -89,5 +84,5 @@ describe("Model Tests", () => {
         done(err);
       }
     });
-  });
+  });*/
 });

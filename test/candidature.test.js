@@ -55,8 +55,9 @@ describe("Model Tests", () => {
   test("readCandidaturesWithOffreDetails candidature", (done) => {
     candidature.readCandidaturesWithOffreDetails(9, (resultat) => {
       try {
-        if (resultat.length === 0) done();
+        if (resultat === null) done();
         else {
+          console.log(resultat[0].type_metier);
           expect(resultat[0].type_metier).toBe("chimie des acides");
           done();
         }

@@ -1,138 +1,383 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= offre.intitule || "Poste à pourvoir" %></title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= offre.intitule || "Poste à pourvoir" %></title>
 
-  <link rel="stylesheet" href="/stylesheets/style.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
 
-  <style>
-    @media screen and (max-width: 730px) {
+    <style>
+      @media screen and (max-width: 730px) {
+        .search-bar {
+          display: block;
+          max-width: 100%;
+          margin-bottom: 20px;
+        }
 
-    .search-bar {
-        display: block;
-        max-width: 100%;
-        margin-bottom: 20px;
-    }
-
-    .job-header2 h2 {
-        font-size: 15px;
-    }
-    
-    }
-</style>
-
-</head>
-<body>
-  <header class="header">
-    <div>
-      <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80" />
-    </div>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/users/ListeOffres">Les offres</a></li>
-        <li><a href="/users/MesOffres">Mes candidatures</a></li>
-        <li><a href="/users/Profile" class="btn-connexion">Mon Profil</a></li>
-      </ul>
-      <div class="burger" onclick="toggleMenu()">
-        <div></div>
-        <div></div>
-        <div></div>
+        .job-header2 h2 {
+          font-size: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div>
+        <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80" />
       </div>
-    </nav>
-  </header>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/users/ListeOffres">Les offres</a></li>
+          <li><a href="/users/MesOffres">Mes candidatures</a></li>
+          <li><a href="/users/Profile" class="btn-connexion">Mon Profil</a></li>
+        </ul>
+        <div class="burger" onclick="toggleMenu()">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </nav>
+    </header>
 
-  <div class="container">
-    <div class="job-list">
-      <div class="search-bar">
-        <input type="text" placeholder="Le job de vos rêves..." />
-        <button class="filter-btn">Filtrer</button>
-        <button class="search-btn">Rechercher</button>
-      </div>
+    <div class="container">
+      <div class="job-list">
+        <div class="search-bar">
+          <input type="text" placeholder="Le job de vos rêves..." />
+          <button class="filter-btn">Filtrer</button>
+          <button class="search-btn">Rechercher</button>
+        </div>
 
-      <div class="job">
-        <div class="job-header2">
+        <div class="job">
           <div class="job-header2">
-            <img src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png" alt="<%= offre.organisation_nom %>">
-            <div>
-            <h2><%= offre.intitule || "Poste à pourvoir" %></h2>
-            <p><%= offre.organisation_nom %></p>
+            <div class="job-header2">
+              <img
+                src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
+                alt="<%= offre.organisation_nom %>"
+              />
+              <div>
+                <h2><%= offre.intitule || "Poste à pourvoir" %></h2>
+                <p><%= offre.organisation_nom %></p>
+              </div>
+            </div>
+            <button
+              class="btn openModalBtn"
+              data-offre-id="<%= offre.numero %>"
+              data-indication="<%= offre.indication %>"
+              data-nb-pieces="<%= offre.nb_pieces_demandees %>"
+            >
+              Postuler
+            </button>
+          </div>
+        </div>
+
+        <div class="job">
+          <div class="job-content">
+            <h4>Caractéristiques :</h4>
+            <div class="caracteristiques">
+              <p class="smallbox">
+                <strong>Type de poste :</strong> <%= offre.statut_de_poste %>
+              </p>
+              <p class="smallbox">
+                <strong>Début :</strong> <%= new
+                Date(offre.date_validite).toLocaleDateString() %>
+              </p>
+              <p class="smallbox">
+                <strong>Localisation :</strong> <%= offre.lieu_mission.ville %>
+              </p>
+              <p class="smallbox"><strong>État :</strong> <%= offre.etat %></p>
+              <p class="smallbox">
+                <strong>Pièces demandées :</strong> <%=
+                offre.nb_pieces_demandees %>
+              </p>
             </div>
           </div>
-          <button class="btn" id="openModalBtn">Postuler</button>
-        </div>
-      </div>
-
-      <div class="job">
-        <div class="job-content">
-          <h4>Caractéristiques :</h4>
-          <div class="caracteristiques">
-            <p class="smallbox"><strong>Type de poste :</strong> <%= offre.statut_de_poste %></p>
-            <p class="smallbox"><strong>Début :</strong> <%= new Date(offre.date_validite).toLocaleDateString() %></p>
-            <p class="smallbox"><strong>Localisation :</strong> <%= offre.lieu_mission.ville %></p>
-            <p class="smallbox"><strong>État :</strong> <%= offre.etat %></p>
-            <p class="smallbox"><strong>Pièces demandées :</strong> <%= offre.nb_pieces_demandees %></p>
+          <div class="job-content">
+            <h4>Détails du poste :</h4>
+            <p><%= offre.description %></p>
           </div>
         </div>
-        <div class="job-content">
-          <h4>Détails du poste :</h4>
-          <p><%= offre.description %></p>
-        </div>
       </div>
     </div>
-  </div>
 
-  <!-- MODAL FORMULAIRE POUR POSTULER -->
-  <div id="modalOverlay" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-      <div class="job-header2">
-        <h3><b>Jump'In to the job !</b></h3>
-        <img src="/images/JumpIn_IMG.png" alt="Logo" class="img2" />
-        <button id="closeModalBtn" class="close-btn">&times;</button>
+    <!-- MODAL FORMULAIRE POUR POSTULER -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-content-offre">
+        <div class="job-header2">
+          <div class="job-header2">
+            <h3><b>Jump'In to the job !</b></h3>
+            <img src="/images/JumpIn_IMG.png" alt="Logo" class="img2" />
+          </div>
+          <button id="closeModalBtn" class="close-btn">&times;</button>
+        </div>
+        <form
+          method="post"
+          action="/users/postuler"
+          enctype="multipart/form-data"
+        >
+          <input type="hidden" name="numero_offre" id="hiddenOffreId" />
+          <input type="hidden" name="id_candidat" id="hiddenCandidatId" />
+
+          <div class="form-group">
+            <label>Adresse e-mail</label>
+            <input type="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label>Numéro de téléphone</label>
+            <input type="tel" name="telephone" required />
+          </div>
+          <div id="indicationZone"></div>
+          <div style="display: flex; gap: 20px; align-items: flex-start">
+            <div id="piecesZone" style="flex: 1"></div>
+            <div
+              id="piecesSauvegardees"
+              style="flex: 1; border-left: 1px solid #ccc; padding-left: 10px"
+            >
+              <strong>Mes documents sauvegardés :</strong>
+              <br /><br />
+              <div id="listePiecesSauvegardees"></div>
+            </div>
+          </div>
+          <button id="envoyerBtn" type="submit" disabled>Jump'In !</button>
+        </form>
       </div>
-      <form>
-        <div class="form-group">
-          <label>Adresse e-mail</label>
-          <input type="email" placeholder="ex : pierre.fromont@gmail.com" />
-        </div>
-        <div class="form-group">
-          <label>Numéro de téléphone</label>
-          <input type="tel" placeholder="ex : +33 6 38 35 86 50" />
-        </div>
-        <div class="form-group">
-          <label>Mon CV</label>
-          <input type="file" />
-        </div>
-        <div class="form-group">
-          <label>Ma Lettre de motivation</label>
-          <input type="file" />
-        </div>
-        <button class="btn">Jump'In !</button>
-      </form>
     </div>
-  </div>
+  </body>
 
   <script>
     function toggleMenu() {
       document.querySelector(".nav-links").classList.toggle("active");
     }
 
-    document.getElementById("openModalBtn").addEventListener("click", function () {
-      document.getElementById("modalOverlay").style.display = "flex";
+    const modal = document.getElementById("modalOverlay");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const offreIdInput = document.getElementById("hiddenOffreId");
+    const indicationZone = document.getElementById("indicationZone");
+    const piecesZone = document.getElementById("piecesZone");
+    const envoyerBtn = document.getElementById("envoyerBtn");
+
+    // chargement des pièces jointes déjà sauvegardées
+    const fileList = document.getElementById("listePiecesSauvegardees");
+    window.addEventListener("DOMContentLoaded", () => {
+      fileList.innerHTML = "";
     });
 
-    document.getElementById("closeModalBtn").addEventListener("click", function () {
-      document.getElementById("modalOverlay").style.display = "none";
+    function checkIfEnvoiPossible(nbPiecesMax) {
+      const filledInputs = Array.from(
+        piecesZone.querySelectorAll('input[type="file"]')
+      ).filter((input) => input.files.length > 0).length;
+
+      const checkedBoxes = document.querySelectorAll(
+        '#listePiecesSauvegardees input[type="checkbox"]:checked'
+      ).length;
+
+      envoyerBtn.disabled = filledInputs + checkedBoxes !== nbPiecesMax;
+    }
+
+    async function loadPiecesJointes(nbPiecesMax) {
+      const response = await fetch("/users/pieces-jointes");
+      const pieces = await response.json();
+
+      fileList.innerHTML = "";
+
+      const em = document.createElement("em");
+      if (pieces.length === 0) {
+        em.textContent = "Aucune pièce jointe associée.";
+        fileList.appendChild(em);
+      } else {
+        pieces.forEach((pj) => {
+          const div = document.createElement("div");
+          div.style.display = "flex";
+          div.style.alignItems = "center";
+          div.style.gap = "10px";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = "pieceSauvegardee";
+          checkbox.value = pj.nom;
+
+          const label = document.createElement("label");
+          label.innerHTML = `<span style="font-size: 0.75em;"><i class="bi bi-download" style="color: #007bff; margin-right: 5px; font-size: 0.75em;"></i>${pj.nom}</span>`;
+
+          checkbox.addEventListener("change", () => {
+            const fileInputs = Array.from(
+              piecesZone.querySelectorAll('input[type="file"]')
+            );
+
+            if (checkbox.checked) {
+              // supprimer dynamiquement si input vide
+              const emptyInputDiv = fileInputs
+                .find((input) => input.files.length === 0)
+                ?.closest(".drop-zone")?.parentElement;
+              if (emptyInputDiv) {
+                emptyInputDiv.remove();
+              }
+            } else {
+              // rajouter un input si le totbal est < nbPiècesDemandées
+              const total =
+                piecesZone.querySelectorAll('input[type="file"]').length +
+                document.querySelectorAll(
+                  '#listePiecesSauvegardees input[type="checkbox"]:checked'
+                ).length;
+              if (total < nbPiecesMax) {
+                const group = document.createElement("div");
+                const k =
+                  piecesZone.querySelectorAll('input[type="file"]').length;
+                const dropId = `dropZone${k}`;
+                const inputId = `fileInput${k}`;
+                const messageId = `messageBox${k}`;
+
+                group.innerHTML = `
+                  <label>Document ${k + 1}</label>
+                  <div id="${dropId}" class="drop-zone">
+                    <p id="${messageId}">
+                      Déposez un fichier ici ou <strong>cliquez</strong>
+                    </p>
+                    <input type="file" id="${inputId}" name="file${k}" style="display: none;" />
+                  </div>
+                `;
+                piecesZone.appendChild(group);
+
+                // Recréation des liens entre les listeners comme dans openModalBtn
+                const dropZone = document.getElementById(dropId);
+                const fileInput = document.getElementById(inputId);
+                const messageBox = document.getElementById(messageId);
+
+                dropZone.addEventListener("click", () => {
+                  fileInput.click();
+                });
+
+                dropZone.addEventListener("dragover", (e) => {
+                  e.preventDefault();
+                  dropZone.classList.add("hover");
+                });
+
+                dropZone.addEventListener("dragleave", () => {
+                  dropZone.classList.remove("hover");
+                });
+
+                dropZone.addEventListener("drop", (e) => {
+                  e.preventDefault();
+                  dropZone.classList.remove("hover");
+
+                  if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    const event = new Event("change", { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                  }
+                });
+
+                fileInput.addEventListener("change", () => {
+                  if (fileInput.files.length > 0) {
+                    const fileName = fileInput.files[0].name;
+                    messageBox.innerHTML = `<div class="vert"><i class="bi bi-check-circle-fill" style="color: green;"></i> ${fileName} chargé correctement.</div>`;
+                  } else {
+                    messageBox.innerHTML = `Déposez un fichier ici ou <strong>cliquez</strong>`;
+                  }
+                  checkIfEnvoiPossible(nbPiecesMax);
+                });
+              }
+            }
+            checkIfEnvoiPossible(nbPiecesMax);
+          });
+          div.appendChild(checkbox);
+          div.appendChild(label);
+          fileList.appendChild(div);
+        });
+      }
+    }
+
+    document.querySelectorAll(".openModalBtn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const offreId = this.dataset.offreId;
+        offreIdInput.value = offreId; // Injecter l'ID dans le formulaire
+
+        const indication = this.dataset.indication;
+        indicationZone.innerHTML = "";
+        const indicationGroup = document.createElement("div");
+        indicationGroup.className = "form-group-offre";
+        indicationGroup.innerHTML = `
+                <label>Indications</label>
+                ${indication}
+            `;
+        indicationZone.appendChild(indicationGroup);
+
+        const nbPieces = parseInt(this.dataset.nbPieces, 10);
+        loadPiecesJointes(nbPieces);
+
+        piecesZone.innerHTML = "";
+        for (let k = 0; k < nbPieces; k++) {
+          const group = document.createElement("div");
+          const dropId = `dropZone${k}`;
+          const inputId = `fileInput${k}`;
+          const messageId = `messageBox${k}`;
+
+          group.innerHTML = `
+            <label>Document ${k + 1}</label>
+            <div id="${dropId}" class="drop-zone">
+              <p id="${messageId}">
+                Déposez un fichier ici ou <strong>cliquez</strong>
+              </p>
+              <input type="file" id="${inputId}" name="file${k}" style="display: none;" />
+            </div>
+            `;
+          piecesZone.appendChild(group);
+          const dropZone = document.getElementById(dropId);
+          const fileInput = document.getElementById(inputId);
+          const messageBox = document.getElementById(messageId);
+
+          dropZone.addEventListener("click", () => {
+            fileInput.click();
+          });
+
+          dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("hover");
+          });
+
+          dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("hover");
+          });
+
+          dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("hover");
+
+            if (e.dataTransfer.files.length > 0) {
+              fileInput.files = e.dataTransfer.files;
+              const event = new Event("change", { bubbles: true });
+              fileInput.dispatchEvent(event);
+            }
+          });
+
+          fileInput.addEventListener("change", () => {
+            if (fileInput.files.length > 0) {
+              const fileName = fileInput.files[0].name;
+              messageBox.innerHTML = `<div class="vert"><i class="bi bi-check-circle-fill" style="color: green;"></i> ${fileName} chargé correctement.</div>`;
+            } else {
+              messageBox.innerHTML = `Déposez un fichier ici ou <strong>cliquez</strong>`;
+            }
+            checkIfEnvoiPossible(nbPieces);
+          });
+        }
+        modal.style.display = "flex";
+      });
     });
 
-    document.getElementById("modalOverlay").addEventListener("click", function (event) {
-      if (event.target === this) {
-        this.style.display = "none";
+    closeModalBtn.addEventListener("click", function () {
+      modal.style.display = "none";
+      envoyerBtn.disabled = true;
+    });
+
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
       }
     });
   </script>
-</body>
 </html>

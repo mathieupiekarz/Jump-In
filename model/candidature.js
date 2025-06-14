@@ -98,7 +98,7 @@ const candidature = {
                 [id_can, num_OE, date_candidature],
                 (err, results) => {
                   if (err) throw err;
-                  callback(results.insertId);
+                  callback(results);
                 }
               );
             });
@@ -133,7 +133,7 @@ const candidature = {
       WHERE c.num_OE = ?
       ORDER BY c.date_candidature DESC
     `;
-    
+
     db.query(sql, [num_OE], (err, results) => {
       if (err) {
         console.error("Erreur lors de la récupération des candidatures:", err);

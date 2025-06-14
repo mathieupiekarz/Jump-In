@@ -85,26 +85,37 @@ vulnérabilités 3 --> injection SQL/Cross-Site Scripting/mdp hachage/Contrôle 
 téléchargement json document
 
 
-RECRUTEUR --> téléchargement des documents
-CANDIDAT --> chargement de pièces jointes 
+RECRUTEUR --> téléchargement des documents 
+
+faire en sorte que sur tel le drag s'enlève dans les offres  
+modification/supression candidature 
+vérifier les update des modeles de pieces jointes
+dans précision sur une offre, il faut tout afficher
 
 
 MATHEO : 
 bouton deconnection 
 demande création
-donner droits admin à candidat et recruteur
 mail pour demande validée
 
 
 RESTE :
 
 gestion actif/inactif 
-vérification format code postal
-afficher uniquement les offres auxquelles je ne postule pas pour un candidat  
+vérification format code postal 
 rajouter "autre" dans type entreprise
 ne pas repostuler à des candidatures déjà postulée
 lorsqu'on créé une nouvelle organisation, vérifier que le siren n'existe pas déjà pour un autre organisation
+gestion des dates
 
-page erreur/accueil
+quand changement de statut demande, pas suppression dans la base mais devient refusee
+quand je vais sur mes candidatures, je ne dois pas pouvoir postuler
+
+
+
+pb de connexion avec mathéo quand la session n'existe pas encore
+refaire test sur pieces jointes
+
+page erreur/accueil - gestion ERREUR
 Admin peut modifier les caractéristiques des recruteurs et  
-message saisie erreur 
+

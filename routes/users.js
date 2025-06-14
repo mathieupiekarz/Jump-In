@@ -2,6 +2,8 @@ var express = require("express");
 var router = express.Router();
 var db = require("../model/db.js");
 var session = require("../session.js");
+var upload = require("../multer.js");
+var path = require("path");
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -220,7 +222,7 @@ router.get("/Profile", function (req, res, next) {
 });
 
 router.get("/ListeOffres", function (req, res, next) {
-  offre.readAllWithFicheAndOrganisation((result) => {
+  offre.readSansPostulee(req.session.id_candidat, (result) => {
     res.render("ListeOffres", {
       title: "Liste des Offres d'Emploi",
       offres: result,
@@ -272,22 +274,129 @@ router.get("/offre/:id", function (req, res, next) {
   });
 });
 
-router.post("/postuler", function (req, res, next) {
-  if (!req.session.id_candidat) {
-    return res.status(403).send("Accès interdit. Veuillez vous connecter.");
+router.post("/postuler", upload.any(), async (req, res) => {
+  /*
+  console.log(req.body.email);
+  console.log(req.body.telephone);
+  console.log(req.body.numero_offre);
+  console.log(req.session.id_candidat);
+
+  const pc = req.body.pieceSauvegardee;
+  if (Array.isArray(pc)) {
+    console.log(pc);
+  } else if (pc) {
+    console.log(pc);
+  } else {
+    console.log("aucune piece trouvée");
   }
 
-  const id_candidat = req.session.id_candidat;
-  const numero_offre = parseInt(req.body.numero_offre, 10);
-
-  candidature.creat(id_candidat, numero_offre, (result) => {
-    if (result === null) {
-      return res.send(
-        "Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre."
+  if (req.files && req.files.length > 0) {
+    console.log("fichiers uploadés :");
+    req.files.forEach((file, i) => {
+      console.log(
+        `nom original : ${file.orginalname}, nom de sauvegarde : ${file.filename}`
       );
-    } else {
-      res.redirect("/users/ListeOffres");
+    });
+  } else {
+    console.log("auncun fichier uploads");
+  }
+  res.send("données reçues");
+  */
+  try {
+    if (!req.session.id_candidat) {
+      return res.status(403).send("Accès interdit. Veuillez vous connecter.");
     }
+    const id_candidat = req.session.id_candidat;
+    const numero_offre = parseInt(req.body.numero_offre, 10);
+
+    // création candidature
+    const result = await new Promise((resolve) => {
+      candidature.creat(id_candidat, numero_offre, resolve);
+    });
+
+    if (!result) {
+      return res.send(
+        "Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre"
+      );
+    }
+
+    // enregistrement des pièces sauvegardées
+    const pieces = req.body.pieceSauvegardee;
+    const piecesArray = Array.isArray(pieces) ? pieces : pieces ? [pieces] : [];
+
+    for (const piece of piecesArray) {
+      await new Promise((resolve, reject) => {
+        pjt.creat(
+          piece,
+          piece.split(".").pop(),
+          id_candidat,
+          numero_offre,
+          (r) =>
+            r ? resolve() : reject("Erreur enregistrement pièce sauvegardée")
+        );
+      });
+    }
+
+    // enregistrement des fichiers uploadés
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        await new Promise((resolve, reject) => {
+          pjt.creat(
+            file.filename,
+            file.filename.split(".").pop(),
+            id_candidat,
+            numero_offre,
+            (r) =>
+              r ? resolve() : reject("Erreur enregistrement fichier uploadé")
+          );
+        });
+      }
+    }
+
+    return res.redirect("/users/ListeOffres");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Une erreur est survenue lors du traitement.");
+  }
+});
+
+router.post("/upload", upload.single("file"), (req, res) => {
+  // test erreur
+  if (!req.file) {
+    return res.status(400).json({ message: "Aucun fichier reçu" });
+  }
+  pjd.creat(
+    req.file.filename,
+    path.extname(req.file.originalname).toLowerCase().slice(1),
+    req.session.id_candidat,
+    (resultat) => {
+      if (!resultat) {
+        return res.status(400).json({
+          success: false,
+          message: "Échec de l'enregistrement du document.",
+        });
+      }
+      res.json({
+        success: true,
+        message: "Fichier reçu",
+        filename: req.file.filename,
+      });
+    }
+  );
+});
+
+router.get("/pieces-jointes", (req, res, next) => {
+  const id_can = req.session.id_candidat;
+  if (!id_can) {
+    return res.status(401).json({ message: "Non autorisé" });
+  }
+  const sql = "SELECT nom FROM Piece_Jointe_Durable WHERE id_can = ?";
+  db.query(sql, [id_can], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Erreur Serveur" });
+    }
+    res.json(results);
   });
 });
 

@@ -54,6 +54,41 @@ const offre = {
       else callback(results);
     });
   },
+
+  readSansPostulee: (id_can, callback) => {
+    let sql = `SELECT tab.numero, tab.etat, tab.date_validite, tab.indication, tab.nb_pieces_demandees,
+        tab.id_fiche, tab.intitule, tab.statut_de_poste, tab.responsable_hierarchique,
+        tab.type_metier, tab.lieu_mission, tab.rythme, tab.fourchette_salaire, tab.description,
+        org.nom AS organisation_nom, org.siren, org.type, org.siege_social FROM (SELECT 
+      o.*, 
+      f.intitule, 
+      f.statut_de_poste, 
+      f.responsable_hierarchique, 
+      f.type_metier, 
+      f.lieu_mission, 
+      f.rythme, 
+      f.fourchette_salaire, 
+      f.description, 
+      f.siren
+    FROM Offre_Emploi o
+    JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM Candidature c
+      WHERE c.num_OE = o.numero
+        AND c.id_can = 19
+    )) AS tab JOIN Organisation org ON tab.siren = org.siren`;
+    db.query(sql, [id_can], (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la récupération des candidatures:", err);
+        callback([]);
+      } else {
+        if (results.length === 0) return callback(null);
+        else callback(results);
+      }
+    });
+  },
+
   // Récupère toutes les offres d'emploi d'une organisation spécifique
   readAllByOrganisation: (siren, callback) => {
     const sql = `
