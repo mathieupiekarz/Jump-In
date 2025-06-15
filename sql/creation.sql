@@ -93,10 +93,11 @@ FOREIGN KEY (num_OE) REFERENCES Offre_Emploi(numero) ON DELETE CASCADE
 );
 
 CREATE TABLE Piece_Jointe_Temporaire (
-  nom      VARCHAR(255)       PRIMARY KEY,
-  type     ENUM('pdf','jpeg','png','xlsx','docx') NOT NULL,
   id_can   INT                 NOT NULL,
   num_OE   INT                 NOT NULL,
+  nom      VARCHAR(255)        NOT NULL,
+  type     ENUM('pdf','jpeg','png','xlsx','docx') NOT NULL,
+  PRIMARY KEY (id_can, num_OE, nom),
   FOREIGN KEY (id_can, num_OE)
     REFERENCES Candidature(id_can, num_OE)
     ON DELETE CASCADE
