@@ -84,13 +84,13 @@ filtres et barre de recherche
 vulnérabilités 3 --> injection SQL/Cross-Site Scripting/mdp hachage/Contrôle d'accès
 téléchargement json document
 
-
 RECRUTEUR --> téléchargement des documents 
 
 faire en sorte que sur tel le drag s'enlève dans les offres  
-modification/supression candidature 
+modification/supression candidature
 vérifier les update des modeles de pieces jointes
 dans précision sur une offre, il faut tout afficher
+supprimer des documents
 
 
 MATHEO : 
@@ -110,6 +110,7 @@ gestion des dates
 
 quand changement de statut demande, pas suppression dans la base mais devient refusee
 quand je vais sur mes candidatures, je ne dois pas pouvoir postuler
+pagination
 
 
 

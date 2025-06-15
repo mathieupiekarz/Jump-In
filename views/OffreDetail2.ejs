@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= offre.intitule || "Poste à pourvoir" %></title>
+
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+
+    <style>
+      @media screen and (max-width: 730px) {
+        .search-bar {
+          display: block;
+          max-width: 100%;
+          margin-bottom: 20px;
+        }
+
+        .job-header2 h2 {
+          font-size: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div>
+        <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80" />
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/users/ListeOffres">Les offres</a></li>
+          <li><a href="/users/MesOffres">Mes candidatures</a></li>
+          <li><a href="/users/Profile" class="btn-connexion">Mon Profil</a></li>
+        </ul>
+        <div class="burger" onclick="toggleMenu()">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container">
+      <div class="job-list">
+        <div class="search-bar">
+          <input type="text" placeholder="Le job de vos rêves..." />
+          <button class="filter-btn">Filtrer</button>
+          <button class="search-btn">Rechercher</button>
+        </div>
+
+        <div class="job">
+          <div class="job-header2">
+            <div class="job-header2">
+              <img
+                src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
+                alt="<%= offre.organisation_nom %>"
+              />
+              <div>
+                <h2><%= offre.intitule || "Poste à pourvoir" %></h2>
+                <p><%= offre.organisation_nom %></p>
+              </div>
+              <div class="actions-buttons">
+                <a
+                  class="action-btn edit-btn openModalBtn"
+                  data-offre-id="<%= offre.numero %>"
+                  data-indication="<%= offre.indication || '' %>"
+                  data-pieces='<%- JSON.stringify(pjts).replace(/'/g, "&#39;") %>'
+                >
+                  <i class="bi bi-pencil-fill"></i> Modifier
+                </a>
+                <button
+                  class="action-btn delete-btn"
+                  onclick="openDeleteConfirmModal('offre', '<%= offre.numero %>', '<%= offre.intitule %>')"
+                >
+                  <i class="bi bi-trash-fill"></i> Supprimer
+                </button>
+                <form
+                  id="delete-form-<%= offre.numero %>"
+                  action="/recruteur/<%= offre.siren %>/offre/<%= offre.numero %>/supprimer"
+                  method="POST"
+                  style="display: none"
+                ></form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="job">
+          <div class="job-content">
+            <h4>Caractéristiques :</h4>
+            <div class="caracteristiques">
+              <p class="smallbox">
+                <strong>Type de poste :</strong> <%= offre.statut_de_poste %>
+              </p>
+              <p class="smallbox">
+                <strong>Début :</strong> <%= new
+                Date(offre.date_validite).toLocaleDateString() %>
+              </p>
+              <p class="smallbox">
+                <strong>Localisation :</strong> <%= offre.lieu_mission.ville %>
+              </p>
+              <p class="smallbox"><strong>État :</strong> <%= offre.etat %></p>
+              <p class="smallbox">
+                <strong>Pièces demandées :</strong> <%=
+                offre.nb_pieces_demandees %>
+              </p>
+            </div>
+          </div>
+          <div class="job-content">
+            <h4>Détails du poste :</h4>
+            <p><%= offre.description %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- Modal de modification de candidature -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-content-offre">
+        <div class="job-header2">
+          <div class="job-header2">
+            <h2 class="modal-title">Modifier la candidature</h2>
+            <img src="/images/JumpIn_IMG.png" alt="Logo" class="img2" />
+          </div>
+          <button id="closeModalBtn" class="close-btn">&times;</button>
+        </div>
+        <form
+          id="editForm"
+          method="post"
+          action="/users/modifier-candidature"
+          enctype="multipart/form-data"
+        >
+          <input type="hidden" name="numero_offre" id="hiddenOffreId" />
+          <input type="hidden" name="id_candidat" id="hiddenCandidatId" />
+          <!-- on stocke ici les anciens noms sélectionnés -->
+          <input type="hidden" name="originalFiles" id="originalFiles" value="[]" />
+
+          <div id="indicationZone"></div>
+          <div style="display: flex; gap: 20px; align-items: flex-start">
+            <div
+              id="piecesSauvegardees"
+              style="flex: 1; padding-left: 10px"
+            >
+              <strong>Mes documents enregistrés :</strong>
+              <br /><br />
+              <div id="listePiecesSauvegardees"></div>
+            </div>
+          </div>
+          <button id="envoyerBtn" type="submit" disabled>Jump'In !</button>
+        </form>
+      </div>
+    </div>
+
+  <script>
+    function toggleMenu() {
+      document.querySelector(".nav-links").classList.toggle("active");
+    }
+
+    // modal
+    const modal = document.getElementById("modalOverlay");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const offreIdInput = document.getElementById("hiddenOffreId");
+    const candidatIdInput = document.getElementById("hiddenCandidatId");
+    const indicationZone = document.getElementById("indicationZone");
+
+    // fichiers déjà chargés
+    const fileList = document.getElementById("listePiecesSauvegardees");
+
+    const originalFilesInput = document.getElementById("originalFiles");
+    const envoyerBtn = document.getElementById("envoyerBtn");
+
+    // on récupère les pièces côté serveur
+    const pjts = JSON.parse(`<%- JSON.stringify(pjts).replace(/'/g, "\\'") %>`);
+
+    // liste dynamique des anciens noms cochés
+    let originalFiles = [];
+
+    // ouvre la modale
+    document.querySelectorAll(".openModalBtn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        offreIdInput.value = btn.dataset.offreId;
+        candidatIdInput.value = btn.dataset.idCandidat || "";
+        indicationZone.innerHTML = btn.dataset.indication || "";
+        loadPiecesJointes(pjts);
+        envoyerBtn.disabled = true;
+        modal.style.display = "flex";
+      });
+    });
+
+    // ferme la modale
+    closeModalBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+      envoyerBtn.disabled = true;
+      originalFiles = [];
+    });
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        envoyerBtn.disabled = true;
+        originalFiles = [];
+      }
+    });
+
+    // construit la liste des pièces avec checkbox + drop-zone
+    function loadPiecesJointes(pieces) {
+      fileList.innerHTML = "";
+      pieces.forEach((pj, index) => {
+        const div = document.createElement("div");
+        div.classList.add("piece-item");
+
+        // checkbox ancien nom
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `checkPiece${index}`;
+        checkbox.value = pj.nom;
+
+        // label
+        const label = document.createElement("label");
+        label.htmlFor = checkbox.id;
+        label.innerHTML = `<span><i class="bi bi-download" style="color:#007bff"></i> ${pj.nom}</span>`;
+
+        // drop-zone cachée
+        const dropZoneWrapper = document.createElement("div");
+        dropZoneWrapper.style.display = "none";
+        dropZoneWrapper.innerHTML = `
+          <div id="dropModif${index}" class="drop-zone">
+            <p id="messageModif${index}">Déposez un fichier ici ou <strong>cliquez</strong></p>
+            <input type="file" name="modifFile${index}" id="inputModif${index}" style="display:none;" />
+          </div>
+        `;
+
+        // sur changement de la checkbox
+        checkbox.addEventListener("change", () => {
+          // gestion drop-zone
+          dropZoneWrapper.style.display = checkbox.checked ? "block" : "none";
+
+          // mise à jour liste originalFiles
+          if (checkbox.checked) {
+            originalFiles.push(pj.nom);
+          } else {
+            originalFiles = originalFiles.filter(n => n !== pj.nom);
+          }
+          originalFilesInput.value = JSON.stringify(originalFiles);
+          updateEnvoyerState();
+        });
+
+        // gestion drag&drop + click
+        const dz = dropZoneWrapper.querySelector(".drop-zone");
+        const inp = dropZoneWrapper.querySelector("input[type=file]");
+        const msg = dropZoneWrapper.querySelector("p");
+        dz.addEventListener("click", () => inp.click());
+        dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("hover"); });
+        dz.addEventListener("dragleave", () => dz.classList.remove("hover"));
+        dz.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dz.classList.remove("hover");
+          if (e.dataTransfer.files.length > 0) {
+            inp.files = e.dataTransfer.files;
+            msg.innerHTML = `<i class="bi bi-check-circle-fill" style="color:green"></i> ${inp.files[0].name} chargé.`;
+            updateEnvoyerState();
+          }
+        });
+        inp.addEventListener("change", () => {
+          if (inp.files.length > 0) {
+            msg.innerHTML = `<i class="bi bi-check-circle-fill" style="color:green"></i> ${inp.files[0].name} chargé.`;
+          } else {
+            msg.innerHTML = `Déposez un fichier ici ou <strong>cliquez</strong>`;
+          }
+          updateEnvoyerState();
+        });
+
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        div.appendChild(dropZoneWrapper);
+        fileList.appendChild(div);
+      });
+    }
+
+    // envoie les données seulement si chaque case cochée a un fichier
+    function updateEnvoyerState() {
+      const items = Array.from(fileList.querySelectorAll(".piece-item"));
+      const ready = items.every(div => {
+        const cb = div.querySelector("input[type=checkbox]");
+        if (!cb.checked) return true;
+        const fi = div.querySelector("input[type=file]");
+        return fi.files.length > 0;
+      });
+      envoyerBtn.disabled = !ready;
+    }
+  </script>
+</body>
+</html>

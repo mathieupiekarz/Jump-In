@@ -4,6 +4,7 @@ var db = require("../model/db.js");
 var session = require("../session.js");
 var upload = require("../multer.js");
 var path = require("path");
+var fs = require("fs");
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -259,10 +260,10 @@ router.post("/inscription", function (req, res, next) {
   });
 });
 
-router.get("/offre/:id", function (req, res, next) {
-  const id = req.params.id;
+router.get("/offre/:id", function (req, res) {
+  const numero = req.params.id;
 
-  offre.readWithFicheAndOrganisation(id, function (result) {
+  offre.readWithFicheAndOrganisation(numero, function (result) {
     if (!result || result.length === 0) {
       return res.status(404).send("Offre non trouvée.");
     }
@@ -270,6 +271,26 @@ router.get("/offre/:id", function (req, res, next) {
     res.render("OffreDetail", {
       title: "Détail de l'offre",
       offre: result[0],
+    });
+  });
+});
+
+router.get("/offre2/:id", function (req, res, next) {
+  const numero = req.params.id;
+  offre.readWithFicheAndOrganisation(numero, function (result1) {
+    if (!result1 || result1.length === 0) {
+      return res.status(404).send("Offre non trouvée.");
+    }
+    pjt.readByCandidature(req.session.id_candidat, numero, (result2) => {
+      if (!result2 || result2.length === 0) {
+        return res.status(404).send("Offre non trouvée.");
+      }
+
+      res.render("OffreDetail2", {
+        title: "Détail de l'offre",
+        offre: result1[0],
+        pjts: result2,
+      });
     });
   });
 });
@@ -360,6 +381,50 @@ router.post("/postuler", upload.any(), async (req, res) => {
   }
 });
 
+router.post("/modifier-candidature", upload.any(), function (req, res, next) {
+  const numero_offre = req.body.numero_offre;
+  const originalName = JSON.parse(req.body.originalFiles);
+  const files = req.files || [];
+
+  if (files.length === 0) {
+    return res.redirect(`/offre2/${numero_offre}`);
+  }
+
+  let completed = 0;
+  let errorSent = false;
+
+  files.forEach((file, index) => {
+    // on récupère le chemin de l'ancien fichier
+    const oldFilePath = path.join(__dirname, "../uploads", originalName[index]);
+
+    // supprime l’ancien fichier
+    fs.unlink(oldFilePath, (err) => {
+      if (err && err.code !== "ENOENT") {
+        console.error("Erreur suppr. ancien fichier:", err);
+      }
+
+      // on récupère le chemin du nouveau fichier
+      const newType = path.extname(file.filename).slice(1);
+
+      // mise à jour en base (callback à adapter si pjt.update utilise callbacks)
+      pjt.update(
+        originalName[index],
+        { nom: file.filename, type: newType },
+        (affectedRows) => {
+          if (!affectedRows) {
+            errorSent = true;
+            return res.status(500).send("Erreur de mise à jour en base.");
+          }
+          completed++;
+          if (completed === files.length) {
+            res.redirect(`/users/offre2/${numero_offre}`);
+          }
+        }
+      );
+    });
+  });
+});
+
 router.post("/upload", upload.single("file"), (req, res) => {
   // test erreur
   if (!req.file) {
@@ -393,7 +458,22 @@ router.get("/pieces-jointes", (req, res, next) => {
   const sql = "SELECT nom FROM Piece_Jointe_Durable WHERE id_can = ?";
   db.query(sql, [id_can], (err, results) => {
     if (err) {
-      console.error(err);
+      return res.status(500).json({ message: "Erreur Serveur" });
+    }
+    res.json(results);
+  });
+});
+
+router.get("/pj-temporaire", (req, res) => {
+  const id_can = req.session.id_candidat;
+  const numero = req.params.id;
+  if (!id_can) {
+    return res.status(401).json({ message: "Non autorisé" });
+  }
+  const sql =
+    "SELECT * FROM Piece_Jointe_Temporaire WHERE id_can = ? AND num_OE = ?";
+  db.query(sql, [id_can, numero], (err, results) => {
+    if (err) {
       return res.status(500).json({ message: "Erreur Serveur" });
     }
     res.json(results);
@@ -520,27 +600,38 @@ router.post("/demande-creation-organisation", function (req, res, next) {
     return res.redirect("/users/login");
   }
 
-  const { 
-    siren, 
-    description, 
-    nom, 
+  const {
+    siren,
+    description,
+    nom,
     type,
     siege_nom,
     siege_adresse,
     siege_complement,
     siege_code_postal,
     siege_ville,
-    siege_pays
+    siege_pays,
   } = req.body;
 
   // Vérifications basiques
-  if (!siren || !description || !nom || !type || !siege_nom || !siege_adresse || !siege_code_postal || !siege_ville || !siege_pays) {
+  if (
+    !siren ||
+    !description ||
+    !nom ||
+    !type ||
+    !siege_nom ||
+    !siege_adresse ||
+    !siege_code_postal ||
+    !siege_ville ||
+    !siege_pays
+  ) {
     req.session.errorMessage = "Veuillez remplir tous les champs obligatoires";
     return res.redirect("/users/Profile");
   }
 
   if (description.length < 10) {
-    req.session.errorMessage = "La description doit contenir au moins 10 caractères";
+    req.session.errorMessage =
+      "La description doit contenir au moins 10 caractères";
     return res.redirect("/users/Profile");
   }
 
@@ -551,7 +642,7 @@ router.post("/demande-creation-organisation", function (req, res, next) {
     complement: siege_complement || null,
     code_postal: siege_code_postal,
     ville: siege_ville,
-    pays: siege_pays
+    pays: siege_pays,
   };
 
   // Vérifier que le candidat existe
@@ -571,10 +662,12 @@ router.post("/demande-creation-organisation", function (req, res, next) {
       siege_social,
       (result) => {
         if (!result) {
-          req.session.errorMessage = "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation ou le SIREN existe déjà.";
+          req.session.errorMessage =
+            "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation ou le SIREN existe déjà.";
           return res.redirect("/users/Profile");
         }
-        req.session.successMessage = "Votre demande de création d'organisation a été envoyée avec succès !";
+        req.session.successMessage =
+          "Votre demande de création d'organisation a été envoyée avec succès !";
         res.redirect("/users/Profile");
       }
     );

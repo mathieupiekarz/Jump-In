@@ -105,7 +105,35 @@ const offre = {
     db.query(sql, [siren], (err, results) => {
       if (err) {
         console.error(
-          "Erreur lors de la récupération des offres de l'organisation:",
+          "Erreur lors de la récupération des offres de l'organisation.",
+          err
+        );
+        callback([]);
+      } else {
+        for (const offre of results) {
+          offre.lieu_mission = JSON.parse(offre.lieu_mission);
+        }
+        if (results.length === 0) return callback(null);
+        else callback(results);
+      }
+    });
+  },
+  readAllByOrganisationValide: (siren, callback) => {
+    const sql = `SELECT 
+      o.numero, o.etat, o.date_validite, o.indication, o.nb_pieces_demandees,
+      f.id_fiche, f.intitule, f.statut_de_poste, f.responsable_hierarchique,
+      f.type_metier, f.lieu_mission, f.rythme, f.fourchette_salaire, f.description,
+      org.nom AS organisation_nom, org.siren, org.type, org.siege_social
+      FROM Offre_Emploi o
+      JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
+      JOIN Organisation org ON f.siren = org.siren
+      WHERE org.siren = ?
+        AND o.date_validite >= CURDATE();
+    `;
+    db.query(sql, [siren], (err, results) => {
+      if (err) {
+        console.error(
+          "Erreur lors de la récupération des offres de l'organisation.",
           err
         );
         callback([]);

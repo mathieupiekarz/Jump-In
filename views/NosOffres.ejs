@@ -1,879 +1,1199 @@
 <!DOCTYPE html>
 <html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %> - Jump'In</title>
 
     <link rel="stylesheet" href="/stylesheets/style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
 
     <style>
-        @media screen and (max-width: 730px) {
-            .sidebar {
-                display: none;
-                width: 280px;
-                background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            }
+      @media screen and (max-width: 730px) {
+        .sidebar {
+          display: none;
+          width: 280px;
+          background: white;
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-            .search-bar {
-                display: block;
-                max-width: 100%;
-                margin-bottom: 20px;
-            }
+        .search-bar {
+          display: block;
+          max-width: 100%;
+          margin-bottom: 20px;
+        }
 
-            .job-header h2 {
-                font-size: 15px;
-            }
+        .job-header h2 {
+          font-size: 15px;
         }
-        
-        /* Styles pour les modals */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #4a90e2;
-            padding-bottom: 10px;
-        }
-        
-        .modal-title {
-            margin: 0;
-            font-size: 22px;
-        }
-        
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #333;
-        }
-        
-        /* Styles pour le formulaire de création de fiche de poste */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .form-group input, 
-        .form-group select, 
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        .form-group textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-        
-        .form-row {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .form-row .form-group {
-            flex: 1;
-        }
-        
-        .form-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 30px;
-        }
-        
-        .adresse-section {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 10px;
-            border: 1px solid #eee;
-        }
-        
-        .adresse-section h4 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        
-        /* Style pour le modal de confirmation */
-        .confirm-modal {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        
-        .confirm-modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .confirm-modal-title {
-            margin-top: 0;
-            color: #333;
-        }
-        
-        .confirm-modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .confirm-cancel-btn {
-            background-color: #f0f0f0;
-            color: #333;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .confirm-delete-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+      }
+
+      /* Styles pour les modals */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #4a90e2;
+        padding-bottom: 10px;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: #333;
+      }
+
+      /* Styles pour le formulaire de création de fiche de poste */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      .form-group textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+      }
+
+      .form-row .form-group {
+        flex: 1;
+      }
+
+      .form-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .adresse-section {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 10px;
+        border: 1px solid #eee;
+      }
+
+      .adresse-section h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      /* Style pour le modal de confirmation */
+      .confirm-modal {
+        display: none;
+        position: fixed;
+        z-index: 1001;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .confirm-modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .confirm-modal-title {
+        margin-top: 0;
+        color: #333;
+      }
+
+      .confirm-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .confirm-cancel-btn {
+        background-color: #f0f0f0;
+        color: #333;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .confirm-delete-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
     </style>
+  </head>
 
-</head>
-
-<body>
+  <body>
     <header class="header">
-        <div>
-            <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80">
-        </div>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="#">Tableau de bord</a></li>
-                <li><a href="/recruteur/<%= organisation.siren %>/NosOffres" class="active">Nos offres</a></li>
-                <li><a href="/recruteur/mon-compte" class="btn-connexion">Mon Compte</a></li>
-            </ul>
+      <div>
+        <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80" />
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#">Tableau de bord</a></li>
+          <li>
+            <a
+              href="/recruteur/<%= organisation.siren %>/NosOffres"
+              class="active"
+              >Nos offres</a
+            >
+          </li>
+          <li>
+            <a href="/recruteur/mon-compte" class="btn-connexion">Mon Compte</a>
+          </li>
+        </ul>
 
-            <div class="burger" onclick="toggleMenu()">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-        </nav>
+        <div class="burger" onclick="toggleMenu()">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </nav>
     </header>
 
     <script>
-        function toggleMenu() {
-            document.querySelector(".nav-links").classList.toggle("active");
+      function toggleMenu() {
+        document.querySelector(".nav-links").classList.toggle("active");
+      }
+
+      function confirmDelete(offreId) {
+        if (confirm("Êtes-vous sûr de vouloir supprimer cette offre ?")) {
+          document.getElementById("delete-form-" + offreId).submit();
         }
-        
-        function confirmDelete(offreId) {
-            if (confirm("Êtes-vous sûr de vouloir supprimer cette offre ?")) {
-                document.getElementById('delete-form-' + offreId).submit();
-            }
+      }
+
+      function confirmDeleteFiche(ficheId) {
+        if (
+          confirm(
+            "Êtes-vous sûr de vouloir supprimer cette fiche de poste ? Cette action supprimera également toutes les offres associées à cette fiche."
+          )
+        ) {
+          document.getElementById("delete-fiche-form-" + ficheId).submit();
         }
-        
-        function confirmDeleteFiche(ficheId) {
-            if (confirm("Êtes-vous sûr de vouloir supprimer cette fiche de poste ? Cette action supprimera également toutes les offres associées à cette fiche.")) {
-                document.getElementById('delete-fiche-form-' + ficheId).submit();
-            }
-        }
+      }
     </script>
 
     <div class="container">
-        <main class="job-list">
-            <div class="org-banner">
-                <img src="/images/<%= organisation.nom.toLowerCase() %>-logo.png" alt="<%= organisation.nom %>" class="org-logo" onerror="this.src='/images/default-logo.png'">
-                <div class="org-info">
-                    <h2><%= organisation.nom %></h2>
-                    <p>SIREN: <%= organisation.siren %> • Type: <%= organisation.type %></p>
-                </div>
-                <a class="create-offer-btn" onclick="openModal('createOfferModal')">
-                    <i class="bi bi-plus-circle"></i> Créer une offre
-                </a>
-                <a class="create-fiche-btn" onclick="openModal('createFicheModal')">
-                    <i class="bi bi-plus-circle"></i> Créer une fiche de poste
-                </a>
-            </div>
-            
-            <div class="tabs">
-                <button class="tab active" onclick="showTab('offres')">Offres d'emploi (<%= offres.length %>)</button>
-                <button class="tab" onclick="showTab('fiches')">Fiches de poste (<%= fichesPoste.length %>)</button>
-            </div>
-            
-            <div id="offres" class="tab-content active">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher parmi nos offres...">
-                    <button class="filter-btn">Filtrer</button>
-                    <button class="search-btn">Rechercher</button>
-                </div>
+      <main class="job-list">
+        <div class="org-banner">
+          <img
+            src="/images/<%= organisation.nom.toLowerCase() %>-logo.png"
+            alt="<%= organisation.nom %>"
+            class="org-logo"
+            onerror="this.src='/images/default-logo.png'"
+          />
+          <div class="org-info">
+            <h2><%= organisation.nom %></h2>
+            <p>
+              SIREN: <%= organisation.siren %> • Type: <%= organisation.type %>
+            </p>
+          </div>
+          <a class="create-offer-btn" onclick="openModal('createOfferModal')">
+            <i class="bi bi-plus-circle"></i> Créer une offre
+          </a>
+          <a class="create-fiche-btn" onclick="openModal('createFicheModal')">
+            <i class="bi bi-plus-circle"></i> Créer une fiche de poste
+          </a>
+        </div>
 
-                <% if (offres.length === 0) { %>
-                    <div class="no-candidatures">
-                        <h3>Vous n'avez pas encore publié d'offres</h3>
-                        <p>Créez votre première offre d'emploi pour commencer à recevoir des candidatures.</p>
-                        <button class="btn">Créer une offre</button>
-                    </div>
-                <% } else { %>
-                    <% offres.forEach((offre) => { %>
-                        <div class="job">
-                            <div class="job-header2">
-                                <div class="job-header2">
-                                    <img src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png" alt="<%= offre.organisation_nom %>" onerror="this.src='/images/default-logo.png'">
-                                    <div>
-                                        <h2><%= offre.intitule %></h2>
-                                        <p>État: <%= offre.etat %> • Validité: <%= new Date(offre.date_validite).toLocaleDateString() %></p>
-                                    </div>
-                                </div>
-                                <div class="actions-buttons">
-                                    <a href="/recruteur/<%= organisation.siren %>/offre/<%= offre.numero %>/candidats" class="action-btn view-btn">
-                                        <i class="bi bi-people-fill"></i> Candidats
-                                    </a>
-                                    <a class="action-btn edit-btn" onclick="openEditOffreModal('<%= offre.numero %>', '<%= offre.intitule %>')">
-                                        <i class="bi bi-pencil-fill"></i> Modifier
-                                    </a>
-                                    <button class="action-btn delete-btn" onclick="openDeleteConfirmModal('offre', '<%= offre.numero %>', '<%= offre.intitule %>')">
-                                        <i class="bi bi-trash-fill"></i> Supprimer
-                                    </button>
-                                    <form id="delete-form-<%= offre.numero %>" action="/recruteur/<%= organisation.siren %>/offre/<%= offre.numero %>/supprimer" method="POST" style="display: none;"></form>
-                                </div>
-                            </div>
-                            <div class="job-context">
-                                <p><%= offre.description %></p>
-                            </div>
+        <div class="tabs">
+          <button class="tab active" onclick="showTab('offres')">
+            Offres d'emploi (<%= offres.length %>)
+          </button>
+          <button class="tab" onclick="showTab('fiches')">
+            Fiches de poste (<%= fichesPoste.length %>)
+          </button>
+        </div>
 
-                            <div class="caracteristiques">
-                                <p class="smallbox"><strong>Lieu:</strong> <%= offre.lieu_mission.ville %></p>
-                                <p class="smallbox"><strong>Type:</strong> <%= offre.type_metier %></p>
-                                <p class="smallbox"><strong>Salaire:</strong> <%= offre.fourchette_salaire %></p>
-                                <p class="smallbox"><strong>Statut:</strong> <%= offre.statut_de_poste %></p>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } %>
-            </div>
-            
-            <div id="fiches" class="tab-content">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher parmi nos fiches de poste...">
-                    <button class="filter-btn">Filtrer</button>
-                    <button class="search-btn">Rechercher</button>
+        <div id="offres" class="tab-content active">
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher parmi nos offres..." />
+            <button class="filter-btn">Filtrer</button>
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (offres.length === 0) { %>
+          <div class="no-candidatures">
+            <h3>Vous n'avez pas encore publié d'offres</h3>
+            <p>
+              Créez votre première offre d'emploi pour commencer à recevoir des
+              candidatures.
+            </p>
+            <button class="btn">Créer une offre</button>
+          </div>
+          <% } else { %> <% offres.forEach((offre) => { %>
+          <div class="job">
+            <div class="job-header2">
+              <div class="job-header2">
+                <img
+                  src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
+                  alt="<%= offre.organisation_nom %>"
+                  onerror="this.src='/images/default-logo.png'"
+                />
+                <div>
+                  <h2><%= offre.intitule %></h2>
+                  <p>
+                    État: <%= offre.etat %> • Validité: <%= new
+                    Date(offre.date_validite).toLocaleDateString() %>
+                  </p>
                 </div>
-                
-                <% if (fichesPoste.length === 0) { %>
-                    <div class="no-candidatures">
-                        <h3>Vous n'avez pas encore de fiches de poste</h3>
-                        <p>Créez votre première fiche de poste pour pouvoir ensuite créer des offres d'emploi.</p>
-                        <a href="/recruteur/<%= organisation.siren %>/fiche/creer" class="btn">Créer une fiche de poste</a>
-                    </div>
-                <% } else { %>
-                    <% fichesPoste.forEach((fiche) => { %>
-                        <div class="fiche-poste">
-                            <div class="fiche-poste-header">
-                                <div class="fiche-poste-title">
-                                    <h3><%= fiche.intitule %></h3>
-                                    <p><small>ID: <%= fiche.id_fiche %></small></p>
-                                </div>
-                                <div class="actions-buttons">
-                                    <button class="action-btn view-btn" onclick="openCreateOffreFromFicheModal('<%= fiche.id_fiche %>', '<%= fiche.intitule %>')">
-                                        <i class="bi bi-plus-circle"></i> Créer une offre
-                                    </button>
-                                    <a class="action-btn edit-btn" onclick="openEditFicheModal('<%= fiche.id_fiche %>', '<%= fiche.intitule %>')">
-                                        <i class="bi bi-pencil-fill"></i> Modifier
-                                    </a>
-                                    <button class="action-btn delete-btn" onclick="openDeleteConfirmModal('fiche', '<%= fiche.id_fiche %>', '<%= fiche.intitule %>')">
-                                        <i class="bi bi-trash-fill"></i> Supprimer
-                                    </button>
-                                    <form id="delete-fiche-form-<%= fiche.id_fiche %>" action="/recruteur/<%= organisation.siren %>/fiche/<%= fiche.id_fiche %>/supprimer" method="POST" style="display: none;"></form>
-                                </div>
-                            </div>
-                            <div class="job-context">
-                                <p><%= fiche.description %></p>
-                            </div>
-                            <div class="fiche-details">
-                                <div class="fiche-detail-item">
-                                    <strong>Statut</strong>
-                                    <%= fiche.statut_de_poste %>
-                                </div>
-                                <div class="fiche-detail-item">
-                                    <strong>Responsable</strong>
-                                    <%= fiche.responsable_hierarchique %>
-                                </div>
-                                <div class="fiche-detail-item">
-                                    <strong>Type</strong>
-                                    <%= fiche.type_metier %>
-                                </div>
-                                <div class="fiche-detail-item">
-                                    <strong>Rythme</strong>
-                                    <%= fiche.rythme %>
-                                </div>
-                                <div class="fiche-detail-item">
-                                    <strong>Salaire</strong>
-                                    <%= fiche.fourchette_salaire %>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } %>
+              </div>
+              <div class="actions-buttons">
+                <a
+                  href="/recruteur/<%= organisation.siren %>/offre/<%= offre.numero %>/candidats"
+                  class="action-btn view-btn"
+                >
+                  <i class="bi bi-people-fill"></i> Candidats
+                </a>
+                <a
+                  class="action-btn edit-btn"
+                  onclick="openEditOffreModal('<%= offre.numero %>', '<%= offre.intitule %>')"
+                >
+                  <i class="bi bi-pencil-fill"></i> Modifier
+                </a>
+                <button
+                  class="action-btn delete-btn"
+                  onclick="openDeleteConfirmModal('offre', '<%= offre.numero %>', '<%= offre.intitule %>')"
+                >
+                  <i class="bi bi-trash-fill"></i> Supprimer
+                </button>
+                <form
+                  id="delete-form-<%= offre.numero %>"
+                  action="/recruteur/<%= organisation.siren %>/offre/<%= offre.numero %>/supprimer"
+                  method="POST"
+                  style="display: none"
+                ></form>
+              </div>
             </div>
-        </main>
+            <div class="job-context">
+              <p><%= offre.description %></p>
+            </div>
+
+            <div class="caracteristiques">
+              <p class="smallbox">
+                <strong>Lieu:</strong> <%= offre.lieu_mission.ville %>
+              </p>
+              <p class="smallbox">
+                <strong>Type:</strong> <%= offre.type_metier %>
+              </p>
+              <p class="smallbox">
+                <strong>Salaire:</strong> <%= offre.fourchette_salaire %>
+              </p>
+              <p class="smallbox">
+                <strong>Statut:</strong> <%= offre.statut_de_poste %>
+              </p>
+            </div>
+          </div>
+          <% }) %> <% } %>
+        </div>
+
+        <div id="fiches" class="tab-content">
+          <div class="search-bar">
+            <input
+              type="text"
+              placeholder="Rechercher parmi nos fiches de poste..."
+            />
+            <button class="filter-btn">Filtrer</button>
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (fichesPoste.length === 0) { %>
+          <div class="no-candidatures">
+            <h3>Vous n'avez pas encore de fiches de poste</h3>
+            <p>
+              Créez votre première fiche de poste pour pouvoir ensuite créer des
+              offres d'emploi.
+            </p>
+            <a
+              href="/recruteur/<%= organisation.siren %>/fiche/creer"
+              class="btn"
+              >Créer une fiche de poste</a
+            >
+          </div>
+          <% } else { %> <% fichesPoste.forEach((fiche) => { %>
+          <div class="fiche-poste">
+            <div class="fiche-poste-header">
+              <div class="fiche-poste-title">
+                <h3><%= fiche.intitule %></h3>
+                <p><small>ID: <%= fiche.id_fiche %></small></p>
+              </div>
+              <div class="actions-buttons">
+                <button
+                  class="action-btn view-btn"
+                  onclick="openCreateOffreFromFicheModal('<%= fiche.id_fiche %>', '<%= fiche.intitule %>')"
+                >
+                  <i class="bi bi-plus-circle"></i> Créer une offre
+                </button>
+                <a
+                  class="action-btn edit-btn"
+                  onclick="openEditFicheModal('<%= fiche.id_fiche %>', '<%= fiche.intitule %>')"
+                >
+                  <i class="bi bi-pencil-fill"></i> Modifier
+                </a>
+                <button
+                  class="action-btn delete-btn"
+                  onclick="openDeleteConfirmModal('fiche', '<%= fiche.id_fiche %>', '<%= fiche.intitule %>')"
+                >
+                  <i class="bi bi-trash-fill"></i> Supprimer
+                </button>
+                <form
+                  id="delete-fiche-form-<%= fiche.id_fiche %>"
+                  action="/recruteur/<%= organisation.siren %>/fiche/<%= fiche.id_fiche %>/supprimer"
+                  method="POST"
+                  style="display: none"
+                ></form>
+              </div>
+            </div>
+            <div class="job-context">
+              <p><%= fiche.description %></p>
+            </div>
+            <div class="fiche-details">
+              <div class="fiche-detail-item">
+                <strong>Statut</strong>
+                <%= fiche.statut_de_poste %>
+              </div>
+              <div class="fiche-detail-item">
+                <strong>Responsable</strong>
+                <%= fiche.responsable_hierarchique %>
+              </div>
+              <div class="fiche-detail-item">
+                <strong>Type</strong>
+                <%= fiche.type_metier %>
+              </div>
+              <div class="fiche-detail-item">
+                <strong>Rythme</strong>
+                <%= fiche.rythme %>
+              </div>
+              <div class="fiche-detail-item">
+                <strong>Salaire</strong>
+                <%= fiche.fourchette_salaire %>
+              </div>
+            </div>
+          </div>
+          <% }) %> <% } %>
+        </div>
+      </main>
     </div>
-    
+
     <script>
-        // Fonction pour afficher l'onglet sélectionné
-        function showTab(tabName) {
-            // Masquer tous les contenus d'onglets
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Désactiver tous les onglets
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Activer l'onglet sélectionné
-            document.getElementById(tabName).classList.add('active');
-            
-            // Trouver et activer le bouton d'onglet correspondant
-            const tabButtons = document.querySelectorAll('.tab');
-            tabButtons.forEach(button => {
-                if (button.textContent.includes(tabName === 'offres' ? 'Offres' : 'Fiches')) {
-                    button.classList.add('active');
-                }
-            });
-        }
-        
-        // Initialiser les onglets
-        document.addEventListener('DOMContentLoaded', function() {
-            // Afficher l'onglet des offres par défaut
-            showTab('offres');
-            
-            // Initialiser la date de validité par défaut (aujourd'hui + 30 jours)
-            const defaultDate = new Date();
-            defaultDate.setDate(defaultDate.getDate() + 30);
-            
-            const dateInputs = document.querySelectorAll('input[type="date"]');
-            dateInputs.forEach(input => {
-                input.valueAsDate = defaultDate;
-            });
+      // Fonction pour afficher l'onglet sélectionné
+      function showTab(tabName) {
+        // Masquer tous les contenus d'onglets
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((content) => {
+          content.classList.remove("active");
         });
-        
-        // Fonctions pour gérer les modals
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+
+        // Désactiver tous les onglets
+        const tabs = document.querySelectorAll(".tab");
+        tabs.forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Activer l'onglet sélectionné
+        document.getElementById(tabName).classList.add("active");
+
+        // Trouver et activer le bouton d'onglet correspondant
+        const tabButtons = document.querySelectorAll(".tab");
+        tabButtons.forEach((button) => {
+          if (
+            button.textContent.includes(
+              tabName === "offres" ? "Offres" : "Fiches"
+            )
+          ) {
+            button.classList.add("active");
+          }
+        });
+      }
+
+      // Initialiser les onglets
+      document.addEventListener("DOMContentLoaded", function () {
+        // Afficher l'onglet des offres par défaut
+        showTab("offres");
+
+        // Initialiser la date de validité par défaut (aujourd'hui + 30 jours)
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() + 30);
+
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        dateInputs.forEach((input) => {
+          input.valueAsDate = defaultDate;
+        });
+      });
+
+      // Fonctions pour gérer les modals
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = "block";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      // Fermer les modals quand on clique en dehors
+      window.onclick = function (event) {
+        const modals = document.querySelectorAll(".modal, .confirm-modal");
+        modals.forEach((modal) => {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      };
+
+      // Fonction pour ouvrir le modal de création d'offre à partir d'une fiche
+      function openCreateOffreFromFicheModal(ficheId, ficheTitle) {
+        document.getElementById("selected_fiche_id").value = ficheId;
+        document.getElementById("selectedFicheTitle").textContent = ficheTitle;
+        document.getElementById("createOffreFromFicheForm").action =
+          "/recruteur/<%= organisation.siren %>/fiche/" +
+          ficheId +
+          "/creer-offre";
+        openModal("createOffreFromFicheModal");
+      }
+
+      // Fonction pour ouvrir le modal de modification d'offre
+      function openEditOffreModal(offreId, offreTitle) {
+        document.getElementById("editOffreTitle").textContent = offreTitle;
+        document.getElementById("editOffreForm").action =
+          "/recruteur/<%= organisation.siren %>/offre/" + offreId + "/modifier";
+
+        // Charger les données de l'offre
+        fetch("/recruteur/<%= organisation.siren %>/offre/" + offreId + "/api")
+          .then((response) => response.json())
+          .then((offre) => {
+            document.getElementById("edit_etat").value = offre.etat;
+            document.getElementById("edit_date_validite").value =
+              offre.date_validite;
+            document.getElementById("edit_indication").value =
+              offre.indication || "";
+            document.getElementById("edit_nb_pieces_demandees").value =
+              offre.nb_pieces_demandees;
+          });
+
+        openModal("editOffreModal");
+      }
+
+      // Fonction pour ouvrir le modal de modification de fiche
+      function openEditFicheModal(ficheId, ficheTitle) {
+        document.getElementById("editFicheTitle").textContent = ficheTitle;
+        document.getElementById("editFicheForm").action =
+          "/recruteur/<%= organisation.siren %>/fiche/" + ficheId + "/modifier";
+
+        // Charger les données de la fiche
+        fetch("/recruteur/<%= organisation.siren %>/fiche/" + ficheId + "/api")
+          .then((response) => response.json())
+          .then((fiche) => {
+            document.getElementById("edit_intitule").value = fiche.intitule;
+            document.getElementById("edit_statut_de_poste").value =
+              fiche.statut_de_poste;
+            document.getElementById("edit_responsable_hierarchique").value =
+              fiche.responsable_hierarchique;
+            document.getElementById("edit_type_metier").value =
+              fiche.type_metier;
+            document.getElementById("edit_rythme").value = fiche.rythme;
+            document.getElementById("edit_fourchette_salaire").value =
+              fiche.fourchette_salaire;
+            document.getElementById("edit_description").value =
+              fiche.description;
+
+            // Remplir les champs du lieu de mission
+            const lieuMission = JSON.parse(fiche.lieu_mission);
+            document.getElementById("edit_lieu_nom").value = lieuMission.nom;
+            document.getElementById("edit_lieu_adresse").value =
+              lieuMission.adresse;
+            document.getElementById("edit_lieu_complement").value =
+              lieuMission.complement || "";
+            document.getElementById("edit_lieu_code_postal").value =
+              lieuMission.code_postal;
+            document.getElementById("edit_lieu_ville").value =
+              lieuMission.ville;
+            document.getElementById("edit_lieu_pays").value = lieuMission.pays;
+          });
+
+        openModal("editFicheModal");
+      }
+
+      // Fonction pour ouvrir le modal de confirmation de suppression
+      function openDeleteConfirmModal(type, id, title) {
+        let message = "";
+        let formId = "";
+
+        if (type === "offre") {
+          message = `Êtes-vous sûr de vouloir supprimer l'offre "${title}" ?`;
+          formId = "delete-form-" + id;
+        } else if (type === "fiche") {
+          message = `Êtes-vous sûr de vouloir supprimer la fiche de poste "${title}" ? Cette action supprimera également toutes les offres associées à cette fiche.`;
+          formId = "delete-fiche-form-" + id;
         }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        // Fermer les modals quand on clique en dehors
-        window.onclick = function(event) {
-            const modals = document.querySelectorAll('.modal, .confirm-modal');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-        
-        // Fonction pour ouvrir le modal de création d'offre à partir d'une fiche
-        function openCreateOffreFromFicheModal(ficheId, ficheTitle) {
-            document.getElementById('selected_fiche_id').value = ficheId;
-            document.getElementById('selectedFicheTitle').textContent = ficheTitle;
-            document.getElementById('createOffreFromFicheForm').action = '/recruteur/<%= organisation.siren %>/fiche/' + ficheId + '/creer-offre';
-            openModal('createOffreFromFicheModal');
-        }
-        
-        // Fonction pour ouvrir le modal de modification d'offre
-        function openEditOffreModal(offreId, offreTitle) {
-            document.getElementById('editOffreTitle').textContent = offreTitle;
-            document.getElementById('editOffreForm').action = '/recruteur/<%= organisation.siren %>/offre/' + offreId + '/modifier';
-            
-            // Charger les données de l'offre
-            fetch('/recruteur/<%= organisation.siren %>/offre/' + offreId + '/api')
-                .then(response => response.json())
-                .then(offre => {
-                    document.getElementById('edit_etat').value = offre.etat;
-                    document.getElementById('edit_date_validite').value = offre.date_validite;
-                    document.getElementById('edit_indication').value = offre.indication || '';
-                    document.getElementById('edit_nb_pieces_demandees').value = offre.nb_pieces_demandees;
-                });
-            
-            openModal('editOffreModal');
-        }
-        
-        // Fonction pour ouvrir le modal de modification de fiche
-        function openEditFicheModal(ficheId, ficheTitle) {
-            document.getElementById('editFicheTitle').textContent = ficheTitle;
-            document.getElementById('editFicheForm').action = '/recruteur/<%= organisation.siren %>/fiche/' + ficheId + '/modifier';
-            
-            // Charger les données de la fiche
-            fetch('/recruteur/<%= organisation.siren %>/fiche/' + ficheId + '/api')
-                .then(response => response.json())
-                .then(fiche => {
-                    document.getElementById('edit_intitule').value = fiche.intitule;
-                    document.getElementById('edit_statut_de_poste').value = fiche.statut_de_poste;
-                    document.getElementById('edit_responsable_hierarchique').value = fiche.responsable_hierarchique;
-                    document.getElementById('edit_type_metier').value = fiche.type_metier;
-                    document.getElementById('edit_rythme').value = fiche.rythme;
-                    document.getElementById('edit_fourchette_salaire').value = fiche.fourchette_salaire;
-                    document.getElementById('edit_description').value = fiche.description;
-                    
-                    // Remplir les champs du lieu de mission
-                    const lieuMission = JSON.parse(fiche.lieu_mission);
-                    document.getElementById('edit_lieu_nom').value = lieuMission.nom;
-                    document.getElementById('edit_lieu_adresse').value = lieuMission.adresse;
-                    document.getElementById('edit_lieu_complement').value = lieuMission.complement || '';
-                    document.getElementById('edit_lieu_code_postal').value = lieuMission.code_postal;
-                    document.getElementById('edit_lieu_ville').value = lieuMission.ville;
-                    document.getElementById('edit_lieu_pays').value = lieuMission.pays;
-                });
-            
-            openModal('editFicheModal');
-        }
-        
-        // Fonction pour ouvrir le modal de confirmation de suppression
-        function openDeleteConfirmModal(type, id, title) {
-            let message = '';
-            let formId = '';
-            
-            if (type === 'offre') {
-                message = `Êtes-vous sûr de vouloir supprimer l'offre "${title}" ?`;
-                formId = 'delete-form-' + id;
-            } else if (type === 'fiche') {
-                message = `Êtes-vous sûr de vouloir supprimer la fiche de poste "${title}" ? Cette action supprimera également toutes les offres associées à cette fiche.`;
-                formId = 'delete-fiche-form-' + id;
-            }
-            
-            document.getElementById('deleteConfirmMessage').textContent = message;
-            
-            // Configurer le bouton de confirmation
-            document.getElementById('confirmDeleteBtn').onclick = function() {
-                document.getElementById(formId).submit();
-            };
-            
-            openModal('deleteConfirmModal');
-        }
+
+        document.getElementById("deleteConfirmMessage").textContent = message;
+
+        // Configurer le bouton de confirmation
+        document.getElementById("confirmDeleteBtn").onclick = function () {
+          document.getElementById(formId).submit();
+        };
+
+        openModal("deleteConfirmModal");
+      }
     </script>
 
     <!-- Modal de création de fiche de poste -->
     <div id="createFicheModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Créer une nouvelle fiche de poste</h2>
-                <span class="close" onclick="closeModal('createFicheModal')">&times;</span>
-            </div>
-            <form action="/recruteur/<%= organisation.siren %>/fiche/creer" method="POST">
-                <div class="form-group">
-                    <label for="intitule">Intitulé du poste *</label>
-                    <input type="text" id="intitule" name="intitule" required>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="statut_de_poste">Statut du poste *</label>
-                        <select id="statut_de_poste" name="statut_de_poste" required>
-                            <option value="">Sélectionner un statut</option>
-                            <option value="CDI">CDI</option>
-                            <option value="CDD">CDD</option>
-                            <option value="Intérim">Intérim</option>
-                            <option value="Stage">Stage</option>
-                            <option value="Alternance">Alternance</option>
-                            <option value="Freelance">Freelance</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="type_metier">Type de métier *</label>
-                        <input type="text" id="type_metier" name="type_metier" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="responsable_hierarchique">Responsable hiérarchique *</label>
-                    <input type="text" id="responsable_hierarchique" name="responsable_hierarchique" required>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="rythme">Rythme de travail *</label>
-                        <input type="text" id="rythme" name="rythme" placeholder="Ex: Temps plein, 35h/semaine" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="fourchette_salaire">Fourchette de salaire *</label>
-                        <input type="text" id="fourchette_salaire" name="fourchette_salaire" placeholder="Ex: 35000€ - 45000€ brut annuel" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Lieu de mission *</label>
-                    <div class="adresse-section">
-                        <h4>Adresse</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lieu_nom">Nom du site</label>
-                                <input type="text" id="lieu_nom" name="lieu_mission[nom]" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="lieu_adresse">Adresse</label>
-                                <input type="text" id="lieu_adresse" name="lieu_mission[adresse]" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="lieu_complement">Complément d'adresse</label>
-                            <input type="text" id="lieu_complement" name="lieu_mission[complement]">
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lieu_code_postal">Code postal</label>
-                                <input type="text" id="lieu_code_postal" name="lieu_mission[code_postal]" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="lieu_ville">Ville</label>
-                                <input type="text" id="lieu_ville" name="lieu_mission[ville]" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="lieu_pays">Pays</label>
-                                <input type="text" id="lieu_pays" name="lieu_mission[pays]" value="France" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="description">Description du poste *</label>
-                    <textarea id="description" name="description" required></textarea>
-                </div>
-                
-                <input type="hidden" name="siren" value="<%= organisation.siren %>">
-                
-                <div class="form-buttons">
-                    <button type="button" class="action-btn cancel-btn" onclick="closeModal('createFicheModal')">Annuler</button>
-                    <button type="submit" class="action-btn save-btn">Créer la fiche de poste</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Créer une nouvelle fiche de poste</h2>
+          <span class="close" onclick="closeModal('createFicheModal')"
+            >&times;</span
+          >
         </div>
+        <form
+          action="/recruteur/<%= organisation.siren %>/fiche/creer"
+          method="POST"
+        >
+          <div class="form-group">
+            <label for="intitule">Intitulé du poste *</label>
+            <input type="text" id="intitule" name="intitule" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="statut_de_poste">Statut du poste *</label>
+              <select id="statut_de_poste" name="statut_de_poste" required>
+                <option value="">Sélectionner un statut</option>
+                <option value="CDI">CDI</option>
+                <option value="CDD">CDD</option>
+                <option value="Intérim">Intérim</option>
+                <option value="Stage">Stage</option>
+                <option value="Alternance">Alternance</option>
+                <option value="Freelance">Freelance</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="type_metier">Type de métier *</label>
+              <input type="text" id="type_metier" name="type_metier" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="responsable_hierarchique"
+              >Responsable hiérarchique *</label
+            >
+            <input
+              type="text"
+              id="responsable_hierarchique"
+              name="responsable_hierarchique"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rythme">Rythme de travail *</label>
+              <input
+                type="text"
+                id="rythme"
+                name="rythme"
+                placeholder="Ex: Temps plein, 35h/semaine"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="fourchette_salaire">Fourchette de salaire *</label>
+              <input
+                type="text"
+                id="fourchette_salaire"
+                name="fourchette_salaire"
+                placeholder="Ex: 35000€ - 45000€ brut annuel"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Lieu de mission *</label>
+            <div class="adresse-section">
+              <h4>Adresse</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="lieu_nom">Nom du site</label>
+                  <input
+                    type="text"
+                    id="lieu_nom"
+                    name="lieu_mission[nom]"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="lieu_adresse">Adresse</label>
+                  <input
+                    type="text"
+                    id="lieu_adresse"
+                    name="lieu_mission[adresse]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="lieu_complement">Complément d'adresse</label>
+                <input
+                  type="text"
+                  id="lieu_complement"
+                  name="lieu_mission[complement]"
+                />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="lieu_code_postal">Code postal</label>
+                  <input
+                    type="text"
+                    id="lieu_code_postal"
+                    name="lieu_mission[code_postal]"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="lieu_ville">Ville</label>
+                  <input
+                    type="text"
+                    id="lieu_ville"
+                    name="lieu_mission[ville]"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="lieu_pays">Pays</label>
+                  <input
+                    type="text"
+                    id="lieu_pays"
+                    name="lieu_mission[pays]"
+                    value="France"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description du poste *</label>
+            <textarea id="description" name="description" required></textarea>
+          </div>
+
+          <input type="hidden" name="siren" value="<%= organisation.siren %>" />
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="action-btn cancel-btn"
+              onclick="closeModal('createFicheModal')"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="action-btn save-btn">
+              Créer la fiche de poste
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal de création d'offre -->
     <div id="createOfferModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Créer une nouvelle offre d'emploi</h2>
-                <span class="close" onclick="closeModal('createOfferModal')">&times;</span>
-            </div>
-            <form action="/recruteur/<%= organisation.siren %>/offre/creer" method="POST">
-                <div class="form-group">
-                    <label for="fiche_id">Sélectionner une fiche de poste *</label>
-                    <select id="fiche_id" name="id_fiche" required>
-                        <option value="">Choisir une fiche de poste</option>
-                        <% fichesPoste.forEach(fiche => { %>
-                            <option value="<%= fiche.id_fiche %>"><%= fiche.intitule %></option>
-                        <% }) %>
-                    </select>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="etat">État de l'offre *</label>
-                        <select id="etat" name="etat" required>
-                            <option value="non_publiee">Non publiée</option>
-                            <option value="publiee">Publiée</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="date_validite">Date de validité *</label>
-                        <input type="date" id="date_validite" name="date_validite" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="indication">Indications <i>(liste des documents demandés séparés par des virgules)</i></label>
-                    <textarea id="indication" name="indication"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="nb_pieces_demandees">Nombre de pièces demandées *</label>
-                    <input type="number" id="nb_pieces_demandees" name="nb_pieces_demandees" min="0" value="0" required>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="action-btn cancel-btn" onclick="closeModal('createOfferModal')">Annuler</button>
-                    <button type="submit" class="action-btn save-btn">Créer l'offre</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Créer une nouvelle offre d'emploi</h2>
+          <span class="close" onclick="closeModal('createOfferModal')"
+            >&times;</span
+          >
         </div>
+        <form
+          action="/recruteur/<%= organisation.siren %>/offre/creer"
+          method="POST"
+        >
+          <div class="form-group">
+            <label for="fiche_id">Sélectionner une fiche de poste *</label>
+            <select id="fiche_id" name="id_fiche" required>
+              <option value="">Choisir une fiche de poste</option>
+              <% fichesPoste.forEach(fiche => { %>
+              <option value="<%= fiche.id_fiche %>">
+                <%= fiche.intitule %>
+              </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="etat">État de l'offre *</label>
+              <select id="etat" name="etat" required>
+                <option value="non_publiee">Non publiée</option>
+                <option value="publiee">Publiée</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="date_validite">Date de validité *</label>
+              <input
+                type="date"
+                id="date_validite"
+                name="date_validite"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="indication"
+              >Indications
+              <i
+                >(liste des documents demandés séparés par des virgules)</i
+              ></label
+            >
+            <textarea id="indication" name="indication"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="nb_pieces_demandees"
+              >Nombre de pièces demandées *</label
+            >
+            <input
+              type="number"
+              id="nb_pieces_demandees"
+              name="nb_pieces_demandees"
+              min="0"
+              value="0"
+              required
+            />
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="action-btn cancel-btn"
+              onclick="closeModal('createOfferModal')"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="action-btn save-btn">
+              Créer l'offre
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal de création d'offre à partir d'une fiche -->
     <div id="createOffreFromFicheModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Créer une offre d'emploi</h2>
-                <span class="close" onclick="closeModal('createOffreFromFicheModal')">&times;</span>
-            </div>
-            <form id="createOffreFromFicheForm" action="" method="POST">
-                <p>Création d'une offre basée sur la fiche de poste: <strong id="selectedFicheTitle"></strong></p>
-                
-                <input type="hidden" id="selected_fiche_id" name="id_fiche">
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="etat_from_fiche">État de l'offre *</label>
-                        <select id="etat_from_fiche" name="etat" required>
-                            <option value="non_publiee">Non publiée</option>
-                            <option value="publiee">Publiée</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="date_validite_from_fiche">Date de validité *</label>
-                        <input type="date" id="date_validite_from_fiche" name="date_validite" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="indication_from_fiche">Indications supplémentaires</label>
-                    <textarea id="indication_from_fiche" name="indication"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="nb_pieces_demandees_from_fiche">Nombre de pièces demandées *</label>
-                    <input type="number" id="nb_pieces_demandees_from_fiche" name="nb_pieces_demandees" min="0" value="0" required>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="action-btn cancel-btn" onclick="closeModal('createOffreFromFicheModal')">Annuler</button>
-                    <button type="submit" class="action-btn save-btn">Créer l'offre</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Créer une offre d'emploi</h2>
+          <span class="close" onclick="closeModal('createOffreFromFicheModal')"
+            >&times;</span
+          >
         </div>
+        <form id="createOffreFromFicheForm" action="" method="POST">
+          <p>
+            Création d'une offre basée sur la fiche de poste:
+            <strong id="selectedFicheTitle"></strong>
+          </p>
+
+          <input type="hidden" id="selected_fiche_id" name="id_fiche" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="etat_from_fiche">État de l'offre *</label>
+              <select id="etat_from_fiche" name="etat" required>
+                <option value="non_publiee">Non publiée</option>
+                <option value="publiee">Publiée</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="date_validite_from_fiche">Date de validité *</label>
+              <input
+                type="date"
+                id="date_validite_from_fiche"
+                name="date_validite"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="indication_from_fiche"
+              >Indications supplémentaires</label
+            >
+            <textarea id="indication_from_fiche" name="indication"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="nb_pieces_demandees_from_fiche"
+              >Nombre de pièces demandées *</label
+            >
+            <input
+              type="number"
+              id="nb_pieces_demandees_from_fiche"
+              name="nb_pieces_demandees"
+              min="0"
+              value="0"
+              required
+            />
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="action-btn cancel-btn"
+              onclick="closeModal('createOffreFromFicheModal')"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="action-btn save-btn">
+              Créer l'offre
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal de modification d'offre -->
     <div id="editOffreModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Modifier l'offre</h2>
-                <span class="close" onclick="closeModal('editOffreModal')">&times;</span>
-            </div>
-            <form id="editOffreForm" action="" method="POST">
-                <p>Modification de l'offre: <strong id="editOffreTitle"></strong></p>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit_etat">État de l'offre *</label>
-                        <select id="edit_etat" name="etat" required>
-                            <option value="non_publiee">Non publiée</option>
-                            <option value="publiee">Publiée</option>
-                            <option value="expiree">Expirée</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="edit_date_validite">Date de validité *</label>
-                        <input type="date" id="edit_date_validite" name="date_validite" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="edit_indication">Indications supplémentaires</label>
-                    <textarea id="edit_indication" name="indication"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="edit_nb_pieces_demandees">Nombre de pièces demandées *</label>
-                    <input type="number" id="edit_nb_pieces_demandees" name="nb_pieces_demandees" min="0" required>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="action-btn cancel-btn" onclick="closeModal('editOffreModal')">Annuler</button>
-                    <button type="submit" class="action-btn save-btn">Enregistrer les modifications</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Modifier l'offre</h2>
+          <span class="close" onclick="closeModal('editOffreModal')"
+            >&times;</span
+          >
         </div>
+        <form id="editOffreForm" action="" method="POST">
+          <p>Modification de l'offre: <strong id="editOffreTitle"></strong></p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit_etat">État de l'offre *</label>
+              <select id="edit_etat" name="etat" required>
+                <option value="non_publiee">Non publiée</option>
+                <option value="publiee">Publiée</option>
+                <option value="expiree">Expirée</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="edit_date_validite">Date de validité *</label>
+              <input
+                type="date"
+                id="edit_date_validite"
+                name="date_validite"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_indication">Indications supplémentaires</label>
+            <textarea id="edit_indication" name="indication"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_nb_pieces_demandees"
+              >Nombre de pièces demandées *</label
+            >
+            <input
+              type="number"
+              id="edit_nb_pieces_demandees"
+              name="nb_pieces_demandees"
+              min="0"
+              required
+            />
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="action-btn cancel-btn"
+              onclick="closeModal('editOffreModal')"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="action-btn save-btn">
+              Enregistrer les modifications
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal de modification de fiche de poste -->
     <div id="editFicheModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Modifier la fiche de poste</h2>
-                <span class="close" onclick="closeModal('editFicheModal')">&times;</span>
-            </div>
-            <form id="editFicheForm" action="" method="POST">
-                <p>Modification de la fiche: <strong id="editFicheTitle"></strong></p>
-                
-                <div class="form-group">
-                    <label for="edit_intitule">Intitulé du poste *</label>
-                    <input type="text" id="edit_intitule" name="intitule" required>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit_statut_de_poste">Statut du poste *</label>
-                        <select id="edit_statut_de_poste" name="statut_de_poste" required>
-                            <option value="">Sélectionner un statut</option>
-                            <option value="CDI">CDI</option>
-                            <option value="CDD">CDD</option>
-                            <option value="Intérim">Intérim</option>
-                            <option value="Stage">Stage</option>
-                            <option value="Alternance">Alternance</option>
-                            <option value="Freelance">Freelance</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="edit_type_metier">Type de métier *</label>
-                        <input type="text" id="edit_type_metier" name="type_metier" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="edit_responsable_hierarchique">Responsable hiérarchique *</label>
-                    <input type="text" id="edit_responsable_hierarchique" name="responsable_hierarchique" required>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit_rythme">Rythme de travail *</label>
-                        <input type="text" id="edit_rythme" name="rythme" placeholder="Ex: Temps plein, 35h/semaine" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="edit_fourchette_salaire">Fourchette de salaire *</label>
-                        <input type="text" id="edit_fourchette_salaire" name="fourchette_salaire" placeholder="Ex: 35000€ - 45000€ brut annuel" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Lieu de mission *</label>
-                    <div class="adresse-section">
-                        <h4>Adresse</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="edit_lieu_nom">Nom du site</label>
-                                <input type="text" id="edit_lieu_nom" name="lieu_mission[nom]" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="edit_lieu_adresse">Adresse</label>
-                                <input type="text" id="edit_lieu_adresse" name="lieu_mission[adresse]" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="edit_lieu_complement">Complément d'adresse</label>
-                            <input type="text" id="edit_lieu_complement" name="lieu_mission[complement]">
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="edit_lieu_code_postal">Code postal</label>
-                                <input type="text" id="edit_lieu_code_postal" name="lieu_mission[code_postal]" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="edit_lieu_ville">Ville</label>
-                                <input type="text" id="edit_lieu_ville" name="lieu_mission[ville]" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="edit_lieu_pays">Pays</label>
-                                <input type="text" id="edit_lieu_pays" name="lieu_mission[pays]" value="France" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="edit_description">Description du poste *</label>
-                    <textarea id="edit_description" name="description" required></textarea>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="action-btn cancel-btn" onclick="closeModal('editFicheModal')">Annuler</button>
-                    <button type="submit" class="action-btn save-btn">Enregistrer les modifications</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Modifier la fiche de poste</h2>
+          <span class="close" onclick="closeModal('editFicheModal')"
+            >&times;</span
+          >
         </div>
+        <form id="editFicheForm" action="" method="POST">
+          <p>Modification de la fiche: <strong id="editFicheTitle"></strong></p>
+
+          <div class="form-group">
+            <label for="edit_intitule">Intitulé du poste *</label>
+            <input type="text" id="edit_intitule" name="intitule" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit_statut_de_poste">Statut du poste *</label>
+              <select id="edit_statut_de_poste" name="statut_de_poste" required>
+                <option value="">Sélectionner un statut</option>
+                <option value="CDI">CDI</option>
+                <option value="CDD">CDD</option>
+                <option value="Intérim">Intérim</option>
+                <option value="Stage">Stage</option>
+                <option value="Alternance">Alternance</option>
+                <option value="Freelance">Freelance</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="edit_type_metier">Type de métier *</label>
+              <input
+                type="text"
+                id="edit_type_metier"
+                name="type_metier"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_responsable_hierarchique"
+              >Responsable hiérarchique *</label
+            >
+            <input
+              type="text"
+              id="edit_responsable_hierarchique"
+              name="responsable_hierarchique"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit_rythme">Rythme de travail *</label>
+              <input
+                type="text"
+                id="edit_rythme"
+                name="rythme"
+                placeholder="Ex: Temps plein, 35h/semaine"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="edit_fourchette_salaire"
+                >Fourchette de salaire *</label
+              >
+              <input
+                type="text"
+                id="edit_fourchette_salaire"
+                name="fourchette_salaire"
+                placeholder="Ex: 35000€ - 45000€ brut annuel"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Lieu de mission *</label>
+            <div class="adresse-section">
+              <h4>Adresse</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit_lieu_nom">Nom du site</label>
+                  <input
+                    type="text"
+                    id="edit_lieu_nom"
+                    name="lieu_mission[nom]"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="edit_lieu_adresse">Adresse</label>
+                  <input
+                    type="text"
+                    id="edit_lieu_adresse"
+                    name="lieu_mission[adresse]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="edit_lieu_complement">Complément d'adresse</label>
+                <input
+                  type="text"
+                  id="edit_lieu_complement"
+                  name="lieu_mission[complement]"
+                />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit_lieu_code_postal">Code postal</label>
+                  <input
+                    type="text"
+                    id="edit_lieu_code_postal"
+                    name="lieu_mission[code_postal]"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="edit_lieu_ville">Ville</label>
+                  <input
+                    type="text"
+                    id="edit_lieu_ville"
+                    name="lieu_mission[ville]"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="edit_lieu_pays">Pays</label>
+                  <input
+                    type="text"
+                    id="edit_lieu_pays"
+                    name="lieu_mission[pays]"
+                    value="France"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_description">Description du poste *</label>
+            <textarea
+              id="edit_description"
+              name="description"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="action-btn cancel-btn"
+              onclick="closeModal('editFicheModal')"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="action-btn save-btn">
+              Enregistrer les modifications
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal de confirmation de suppression -->
     <div id="deleteConfirmModal" class="confirm-modal">
-        <div class="confirm-modal-content">
-            <h3 class="confirm-modal-title">Confirmation de suppression</h3>
-            <p id="deleteConfirmMessage"></p>
-            <div class="confirm-modal-buttons">
-                <button class="confirm-cancel-btn" onclick="closeModal('deleteConfirmModal')">Annuler</button>
-                <button id="confirmDeleteBtn" class="confirm-delete-btn">Supprimer</button>
-            </div>
+      <div class="confirm-modal-content">
+        <h3 class="confirm-modal-title">Confirmation de suppression</h3>
+        <p id="deleteConfirmMessage"></p>
+        <div class="confirm-modal-buttons">
+          <button
+            class="confirm-cancel-btn"
+            onclick="closeModal('deleteConfirmModal')"
+          >
+            Annuler
+          </button>
+          <button id="confirmDeleteBtn" class="confirm-delete-btn">
+            Supprimer
+          </button>
         </div>
+      </div>
     </div>
-</body>
-
-</html> 
+  </body>
+</html>

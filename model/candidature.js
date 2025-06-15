@@ -4,9 +4,13 @@ const candidature = {
   read: (id_can, num_OE, callback) => {
     let sql = "SELECT * FROM Candidature WHERE id_can = ? AND num_OE = ?";
     db.query(sql, [id_can, num_OE], (err, results) => {
-      if (err) throw err;
-      if (results.length === 0) return callback(null);
-      callback(results);
+      if (err) {
+        console.error("Erreur lors de la récupération des candidatures:", err);
+        callback([]);
+      } else {
+        if (results.length === 0) return callback(null);
+        else callback(results);
+      }
     });
   },
   readall: (callback) => {
