@@ -14,7 +14,7 @@ siren varchar(9) PRIMARY KEY,
 nom varchar(255) NOT NULL,
 type enum('association', 'EURL', 'SA', 'SAS', 'SASU', 'ONG', 'SARL', 'SNC', 'SCS', 'SCA', 'SCI', 'SCP', 'SCM', 'SCEA', 'SCCV', 'SCPa', 'EARL', 'GAEC', 'SCIC', 'SCOP', 'GIE', 'GEIE', 'GE') NOT NULL, 
 siege_social json NOT NULL,
-statut enum('inactive', 'en_cours', 'active') NOT NULL
+statut enum('inactive', 'active') NOT NULL
 );
 
 CREATE TABLE Candidat(
@@ -29,8 +29,7 @@ statut enum('actif', 'inactif') NOT NULL
 );
 
 CREATE TABLE Piece_Jointe_Durable(
-chemin varchar(255) PRIMARY KEY,
-nom varchar(100) NOT NULL,
+nom varchar(255) PRIMARY KEY,
 type enum('pdf', 'jpeg', 'png', 'xlsx', 'docx') NOT NULL,
 id_can int, 
 FOREIGN KEY (id_can) REFERENCES Candidat(id_can) ON DELETE CASCADE
@@ -53,6 +52,9 @@ siren varchar(9),
 descriptionCrO text NOT NULL,
 dateDemandeCrO date NOT NULL,
 statutCrO enum('validee', 'refusee', 'en_attente') NOT NULL,
+nom varchar(255) NOT NULL,
+type ENUM('association','EURL','SA','SAS','SASU','ONG','SARL','SNC','SCS','SCA','SCI','SCP','SCM','SCEA','SCCV','SCPa','EARL','GAEC','SCIC','SCOP','GIE','GEIE','GE') NOT NULL,
+siege_social json NOT NULL,
 PRIMARY KEY(id_can, siren),
 FOREIGN KEY(id_can) REFERENCES Candidat(id_can) ON DELETE CASCADE
 );
@@ -90,14 +92,14 @@ FOREIGN KEY (id_can) REFERENCES Candidat(id_can) ON DELETE CASCADE,
 FOREIGN KEY (num_OE) REFERENCES Offre_Emploi(numero) ON DELETE CASCADE
 );
 
-CREATE TABLE Piece_Jointe_Temporaire(
-chemin varchar(255) PRIMARY KEY,
-nom varchar(100) NOT NULL,
-type enum('pdf', 'jpeg', 'png', 'xlsx', 'docx') NOT NULL,
-id_can int, 
-num_OE int,
-FOREIGN KEY (id_can) REFERENCES Candidature(id_can) ON DELETE CASCADE
-FOREIGN KEY (num_OE) REFERENCES Offre_Emploi(num_OE) ON DELETE CASCADE
+CREATE TABLE Piece_Jointe_Temporaire (
+  nom      VARCHAR(255)       PRIMARY KEY,
+  type     ENUM('pdf','jpeg','png','xlsx','docx') NOT NULL,
+  id_can   INT                 NOT NULL,
+  num_OE   INT                 NOT NULL,
+  FOREIGN KEY (id_can, num_OE)
+    REFERENCES Candidature(id_can, num_OE)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Recruteur(
