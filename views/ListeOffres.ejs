@@ -68,12 +68,21 @@
         <h2>Filtres</h2>
 
         <!-- form de filtres dynamiques -->
-        <form method="GET" action="/users/ListeOffres" class="filters">
+        <form
+          method="GET"
+          action="/users/ListeOffres"
+          class="filters"
+          onsubmit=" return requestlocation(event)
+        "
+        >
           <button type="submit">Filtrer</button>
+          <em style="font-size: 0.75em" class="vert">
+            en cliquant sur "Filtrer", vous acceptez de partager votre
+            localisation<br />pour le calcul de la distance</em
+          >
 
           <!-- Date de Validité -->
           <section class="filter-section">
-            <% console.log(datesPublication) %>
             <h4>Date de publication</h4>
             <% (datesPublication || []).filter(function(val) { return typeof val
             === 'string'; }).forEach(function(val) { var parts = val.split('-');
@@ -138,6 +147,23 @@
             </label>
             <% }) %>
           </section>
+
+          <!-- Position géographique -->
+          <section class="filter-section">
+            <h4>Position géographique</h4>
+            <% citiesDistances.forEach(cd => { %>
+            <label>
+              <input type="checkbox" name="city" value="<%= cd.ville %>" <%=
+              selectedFilters.city &&
+              [].concat(selectedFilters.city).includes(cd.ville) ? 'checked' :
+              '' %> /> <%= cd.ville %> <% if (isFinite(cd.distance)) { %> (<%=
+              cd.distance.toFixed(1) %> km) <% } else { %> (distance inconnue)
+              <% } %>
+            </label>
+            <% }) %>
+          </section>
+          <input type="hidden" id="inputLat" name="lat" value="" />
+          <input type="hidden" id="inputLng" name="lng" value="" />
         </form>
       </aside>
 
@@ -467,5 +493,26 @@
         modal.style.display = "none";
       }
     });
+
+    function requestlocation(event) {
+      // évite le submit immédiat
+      event.preventDefault();
+      if (!navigator.geolocation) {
+        event.target.submit();
+        return false;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Injecter lat/lng dans deux champs cachés
+          document.getElementById("inputLat").value = position.coords.latitude;
+          document.getElementById("inputLng").value = position.coords.longitude;
+          event.target.submit();
+        },
+        (err) => {
+          event.target.submit();
+        }
+      );
+      return false; // boque le submit
+    }
   </script>
 </html>

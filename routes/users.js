@@ -7,6 +7,8 @@ var path = require("path");
 var fs = require("fs");
 var util = require("util");
 var query = util.promisify(db.query).bind(db);
+var { geocode } = require("../services/geocode.js");
+var { calculDistance } = require("../services/distance.js");
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -290,6 +292,9 @@ router.get("/ListeOffres", function (req, res, next) {
 
 router.get("/ListeOffres", async (req, res, next) => {
   try {
+    const uLat = parseFloat(req.query.lat);
+    const uLon = parseFloat(req.query.lng);
+    console.log(req.userLocation);
     const id_can = req.session.id_candidat;
     const {
       type_metier,
@@ -297,6 +302,7 @@ router.get("/ListeOffres", async (req, res, next) => {
       statut_de_poste,
       fourchette_salaire,
       date_validite,
+      city,
     } = req.query;
 
     // Permet d'aller chercher toutes les offres pour lesquelles le candidat ne peut pas postuler et qui sont "publiee"
@@ -344,10 +350,10 @@ router.get("/ListeOffres", async (req, res, next) => {
     const clauses = [];
     const params = [id_can];
 
-    function addFilterCi(fieldSql, values) {
+    function addFilterCi(field, values) {
       const arr = Array.isArray(values) ? values : [values];
       // on met tout en lowercase côté SQL et JS --> (insensibles à la casse)
-      clauses.push(`LOWER(${fieldSql}) IN (?)`);
+      clauses.push(`LOWER(${field}) IN (?)`);
       params.push(arr.map((v) => v.toLowerCase()));
     }
 
@@ -376,11 +382,63 @@ router.get("/ListeOffres", async (req, res, next) => {
       ${whereFilters}
       ORDER BY base.date_validite DESC
     `;
-    const offres = await query(finalSql, params);
+    const rows = await query(finalSql, params);
 
+    // Récupération de toute les villes et distances
+    const enriched = await Promise.all(
+      rows.map(async (of) => {
+        let ville = null,
+          distance = Infinity;
+        try {
+          const lieu =
+            typeof of.lieu_mission === "string"
+              ? JSON.parse(of.lieu_mission)
+              : of.lieu_mission;
+          ville = lieu.ville;
+          if (ville && uLat != null && uLon != null) {
+            const { lat, lon } = await geocode(ville);
+            distance = calculDistance(uLat, uLon, lat, lon);
+          }
+        } catch {}
+        return { ...of, ville, distance };
+      })
+    );
+    console.log("caca1");
+    console.log(enriched);
+
+    // Filtrage pour une ville, garder la plus petite distance trouvée
+    const cityMap = {};
+    enriched.forEach((of) => {
+      if (of.ville) {
+        const prev = cityMap[of.ville];
+        // si première fois, ou distance plus petite, on met à jour
+        if (prev === undefined || of.distance < prev) {
+          cityMap[of.ville] = of.distance;
+        }
+      }
+    });
+    console.log("caca2");
+    console.log(cityMap);
+
+    // Transformaion en 1 tableau trié pour les checkbox
+    const citiesDistances = Object.entries(cityMap)
+      .map(([ville, distance]) => ({ ville, distance }))
+      .sort((a, b) => a.distance - b.distance);
+
+    // Filtrage final selon la selection de l'utilisateur
+    let offres = enriched;
+    if (city) {
+      const selection = Array.isArray(city) ? city : [city]; // city peut être un str ou un tableau
+      offres = enriched.filter((o) => selection.includes(o.ville)); // on ne garde que les villes dans selection
+    }
+
+    console.log("CITIES & DISTANCES ▶", citiesDistances);
+
+    // Renvoi final
     res.render("ListeOffres", {
       title: "Liste des Offres d'Emploi",
       offres,
+      citiesDistances,
       typesMetier: typesMetierRows.map((r) => r.type_metier),
       rythmes: rythmesRows.map((r) => r.rythme),
       statutsDePoste: statutsRows.map((r) => r.statut_de_poste),
