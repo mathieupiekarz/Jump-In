@@ -51,7 +51,8 @@ const admin = {
     }
 
     // vérification du format du numéro de téléphone
-    const numValide = /^\+33\d{9}$/.test(num);
+    let numValide = num.replace(/\s+/g, "");
+    numValide = /^\+33\d{9}$/.test(numValide);
     if (!numValide) return callback(null);
 
     // vérification du format de l'email
@@ -67,7 +68,7 @@ const admin = {
         const dateC = new Date().toISOString().split("T")[0];
         db.query(
           sql,
-          [email, mdp, nom, prenom, num, dateC, statut],
+          [email, mdp, nom, prenom, numValide, dateC, statut],
           (err, results) => {
             if (err) throw err;
             callback(results.insertId);
@@ -122,6 +123,7 @@ const admin = {
             }
           }
 
+          nvdict.numero_telephone = nvdict.numero_telephone.replace(/\s+/g, "");
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);

@@ -52,7 +52,8 @@ const candidat = {
     }
 
     // vérification du format du numéro de téléphone
-    const numValide = /^\+33\d{9}$/.test(num);
+    let numValide = num.replace(/\s+/g, "");
+    numValide = /^\+33\d{9}$/.test(numValide);
     if (!numValide) return callback(null);
 
     // vérification de la composition du mot de passe
@@ -76,9 +77,15 @@ const candidat = {
         const dateC = new Date().toISOString().split("T")[0];
         db.query(
           sql,
-          [email, mdp, nom, prenom, num, dateC, statut],
+          [email, mdp, nom, prenom, numValide, dateC, statut],
           (err, results) => {
-            if (err) throw err;
+            if (err) {
+              console.error(
+                "Erreur lors de la récupération des candidatures:",
+                err
+              );
+              return callback(null);
+            }
             callback(results.insertId);
           }
         );
@@ -131,6 +138,7 @@ const candidat = {
             }
           }
 
+          nvdict.numero_telephone = nvdict.numero_telephone.replace(/\s+/g, "");
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);

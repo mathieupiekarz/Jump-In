@@ -75,8 +75,8 @@ const offre = {
       f.description, 
       f.siren
     FROM Offre_Emploi o
-    JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
-    WHERE NOT EXISTS (
+    JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche 
+    WHERE o.etat = "publiee" AND NOT EXISTS (
       SELECT 1
       FROM Candidature c
       WHERE c.num_OE = o.numero

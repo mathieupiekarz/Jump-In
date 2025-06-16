@@ -123,14 +123,16 @@ router.get("/demandeChOlist", function (req, res, next) {
 
 /////////////////////////////////////////////////////////////////////////////
 router.get("/login", function (req, res, next) {
-  res.render("Login", { title: "S'authentifier" });
+  const inactive = req.session.inactiveAccount === true;
+  req.session.inactiveAccount = false;
+  res.render("Login", { title: "S'authentifier", inactive });
 });
 
 router.post("/login", function (req, res, next) {
   const { email, password } = req.body;
 
-  // Vérifier d'abord si c'est un admin
-  admin.read(email, function (adminResult) {
+  // ADMIN
+  admin.read(email, (adminResult) => {
     if (adminResult && adminResult.length > 0) {
       const adminUser = adminResult[0];
       if (adminUser.mdp === password) {
@@ -144,13 +146,40 @@ router.post("/login", function (req, res, next) {
         );
         return res.redirect("/admin/dashboard");
       }
+      // sinon on continue vers RECRUTEUR
     }
 
-    // Vérifier si c'est un recruteur
-    rec.read(email, function (recruteurResult) {
+    // RECRUTEUR
+    rec.read(email, (recruteurResult) => {
       if (recruteurResult && recruteurResult.length > 0) {
         const recruteur = recruteurResult[0];
-        if (recruteur.mdp === password) {
+        // on récupère le statut en base
+        const sqlRec = "SELECT statut FROM Recruteur WHERE id_rec = ?";
+        db.query(sqlRec, [recruteur.id_rec], (err, recStatuts) => {
+          if (err) {
+            console.error(err);
+            return res
+              .status(500)
+              .redirect(
+                "/users/login?error=" + encodeURIComponent("Erreur serveur")
+              );
+          }
+
+          const statutRec = recStatuts[0].statut;
+          if (statutRec === "inactif") {
+            // drapeau en session, puis redirection sans query
+            req.session.inactiveAccount = true;
+            return res.redirect("/users/login");
+          }
+
+          if (recruteur.mdp !== password) {
+            return res.redirect(
+              "/users/login?error=" +
+                encodeURIComponent("Email ou mot de passe incorrect")
+            );
+          }
+
+          // tout est ok
           session.creatSession(
             req.session,
             {
@@ -161,14 +190,42 @@ router.post("/login", function (req, res, next) {
             "recruteur"
           );
           return res.redirect(`/recruteur/${recruteur.siren}/NosOffres`);
-        }
-      }
+        });
+      } else {
+        // CANDIDAT
+        candidat.read(email, (candidatResult) => {
+          if (!candidatResult || candidatResult.length === 0) {
+            return res.redirect(
+              "/users/login?error=" +
+                encodeURIComponent("Email ou mot de passe incorrect")
+            );
+          }
 
-      // Vérifier si c'est un candidat
-      candidat.read(email, function (candidatResult) {
-        if (candidatResult && candidatResult.length > 0) {
           const candidat = candidatResult[0];
-          if (candidat.mdp === password) {
+          const sqlCan = "SELECT statut FROM Candidat WHERE id_can = ?";
+          db.query(sqlCan, [candidat.id_can], (err, canStatuts) => {
+            if (err) {
+              console.error(err);
+              return res
+                .status(500)
+                .redirect(
+                  "/users/login?error=" + encodeURIComponent("Erreur serveur")
+                );
+            }
+
+            const statutCan = canStatuts[0].statut;
+            if (statutCan === "inactif") {
+              req.session.inactiveAccount = true;
+              return res.redirect("/users/login");
+            }
+
+            if (candidat.mdp !== password) {
+              return res.redirect(
+                "/users/login?error=" +
+                  encodeURIComponent("Email ou mot de passe incorrect")
+              );
+            }
+
             session.creatSession(
               req.session,
               {
@@ -178,14 +235,9 @@ router.post("/login", function (req, res, next) {
               "candidat"
             );
             return res.redirect("/users/ListeOffres");
-          }
-        }
-
-        // Si aucun utilisateur n'est trouvé ou le mot de passe est incorrect
-        res.render("Login", {
-          error: "Email ou mot de passe incorrect",
+          });
         });
-      });
+      }
     });
   });
 });
@@ -223,10 +275,11 @@ router.get("/Profile", function (req, res, next) {
 });
 
 router.get("/ListeOffres", function (req, res, next) {
-  offre.readSansPostuler(req.session.id_candidat, (result) => {
+  const id_can = req.session.id_candidat;
+  offre.readSansPostuler(id_can, (results) => {
     res.render("ListeOffres", {
       title: "Liste des Offres d'Emploi",
-      offres: result,
+      offres: results,
     });
   });
 });
@@ -250,12 +303,13 @@ router.post("/inscription", function (req, res, next) {
   // Statut = actif par défaut, à voir si on le garde
   // ou si on le met à inactif par défaut et qu'on l'active après validation
   const statut = "actif";
+  console.log(password);
 
   candidat.creat(email, password, nom, prenom, num, statut, (result) => {
     if (!result) {
       return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
     } else {
-      res.redirect("/users/userlist"); // après inscription, retour à la liste des utilisateurs (à enlever ensuite car c'est pour tester)
+      res.render("Login", { title: "S'authentifier" });
     }
   });
 });

@@ -75,10 +75,9 @@ const recruteur = {
     }
 
     // vérification du format du numéro de téléphone
-    const numValide = /^\+33\d{9}$/.test(num);
-    if (!numValide) {
-      return callback(null);
-    }
+    let numValide = num.replace(/\s+/g, "");
+    numValide = /^\+33\d{9}$/.test(numValide);
+    if (!numValide) return callback(null);
 
     // vérification du format de l'email
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -111,14 +110,17 @@ const recruteur = {
             prenom,
             num,
             dateC,
-            statut
+            statut,
           });
           db.query(
             sql,
-            [siren, email, mdp, nom, prenom, num, dateC, statut],
+            [siren, email, mdp, nom, prenom, numValide, dateC, statut],
             (err, results) => {
               if (err) {
-                console.error("Erreur MySQL lors de la création du recruteur:", err);
+                console.error(
+                  "Erreur MySQL lors de la création du recruteur:",
+                  err
+                );
                 throw err;
               }
               console.log("Recruteur créé avec succès, ID:", results.insertId);
@@ -187,6 +189,7 @@ const recruteur = {
             }
           }
 
+          nvdict.numero_telephone = nvdict.numero_telephone.replace(/\s+/g, "");
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);
