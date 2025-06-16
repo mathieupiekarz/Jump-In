@@ -163,16 +163,18 @@ const recruteur = {
           if (!valueslist.every((valeur) => typeof valeur === "string"))
             return callback(null);
 
-          //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
-          if (!/^\d{9}$/.test(nvdict.siren)) return callback(null);
-          let sum = 0;
-          for (let i = 0; i < 9; i++) {
-            let digit = parseInt(nvdict.siren[i], 10);
-            if (i % 2 === 1) digit *= 2;
-            if (digit > 9) digit -= 9;
-            sum += digit;
+          if ("siren" in nvdict) {
+            //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
+            if (!/^\d{9}$/.test(nvdict.siren)) return callback(null);
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+              let digit = parseInt(nvdict.siren[i], 10);
+              if (i % 2 === 1) digit *= 2;
+              if (digit > 9) digit -= 9;
+              sum += digit;
+            }
+            if (sum % 10 !== 0) return callback(null);
           }
-          if (sum % 10 !== 0) return callback(null);
 
           // vérification si le nouveau statut est bien compris entre 'actif' et 'inactif'
           if (
@@ -189,9 +191,12 @@ const recruteur = {
             }
           }
 
-          nvdict.numero_telephone = nvdict.numero_telephone.replace(/\s+/g, "");
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {
+            nvdict.numero_telephone = nvdict.numero_telephone.replace(
+              /\s+/g,
+              ""
+            );
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);
             if (!numValide) return callback(null);
           }

@@ -455,7 +455,9 @@
     <!-- Modal pour créer un nouvel administrateur -->
     <div id="newAdminModal" class="modal-overlay">
       <div class="modal-content">
-        <button class="close-btn" onclick="closeNewAdminModal()">&times;</button>
+        <button class="close-btn" onclick="closeNewAdminModal()">
+          &times;
+        </button>
         <h3>Créer un nouvel administrateur</h3>
         <form action="/admin/create-admin" method="POST">
           <div class="form-group">
@@ -463,15 +465,24 @@
             <select name="id_candidat" id="candidat" required>
               <option value="">Choisir un candidat...</option>
               <% candidats.forEach(candidat => { %>
-                <option value="<%= candidat.id_can %>">
-                  <%= candidat.prenom %> <%= candidat.nom %> (<%= candidat.email %>)
-                </option>
+              <option value="<%= candidat.id_can %>">
+                <%= candidat.prenom %> <%= candidat.nom %> (<%= candidat.email
+                %>)
+              </option>
               <% }); %>
             </select>
           </div>
           <div class="form-buttons-profile">
-            <button type="button" class="cancel-btn-profile" onclick="closeNewAdminModal()">Annuler</button>
-            <button type="submit" class="save-btn-profile">Créer l'administrateur</button>
+            <button
+              type="button"
+              class="cancel-btn-profile"
+              onclick="closeNewAdminModal()"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="save-btn-profile">
+              Créer l'administrateur
+            </button>
           </div>
         </form>
       </div>
@@ -480,19 +491,21 @@
     <script>
       // Fonction pour ouvrir le modal
       function openNewAdminModal() {
-        document.getElementById('newAdminModal').style.display = 'flex';
+        document.getElementById("newAdminModal").style.display = "flex";
       }
 
       // Fonction pour fermer le modal
       function closeNewAdminModal() {
-        document.getElementById('newAdminModal').style.display = 'none';
+        document.getElementById("newAdminModal").style.display = "none";
       }
 
       // Ajouter l'événement click au bouton "Nouvel administrateur"
-      document.querySelector('.admin-actions .action-button:last-child').addEventListener('click', function(e) {
-        e.preventDefault();
-        openNewAdminModal();
-      });
+      document
+        .querySelector(".admin-actions .action-button:last-child")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          openNewAdminModal();
+        });
     </script>
   </body>
 </html>

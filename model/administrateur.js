@@ -123,9 +123,12 @@ const admin = {
             }
           }
 
-          nvdict.numero_telephone = nvdict.numero_telephone.replace(/\s+/g, "");
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {
+            nvdict.numero_telephone = nvdict.numero_telephone.replace(
+              /\s+/g,
+              ""
+            );
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);
             if (!numValide) return callback(null);
           }
