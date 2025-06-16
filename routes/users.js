@@ -5,6 +5,8 @@ var session = require("../session.js");
 var upload = require("../multer.js");
 var path = require("path");
 var fs = require("fs");
+var util = require("util");
+var query = util.promisify(db.query).bind(db);
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -274,6 +276,7 @@ router.get("/Profile", function (req, res, next) {
   });
 });
 
+/*
 router.get("/ListeOffres", function (req, res, next) {
   const id_can = req.session.id_candidat;
   offre.readSansPostuler(id_can, (results) => {
@@ -282,6 +285,112 @@ router.get("/ListeOffres", function (req, res, next) {
       offres: results,
     });
   });
+});
+*/
+
+router.get("/ListeOffres", async (req, res, next) => {
+  try {
+    const id_can = req.session.id_candidat;
+    const {
+      type_metier,
+      rythme,
+      statut_de_poste,
+      fourchette_salaire,
+      date_validite,
+    } = req.query;
+
+    // Permet d'aller chercher toutes les offres pour lesquelles le candidat ne peut pas postuler et qui sont "publiee"
+    const baseTab = `
+      SELECT 
+        o.numero, o.etat, o.date_validite, o.indication,
+        o.nb_pieces_demandees, f.id_fiche, f.intitule,
+        f.statut_de_poste, f.responsable_hierarchique,
+        f.type_metier, f.lieu_mission, f.rythme,
+        f.fourchette_salaire, f.description, f.siren
+      FROM Offre_Emploi o
+      JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
+      WHERE o.etat = 'publiee'
+        AND NOT EXISTS (
+          SELECT 1 FROM Candidature c
+          WHERE c.num_OE = o.numero
+            AND c.id_can  = ?
+        )
+    `;
+    const baseParams = [id_can];
+
+    // Récupération des listes de valeurs dans ma table d'offres triées
+    const [typesMetierRows, rythmesRows, statutsRows, salairesRows, datesRows] =
+      await Promise.all([
+        query(
+          `SELECT DISTINCT type_metier FROM (${baseTab}) AS base`,
+          baseParams
+        ),
+        query(`SELECT DISTINCT rythme FROM (${baseTab}) AS base`, baseParams),
+        query(
+          `SELECT DISTINCT statut_de_poste FROM (${baseTab}) AS base`,
+          baseParams
+        ),
+        query(
+          `SELECT DISTINCT fourchette_salaire FROM (${baseTab}) AS base`,
+          baseParams
+        ),
+        query(
+          `SELECT DISTINCT DATE_FORMAT(base.date_validite, '%Y-%m-%d') AS date_validite FROM (${baseTab}) AS base`,
+          baseParams
+        ),
+      ]);
+
+    // Construction dynamique des filtres
+    const clauses = [];
+    const params = [id_can];
+
+    function addFilterCi(fieldSql, values) {
+      const arr = Array.isArray(values) ? values : [values];
+      // on met tout en lowercase côté SQL et JS --> (insensibles à la casse)
+      clauses.push(`LOWER(${fieldSql}) IN (?)`);
+      params.push(arr.map((v) => v.toLowerCase()));
+    }
+
+    if (type_metier) addFilterCi("base.type_metier", type_metier);
+    if (rythme) addFilterCi("base.rythme", rythme);
+    if (statut_de_poste) addFilterCi("base.statut_de_poste", statut_de_poste);
+    if (fourchette_salaire)
+      addFilterCi("base.fourchette_salaire", fourchette_salaire);
+    if (date_validite) addFilterCi("base.date_validite", date_validite);
+
+    const whereFilters = clauses.length ? " AND " + clauses.join(" AND ") : "";
+
+    // Construction requête finale : baseTab + filtres + join Organisation
+    const finalSql = `
+      SELECT
+        base.*,
+        org.nom           AS organisation_nom,
+        org.siren         AS organisation_siren,
+        org.type          AS organisation_type,
+        org.siege_social  AS organisation_siege
+      FROM (
+        ${baseTab}
+      ) AS base
+      JOIN Organisation org
+        ON base.siren = org.siren
+      ${whereFilters}
+      ORDER BY base.date_validite DESC
+    `;
+    const offres = await query(finalSql, params);
+
+    res.render("ListeOffres", {
+      title: "Liste des Offres d'Emploi",
+      offres,
+      typesMetier: typesMetierRows.map((r) => r.type_metier),
+      rythmes: rythmesRows.map((r) => r.rythme),
+      statutsDePoste: statutsRows.map((r) => r.statut_de_poste),
+      fourchettesSalaires: salairesRows.map((r) => r.fourchette_salaire),
+      datesPublication: datesRows.map((r) => r.date_validite),
+      selectedFilters: req.query,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get("/inscription", function (req, res, next) {

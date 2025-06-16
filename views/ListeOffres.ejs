@@ -63,34 +63,82 @@
     </script>
 
     <div class="container">
-      <!-- Barre latérale de filtrage -->
+      <!-- ========== SIDEBAR ========== -->
       <aside class="sidebar">
-        <h2>Trier les offres</h2>
-        <div class="filter-section">
-          <h4>Type de contrat</h4>
-          <label><input type="checkbox" /> CDD</label>
-          <label><input type="checkbox" /> CDI</label>
-          <label><input type="checkbox" /> Stage de fin d'études</label>
-          <label><input type="checkbox" /> Stage Bac+4</label>
-          <label><input type="checkbox" /> Job étudiant</label>
-        </div>
-        <div class="filter-section">
-          <h4>Métiers</h4>
-          <label><input type="checkbox" /> Informatique</label>
-          <label><input type="checkbox" /> Mécanique</label>
-          <label><input type="checkbox" /> Urbain et Civil</label>
-          <label><input type="checkbox" /> Biologique</label>
-          <label><input type="checkbox" /> Procédés</label>
-        </div>
-        <div class="filter-section">
-          <h4>Localisation</h4>
-          <label><input type="checkbox" /> Paris</label>
-          <label><input type="checkbox" /> Bordeaux</label>
-          <label><input type="checkbox" /> Nantes</label>
-          <label><input type="checkbox" /> Lyon</label>
-          <label><input type="checkbox" /> Lille</label>
-          <label><input type="checkbox" /> +9 autres</label>
-        </div>
+        <h2>Filtres</h2>
+
+        <!-- form de filtres dynamiques -->
+        <form method="GET" action="/users/ListeOffres" class="filters">
+          <button type="submit">Filtrer</button>
+
+          <!-- Date de Validité -->
+          <section class="filter-section">
+            <% console.log(datesPublication) %>
+            <h4>Date de publication</h4>
+            <% (datesPublication || []).filter(function(val) { return typeof val
+            === 'string'; }).forEach(function(val) { var parts = val.split('-');
+            var dateObj = new Date(parts[0], parts[1] - 1, parts[2]); %>
+            <label>
+              <input type="checkbox" name="date_validite" value="<%= val %>" <%=
+              selectedFilters.date_validite &&
+              [].concat(selectedFilters.date_validite).includes(val) ? 'checked'
+              : '' %> /> <%= dateObj.toLocaleDateString('fr-FR') %>
+            </label>
+            <% }); %>
+          </section>
+
+          <!-- Type de métier -->
+          <section class="filter-section">
+            <h4>Type de métier</h4>
+            <% typesMetier.forEach(metier => { %>
+            <label>
+              <input type="checkbox" name="type_metier" value="<%= metier %>"
+              <%= selectedFilters.type_metier &&
+              [].concat(selectedFilters.type_metier).includes(metier) ?
+              "checked" : "" %> /> <%= metier %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Rythme -->
+          <section class="filter-section">
+            <h4>Rythme</h4>
+            <% rythmes.forEach(r => { %>
+            <label>
+              <input type="checkbox" name="rythme" value="<%= r %>" <%=
+              selectedFilters.rythme &&
+              [].concat(selectedFilters.rythme).includes(r) ? "checked" : "" %>
+              /> <%= r %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Statut de poste -->
+          <section class="filter-section">
+            <h4>Statut de poste</h4>
+            <% statutsDePoste.forEach(s => { %>
+            <label>
+              <input type="checkbox" name="statut_de_poste" value="<%= s %>" <%=
+              selectedFilters.statut_de_poste &&
+              [].concat(selectedFilters.statut_de_poste).includes(s) ? "checked"
+              : "" %> /> <%= s %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Fourchette de salaire -->
+          <section class="filter-section">
+            <h4>Fourchette de salaire</h4>
+            <% fourchettesSalaires.forEach(f => { %>
+            <label>
+              <input type="checkbox" name="fourchette_salaire" value="<%= f %>"
+              <%= selectedFilters.fourchette_salaire &&
+              [].concat(selectedFilters.fourchettes_salaire).includes(f) ?
+              "checked" : "" %> /> <%= f %>
+            </label>
+            <% }) %>
+          </section>
+        </form>
       </aside>
 
       <!-- Section des offres -->
@@ -101,7 +149,11 @@
           <button class="search-btn">Rechercher</button>
         </div>
 
-        <% offres.forEach((offre) => { %>
+        <% if (offres.length === 0) { %>
+        <div class="no-results">
+          Aucune offre ne correspond à votre recherche.
+        </div>
+        <% } else { %> <% offres.forEach((offre) => { %>
         <div class="job">
           <div class="job-header">
             <img
@@ -135,7 +187,7 @@
             </button>
           </div>
         </div>
-        <% }) %>
+        <% }) %> <% } %>
       </main>
 
       <!-- Création Modale dans la boucle forEach-->
