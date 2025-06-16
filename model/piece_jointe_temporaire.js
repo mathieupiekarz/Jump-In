@@ -18,11 +18,9 @@ const pjt = {
           "Erreur lors de la récupération des pieces jointes:",
           err
         );
-        callback([]);
-      } else {
-        if (results.length === 0) return callback(null);
-        else callback(results);
+        return callback([]);
       }
+      callback(results);
     });
   },
   readByEverything: (nom, id_can, num_OE, callback) => {

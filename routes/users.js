@@ -223,7 +223,7 @@ router.get("/Profile", function (req, res, next) {
 });
 
 router.get("/ListeOffres", function (req, res, next) {
-  offre.readSansPostulee(req.session.id_candidat, (result) => {
+  offre.readSansPostuler(req.session.id_candidat, (result) => {
     res.render("ListeOffres", {
       title: "Liste des Offres d'Emploi",
       offres: result,

@@ -59,7 +59,7 @@ const offre = {
     });
   },
 
-  readSansPostulee: (id_can, callback) => {
+  readSansPostuler: (id_can, callback) => {
     let sql = `SELECT tab.numero, tab.etat, tab.date_validite, tab.indication, tab.nb_pieces_demandees,
         tab.id_fiche, tab.intitule, tab.statut_de_poste, tab.responsable_hierarchique,
         tab.type_metier, tab.lieu_mission, tab.rythme, tab.fourchette_salaire, tab.description,
@@ -80,7 +80,7 @@ const offre = {
       SELECT 1
       FROM Candidature c
       WHERE c.num_OE = o.numero
-        AND c.id_can = 19
+        AND c.id_can = ?
     )) AS tab JOIN Organisation org ON tab.siren = org.siren`;
     db.query(sql, [id_can], (err, results) => {
       if (err) {

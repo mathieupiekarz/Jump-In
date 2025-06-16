@@ -224,7 +224,7 @@
         em.textContent = "Aucune pièce jointe associée.";
         fileList.appendChild(em);
       } else {
-        pieces.forEach((pj) => {
+        pieces.forEach((pj, index) => {
           const div = document.createElement("div");
           div.style.display = "flex";
           div.style.alignItems = "center";
@@ -233,9 +233,11 @@
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.name = "pieceSauvegardee";
+          checkbox.id = `checkPiece${index}`;
           checkbox.value = pj.nom;
 
           const label = document.createElement("label");
+          label.htmlFor = checkbox.id;
           label.innerHTML = `<span style="font-size: 0.75em;"><i class="bi bi-download" style="color: #007bff; margin-right: 5px; font-size: 0.75em;"></i>${pj.nom}</span>`;
 
           checkbox.addEventListener("change", () => {

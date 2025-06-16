@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var db = require("../model/db.js");
+var path = require("path");
+var archiver = require("archiver");
 
 var organisation = require("../model/organisation.js");
 var offre = require("../model/offre_emploi.js");
@@ -8,6 +10,7 @@ var candidature = require("../model/candidature.js");
 var fp = require("../model/fiche_poste.js");
 var rec = require("../model/recruteur.js");
 var dcho = require("../model/Demande_changer_organisation.js");
+var pjt = require("../model/piece_jointe_temporaire.js");
 
 // Route pour afficher les offres d'une organisation spécifique
 router.get("/:entreprise_id/NosOffres", function (req, res, next) {
@@ -87,6 +90,51 @@ router.get(
     });
   }
 );
+
+router.get("/downloadCandidature/:numero/:id_can", async (req, res, next) => {
+  const id_can = parseInt(req.params.id_can, 10);
+  const numero = parseInt(req.params.numero, 10);
+  try {
+    // Récupération de tous les noms de fichiers temporaires
+    const files = await new Promise((resolve, reject) => {
+      pjt.readByCandidature(id_can, numero, (results) => {
+        if (!Array.isArray(results)) {
+          // en cas d'erreur interne, on considère qu'il n'y a rien
+          return resolve([]);
+        }
+        resolve(results.map((r) => r.nom));
+      });
+    });
+    if (files.length === 0) {
+      return res.status(404).send("Aucune pièce à télécharger");
+    }
+
+    // Préparer la réponse http en tant que zip
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="candidature-${numero}-${id_can}.zip"`
+    );
+    res.setHeader("Content-Type", "application/zip");
+
+    // Création archive + stream
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.on("error", (err) => next(err));
+    archive.pipe(res);
+
+    // Ajout des fichiers à l'archive
+    const uploadDir = path.join(__dirname, "../uploads");
+    for (const nom of files) {
+      const fullPath = path.join(uploadDir, nom);
+      archive.file(fullPath, { name: nom });
+    }
+
+    // Finaliser l'envoi
+    await archive.finalize();
+  } catch (err) {
+    console.error("Erreur ZIP candidature :", err);
+    next(err);
+  }
+});
 
 // Route pour modifier une offre
 router.post(
