@@ -294,7 +294,6 @@ router.get("/ListeOffres", async (req, res, next) => {
   try {
     const uLat = parseFloat(req.query.lat);
     const uLon = parseFloat(req.query.lng);
-    console.log(req.userLocation);
     const id_can = req.session.id_candidat;
     const {
       type_metier,
@@ -403,8 +402,6 @@ router.get("/ListeOffres", async (req, res, next) => {
         return { ...of, ville, distance };
       })
     );
-    console.log("caca1");
-    console.log(enriched);
 
     // Filtrage pour une ville, garder la plus petite distance trouvée
     const cityMap = {};
@@ -417,8 +414,6 @@ router.get("/ListeOffres", async (req, res, next) => {
         }
       }
     });
-    console.log("caca2");
-    console.log(cityMap);
 
     // Transformaion en 1 tableau trié pour les checkbox
     const citiesDistances = Object.entries(cityMap)
@@ -431,8 +426,6 @@ router.get("/ListeOffres", async (req, res, next) => {
       const selection = Array.isArray(city) ? city : [city]; // city peut être un str ou un tableau
       offres = enriched.filter((o) => selection.includes(o.ville)); // on ne garde que les villes dans selection
     }
-
-    console.log("CITIES & DISTANCES ▶", citiesDistances);
 
     // Renvoi final
     res.render("ListeOffres", {
