@@ -112,23 +112,27 @@ const candidature = {
     );
   },
   delete: (id_can, num_OE, callback) => {
-    // vérification si la candidature existe
-    db.query(
-      "SELECT * FROM Candidature WHERE id_can = ? AND num_OE = ?",
-      [id_can, num_OE],
-      (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
-
-        // suppression
-        let sql = "DELETE FROM Candidature WHERE id_can = ? AND num_OE = ?";
-        db.query(sql, [id_can, num_OE], (err, results) => {
-          if (err) throw err;
-          callback(results.affectedRows);
-        });
+    const sqlCheck =
+      "SELECT 1 FROM Candidature WHERE id_can = ? AND num_OE = ?";
+    db.query(sqlCheck, [id_can, num_OE], (err, rows) => {
+      if (err) {
+        console.error("Erreur vérif candidature:", err);
+        return callback(err, null);
       }
-    );
+      if (rows.length === 0) return callback(null, 0);
+
+      // Suppression de la candidature
+      const sqlDel = "DELETE FROM Candidature WHERE id_can = ? AND num_OE = ?";
+      db.query(sqlDel, [id_can, num_OE], (err2, result2) => {
+        if (err2) {
+          console.error("Erreur suppression candidature:", err2);
+          return callback(err2, null);
+        }
+        callback(null, result2.affectedRows);
+      });
+    });
   },
+
   readByOffreWithCandidat: (num_OE, callback) => {
     const sql = `
       SELECT c.*, cd.nom, cd.prenom, cd.email, cd.numero_telephone, cd.statut as statut_candidat

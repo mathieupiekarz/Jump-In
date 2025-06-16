@@ -64,29 +64,29 @@
                 <h2><%= offre.intitule || "Poste à pourvoir" %></h2>
                 <p><%= offre.organisation_nom %></p>
               </div>
-              <div class="actions-buttons">
-                <a
-                  class="action-btn edit-btn openModalBtn"
-                  data-offre-id="<%= offre.numero %>"
-                  data-indication="<%= offre.indication || '' %>"
-                  data-pieces='<%- JSON.stringify(pjts).replace(/'/g, "&#39;") %>'
-                >
-                  <i class="bi bi-pencil-fill"></i> Modifier
-                </a>
-                <button
-                  class="action-btn delete-btn"
-                  onclick="openDeleteConfirmModal('offre', '<%= offre.numero %>', '<%= offre.intitule %>')"
-                >
-                  <i class="bi bi-trash-fill"></i> Supprimer
-                </button>
-                <form
-                  id="delete-form-<%= offre.numero %>"
-                  action="/recruteur/<%= offre.siren %>/offre/<%= offre.numero %>/supprimer"
-                  method="POST"
-                  style="display: none"
-                ></form>
-              </div>
             </div>
+            <span>
+              <a 
+                class="btn2 edit-btn openModalBtn" 
+                data-offre-id="<%= offre.numero %>"
+                data-indication="<%= offre.indication || '' %>"
+                data-pieces='<%- JSON.stringify(pjts).replace(/'/g, "&#39;") %>'
+              >
+                <i class="bi bi-pencil-fill"></i> Modifier
+              </a>
+              <button 
+                class="btn2 delete-btn"
+                data-form-id="delete-form-<%= offre.numero %>"
+              >
+                <i class="bi bi-trash-fill"></i> Supprimer
+              </button>
+              <form
+                id="delete-form-<%= offre.numero %>"
+                action="/users/supprimerCandidature/<%= offre.numero %>"
+                method="POST"
+                style="display: none"
+              ></form>
+            </span>
           </div>
         </div>
 
@@ -115,10 +115,15 @@
             <h4>Détails du poste :</h4>
             <p><%= offre.description %></p>
           </div>
+          <div id="job-content">
+              <h4>Mes documents enregistrés :</h4>
+              <div id="listePiecesSauvegardees2"></div>
+            </div>
         </div>
       </div>
     </div>
-  <!-- Modal de modification de candidature -->
+
+    <!-- Modal de modification de candidature -->
     <div id="modalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-content-offre">
         <div class="job-header2">
@@ -152,6 +157,19 @@
           </div>
           <button id="envoyerBtn" type="submit" disabled>Jump'In !</button>
         </form>
+      </div>
+    </div>
+
+    <!-- === Modale de confirmation de suppression de candidature === -->
+    <div id="deleteOverlay" class="modal-overlay" style="display:none">
+      <div class="modal-content">
+        <strong>Voulez-vous vraiment supprimer la candidature ?</strong>
+
+        <div style="display:flex; justify-content:center">
+          <button id="deleteNo"  class="btn2">No Stay</button>
+          <!-- Le “Oui” déclenchera la soumission du bon formulaire -->
+          <button id="deleteYes" class="btn">Jump'Out</button>
+        </div>
       </div>
     </div>
 
@@ -292,6 +310,65 @@
       });
       envoyerBtn.disabled = !ready;
     }
+
+    // uniqument pour le chargement de la page
+    document.addEventListener("DOMContentLoaded", () => {
+    const list2 = document.getElementById("listePiecesSauvegardees2");
+    if (!pjts || pjts.length === 0) {
+      const em = document.createElement("em");
+      em.textContent = "Aucune pièce jointe associée.";
+      list2.appendChild(em);
+      return;
+    }
+    pjts.forEach((pj, idx) => {
+      const div = document.createElement("div");
+      div.style.display = "flex";
+      div.style.alignItems = "center";
+      div.style.gap = "10px";
+
+      const span = document.createElement("span");
+      span.style.fontSize = "0.95em";
+
+      const icon = document.createElement("i");
+      icon.className = "bi bi-download";
+      icon.style.color = "#007bff";
+      icon.style.marginRight = "5px";
+      icon.style.fontSize = "0.95em";
+
+      span.appendChild(icon);
+      span.appendChild(document.createTextNode(pj.nom));
+      div.appendChild(span);
+      list2.appendChild(div);
+    });
+  });
+
+  /* ---------- Modale de Suppression ---------- */
+  const delOverlay = document.getElementById("deleteOverlay");
+  const delYes = document.getElementById("deleteYes");
+  const delNo = document.getElementById("deleteNo");
+
+  // mémorise le formulaire à envoyer
+  let formToSubmit = null;   
+
+  // ouvre la modale quand on clique sur n’importe quel .delete-btn
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const formId = btn.dataset.formId;
+      formToSubmit = document.getElementById(formId);
+      delOverlay.style.display = "flex";
+    });
+  });
+
+  // "Non" = fermeture
+  delNo.addEventListener("click", () => {
+    delOverlay.style.display = "none";
+    formToSubmit = null;
+  });
+
+  // "Oui" = submit
+  delYes.addEventListener("click", () => {
+    if (formToSubmit) formToSubmit.submit();
+  });
   </script>
 </body>
 </html>

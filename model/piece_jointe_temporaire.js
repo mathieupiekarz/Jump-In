@@ -14,12 +14,23 @@ const pjt = {
       "SELECT * FROM Piece_Jointe_Temporaire WHERE id_can = ? AND num_OE = ?";
     db.query(sql, [id_can, num_OE], (err, results) => {
       if (err) {
-        console.error("Erreur lors de la récupération des candidatures:", err);
+        console.error(
+          "Erreur lors de la récupération des pieces jointes:",
+          err
+        );
         callback([]);
       } else {
         if (results.length === 0) return callback(null);
         else callback(results);
       }
+    });
+  },
+  readByEverything: (nom, id_can, num_OE, callback) => {
+    const sql =
+      "SELECT * FROM Piece_Jointe_Temporaire WHERE nom = ? AND id_can = ? AND num_OE = ?";
+    db.query(sql, [nom, id_can, num_OE], (err, results) => {
+      if (err) return callback(err, null);
+      callback(null, results);
     });
   },
   readall: (callback) => {
@@ -40,8 +51,12 @@ const pjt = {
     )
       return callback(null);
 
-    pjt.read(nom, (result) => {
-      if (result && result.length > 0) return callback(null);
+    pjt.readByEverything(nom, id_can, num_OE, (readErr, existing) => {
+      if (readErr) {
+        console.error("Erreur readByEverything :", readErr);
+        return callback(readErr);
+      }
+      if (existing.length > 0) return callback(null);
 
       const sql_can = "SELECT 1 FROM Candidat WHERE id_can = ?";
       db.query(sql_can, [id_can], (err, resCan) => {
@@ -64,12 +79,21 @@ const pjt = {
       });
     });
   },
+  countByName: (nom, callback) => {
+    const sql =
+      "SELECT COUNT(*) AS cnt FROM Piece_Jointe_Temporaire WHERE nom = ?";
+    db.query(sql, [nom], (err, results) => {
+      if (err) return callback(err);
+      callback(null, results[0].cnt);
+    });
+  },
+
   // prend en argument un dictionnaire qui contient tous les arguments de piece_jointe_temporaire en clé
-  update: (nom, dictUpdate, callback) => {
+  update: (nom, id_can, num_OE, dictUpdate, callback) => {
     // Vérification que la pièce existe
     db.query(
-      "SELECT * FROM Piece_Jointe_Temporaire WHERE nom = ?",
-      [nom],
+      "SELECT * FROM Piece_Jointe_Temporaire WHERE nom = ? AND id_can = ? AND num_OE = ?",
+      [nom, id_can, num_OE],
       (err, results) => {
         if (err) {
           return callback(err);
@@ -107,10 +131,10 @@ const pjt = {
         const champs = Object.keys(nvdict);
         const values = champs.map((k) => nvdict[k]);
         const clause = champs.map((k) => `${k} = ?`).join(", ");
-        const sql = `UPDATE Piece_Jointe_Temporaire SET ${clause} WHERE nom = ?`;
+        const sql = `UPDATE Piece_Jointe_Temporaire SET ${clause} WHERE nom = ? AND id_can = ? AND num_OE = ?`;
 
         // Exécution
-        db.query(sql, [...values, nom], (err2, result2) => {
+        db.query(sql, [...values, nom, id_can, num_OE], (err2, result2) => {
           if (err2) {
             return callback(err2);
           }

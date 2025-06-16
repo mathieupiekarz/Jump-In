@@ -778,6 +778,15 @@ form {
   text-decoration: none;
 }
 
+.job-header-inner {
+  display: flex;
+  align-items: center;
+}
+.actions-buttons2 {
+  margin-left: auto;
+  display: flex;
+}
+
 .view-btn {
   background-color: #4a90e2;
 }

@@ -1,9 +1,9 @@
 var db = require("./db.js");
 
 const pjd = {
-  read: (nom, callback) => {
-    let sql = "SELECT * FROM Piece_Jointe_Durable WHERE nom = ?";
-    db.query(sql, [nom], (err, results) => {
+  read: (nom, id_can, callback) => {
+    let sql = "SELECT * FROM Piece_Jointe_Durable WHERE nom = ? AND id_can = ?";
+    db.query(sql, [nom, id_can], (err, results) => {
       if (err) throw err;
       if (results.length === 0) return callback(null);
       callback(results);
@@ -36,7 +36,7 @@ const pjd = {
       return callback(null);
     }
 
-    pjd.read(nom, (result) => {
+    pjd.read(nom, id_can, (result) => {
       if (result && result.length > 0) return callback(null);
 
       const sql_can = "SELECT * FROM Candidat WHERE id_can = ?";
@@ -60,12 +60,21 @@ const pjd = {
       });
     });
   },
+  countByName: (nom, callback) => {
+    const sql =
+      "SELECT COUNT(*) AS cnt FROM Piece_Jointe_Durable WHERE nom = ?";
+    db.query(sql, [nom], (err, results) => {
+      if (err) return callback(err);
+      callback(null, results[0].cnt);
+    });
+  },
+
   // prend en argument un dictionnaire qui contient tous les arguments de piece_jointe_durable en clé
-  update: (nom, dictUpdate, callback) => {
+  update: (nom, id_can, dictUpdate, callback) => {
     // vérification si la piece jointe durable existe
     db.query(
-      "SELECT * FROM Piece_Jointe_Durable WHERE nom = ?",
-      [nom],
+      "SELECT * FROM Piece_Jointe_Durable WHERE nom = ? AND id_can = ?",
+      [nom, id_can],
       (err, results) => {
         if (err) throw err;
         if (results.length === 0) return callback(null);
@@ -96,8 +105,8 @@ const pjd = {
           const champs = Object.keys(nvdict);
           const values = Object.values(nvdict);
           const clause = champs.map((k) => `${k} = ?`).join(", ");
-          const sql = `UPDATE Piece_Jointe_Durable SET ${clause} WHERE nom = ?`;
-          db.query(sql, [...values, nom], (err, results) => {
+          const sql = `UPDATE Piece_Jointe_Durable SET ${clause} WHERE nom = ? AND id_can = ?`;
+          db.query(sql, [...values, nom, id_can], (err, results) => {
             if (err) throw err;
             callback(results.affectedRows);
           });

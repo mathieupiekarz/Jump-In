@@ -19,12 +19,16 @@ const offre = {
       JOIN Organisation org ON f.siren = org.siren
       WHERE o.numero = ?`;
     db.query(sql, [numero], (err, results) => {
-      if (err) throw err;
-      for (const offre of results) {
-        offre.lieu_mission = JSON.parse(offre.lieu_mission);
+      if (err) {
+        console.error("Erreur lors de la récupération des candidatures:", err);
+        callback([]);
+      } else {
+        for (const offre of results) {
+          offre.lieu_mission = JSON.parse(offre.lieu_mission);
+        }
+        if (results.length === 0) return callback(null);
+        else callback(results);
       }
-      if (results.length === 0) return callback(null);
-      else callback(results);
     });
   },
   readall: (callback) => {

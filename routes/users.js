@@ -262,7 +262,6 @@ router.post("/inscription", function (req, res, next) {
 
 router.get("/offre/:id", function (req, res) {
   const numero = req.params.id;
-
   offre.readWithFicheAndOrganisation(numero, function (result) {
     if (!result || result.length === 0) {
       return res.status(404).send("Offre non trouvée.");
@@ -334,7 +333,6 @@ router.post("/postuler", upload.any(), async (req, res) => {
     const result = await new Promise((resolve) => {
       candidature.creat(id_candidat, numero_offre, resolve);
     });
-
     if (!result) {
       return res.send(
         "Erreur lors de la candidature. Vous avez peut-être déjà postulé à cette offre"
@@ -352,8 +350,14 @@ router.post("/postuler", upload.any(), async (req, res) => {
           piece.split(".").pop(),
           id_candidat,
           numero_offre,
-          (r) =>
-            r ? resolve() : reject("Erreur enregistrement pièce sauvegardée")
+          (r) => {
+            if (r) resolve();
+            else {
+              reject(
+                new Error(`Échec enregistrement pièce sauvegardée : ${piece}`)
+              );
+            }
+          }
         );
       });
     }
@@ -373,7 +377,6 @@ router.post("/postuler", upload.any(), async (req, res) => {
         });
       }
     }
-
     return res.redirect("/users/ListeOffres");
   } catch (err) {
     console.error(err);
@@ -381,7 +384,7 @@ router.post("/postuler", upload.any(), async (req, res) => {
   }
 });
 
-router.post("/modifier-candidature", upload.any(), function (req, res, next) {
+router.post("/modifier-candidature", upload.any(), async (req, res, next) => {
   const numero_offre = req.body.numero_offre;
   const originalName = JSON.parse(req.body.originalFiles);
   const files = req.files || [];
@@ -390,39 +393,56 @@ router.post("/modifier-candidature", upload.any(), function (req, res, next) {
     return res.redirect(`/offre2/${numero_offre}`);
   }
 
-  let completed = 0;
-  let errorSent = false;
+  try {
+    for (let i = 0; i < files.length; i++) {
+      // on récupère le chemin de l'ancien fichier
+      const file = files[i];
+      const oldName = originalName[i];
+      const newName = file.filename;
+      const newType = path.extname(newName).slice(1);
 
-  files.forEach((file, index) => {
-    // on récupère le chemin de l'ancien fichier
-    const oldFilePath = path.join(__dirname, "../uploads", originalName[index]);
+      // mise à jour de la base
+      await new Promise((resolve, reject) => {
+        pjt.update(
+          oldName,
+          req.session.id_candidat,
+          numero_offre,
+          { nom: newName, type: newType },
+          (affectedRows) => {
+            if (!affectedRows) {
+              return reject(new Error("Erreur update DB pour " + oldName));
+            }
+            resolve();
+          }
+        );
+      });
 
-    // supprime l’ancien fichier
-    fs.unlink(oldFilePath, (err) => {
-      if (err && err.code !== "ENOENT") {
-        console.error("Erreur suppr. ancien fichier:", err);
+      // on compte les références restantes de l'ancien fichier
+      const count = await new Promise((resolve, reject) => {
+        pjt.countByName(oldName, (err, cnt) => {
+          if (err) return reject(err);
+          resolve(cnt);
+        });
+      });
+
+      // supprime l’ancien fichier si aucune référence
+      if (count === 0) {
+        const oldPath = path.join(__dirname, "../uploads", oldName);
+        fs.unlink(oldPath, (err) => {
+          if (err && err.code !== "ENOENT") {
+            console.error("Erreur suppr. ancien fichier:", err);
+          }
+        });
       }
-
-      // on récupère le chemin du nouveau fichier
-      const newType = path.extname(file.filename).slice(1);
-
-      // mise à jour en base (callback à adapter si pjt.update utilise callbacks)
-      pjt.update(
-        originalName[index],
-        { nom: file.filename, type: newType },
-        (affectedRows) => {
-          if (!affectedRows) {
-            errorSent = true;
-            return res.status(500).send("Erreur de mise à jour en base.");
-          }
-          completed++;
-          if (completed === files.length) {
-            res.redirect(`/users/offre2/${numero_offre}`);
-          }
-        }
-      );
-    });
-  });
+    }
+    // on redirige
+    res.redirect(`/users/offre2/${numero_offre}`);
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .send("Une erreur est survenue lors de la modification.");
+  }
 });
 
 router.post("/upload", upload.single("file"), (req, res) => {
@@ -464,35 +484,69 @@ router.get("/pieces-jointes", (req, res, next) => {
   });
 });
 
-router.get("/pj-temporaire", (req, res) => {
+router.post("/supprimerCandidature/:numero", async (req, res, next) => {
   const id_can = req.session.id_candidat;
-  const numero = req.params.id;
+  const numero_offre = parseInt(req.params.numero, 10);
+
   if (!id_can) {
     return res.status(401).json({ message: "Non autorisé" });
   }
-  const sql =
-    "SELECT * FROM Piece_Jointe_Temporaire WHERE id_can = ? AND num_OE = ?";
-  db.query(sql, [id_can, numero], (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: "Erreur Serveur" });
-    }
-    res.json(results);
-  });
-});
 
-router.get("/offre/:id", function (req, res, next) {
-  const id = req.params.id;
-
-  offre.readWithFicheAndOrganisation(id, function (result) {
-    if (!result || result.length === 0) {
-      return res.status(404).send("Offre non trouvée.");
-    }
-
-    res.render("OffreDetail", {
-      title: "Détail de l'offre",
-      offre: result[0],
+  try {
+    // Récupération des noms de fichiers avant suppression
+    const oldFiles = await new Promise((resolve, reject) => {
+      const sql =
+        "SELECT nom FROM Piece_Jointe_Temporaire WHERE id_can = ? AND num_OE = ?";
+      db.query(sql, [id_can, numero_offre], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows.map((r) => r.nom));
+      });
     });
-  });
+
+    // Suppression de la candidature
+    const deleteCount = await new Promise((resolve, reject) => {
+      candidature.delete(id_can, numero_offre, (err, affectedRows) => {
+        if (err) return reject(err);
+        resolve(affectedRows);
+      });
+    });
+    if (!deleteCount) {
+      return res.status(404).send("Candidature introuvable ou déjà supprimée.");
+    }
+
+    // Pour chaque ancien fichier, vérifier références restantes
+    for (const nom of oldFiles) {
+      // count dans la table temporaire
+      const tempCount = await new Promise((resolve, reject) => {
+        pjt.countByName(nom, (err, cnt) => {
+          if (err) return reject(err);
+          resolve(cnt);
+        });
+      });
+      // count dans la table durable
+      const durCount = await new Promise((resolve, reject) => {
+        pjd.countByName(nom, (err, cnt) => {
+          if (err) return reject(err);
+          resolve(cnt);
+        });
+      });
+
+      // Suppression physique si plus aucune référence
+      if (tempCount === 0 && durCount === 0) {
+        const filePath = path.join(__dirname, "../uploads", nom);
+        fs.unlink(filePath, (err) => {
+          if (err && err.code !== "ENOENT") {
+            console.error("Erreur suppression fichier :", err);
+          }
+        });
+      }
+    }
+
+    return res.redirect("/users/ListeOffres");
+  } catch (err) {
+    console.error("Erreur suppression candidature :", err);
+    next(err);
+  }
 });
 
 router.get("/MesOffres", function (req, res, next) {
