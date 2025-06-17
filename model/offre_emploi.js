@@ -93,6 +93,78 @@ const offre = {
     });
   },
 
+  // Nouvelle fonction pour la pagination
+  readSansPostulerPaginated: (id_can, page = 1, limit = 9, callback) => {
+    const offset = (page - 1) * limit;
+    
+    // Requête pour obtenir le nombre total d'offres
+    const countSql = `
+      SELECT COUNT(*) as total FROM (
+        SELECT o.numero
+        FROM Offre_Emploi o
+        JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche 
+        WHERE o.etat = "publiee" 
+        AND NOT EXISTS (
+          SELECT 1
+          FROM Candidature c
+          WHERE c.num_OE = o.numero
+          AND c.id_can = ?
+        )
+      ) AS count_table`;
+
+    // Requête principale avec pagination
+    const sql = `
+      SELECT 
+        tab.numero, tab.etat, tab.date_validite, tab.indication, tab.nb_pieces_demandees,
+        tab.id_fiche, tab.intitule, tab.statut_de_poste, tab.responsable_hierarchique,
+        tab.type_metier, tab.lieu_mission, tab.rythme, tab.fourchette_salaire, tab.description,
+        org.nom AS organisation_nom, org.siren, org.type, org.siege_social 
+      FROM (
+        SELECT 
+          o.*, 
+          f.intitule, 
+          f.statut_de_poste, 
+          f.responsable_hierarchique, 
+          f.type_metier, 
+          f.lieu_mission, 
+          f.rythme, 
+          f.fourchette_salaire, 
+          f.description, 
+          f.siren
+        FROM Offre_Emploi o
+        JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche 
+        WHERE o.etat = "publiee" 
+        AND NOT EXISTS (
+          SELECT 1
+          FROM Candidature c
+          WHERE c.num_OE = o.numero
+          AND c.id_can = ?
+        )
+      ) AS tab 
+      JOIN Organisation org ON tab.siren = org.siren
+      ORDER BY tab.date_validite DESC
+      LIMIT ? OFFSET ?`;
+
+    // Exécuter les deux requêtes
+    db.query(countSql, [id_can], (err, countResult) => {
+      if (err) {
+        console.error("Erreur lors du comptage des offres:", err);
+        return callback(null, 0);
+      }
+
+      const totalOffres = countResult[0].total;
+
+      db.query(sql, [id_can, limit, offset], (err, results) => {
+        if (err) {
+          console.error("Erreur lors de la récupération des offres:", err);
+          return callback([], totalOffres);
+        }
+
+        callback(results, totalOffres);
+      });
+    });
+  },
+
   // Récupère toutes les offres d'emploi d'une organisation spécifique
   readAllByOrganisation: (siren, callback) => {
     const sql = `
