@@ -53,8 +53,7 @@ const candidat = {
 
     // vérification du format du numéro de téléphone
     let numValide = num.replace(/\s+/g, "");
-    numValide = /^\+33\d{9}$/.test(numValide);
-    if (!numValide) return callback(null);
+    if (!/^\+33\d{9}$/.test(numValide)) return callback(null);
 
     // vérification de la composition du mot de passe
     const isValide = await candidat.areValide(mdp);

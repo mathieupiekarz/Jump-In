@@ -9,6 +9,7 @@ var util = require("util");
 var query = util.promisify(db.query).bind(db);
 var { geocode } = require("../services/geocode.js");
 var { calculDistance } = require("../services/distance.js");
+var { sendEmail, emailTemplates } = require('../services/email.js');
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -129,7 +130,10 @@ router.get("/demandeChOlist", function (req, res, next) {
 router.get("/login", function (req, res, next) {
   const inactive = req.session.inactiveAccount === true;
   req.session.inactiveAccount = false;
-  res.render("Login", { title: "S'authentifier", inactive });
+  res.render("Login", { 
+    title: "S'authentifier", 
+    inactive: inactive 
+  });
 });
 
 router.post("/login", function (req, res, next) {
@@ -465,11 +469,18 @@ router.post("/inscription", function (req, res, next) {
   const statut = "actif";
   console.log(password);
 
-  candidat.creat(email, password, nom, prenom, num, statut, (result) => {
+  candidat.creat(email, password, nom, prenom, num, statut, async (result) => {
     if (!result) {
       return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
     } else {
-      res.render("Login", { title: "S'authentifier" });
+      // Envoyer l'email de confirmation
+      const template = emailTemplates.compteCree(nom, prenom);
+      await sendEmail(email, template);
+      
+      res.render("Login", { 
+        title: "S'authentifier",
+        inactive: false
+      });
     }
   });
 });
@@ -639,7 +650,7 @@ router.post("/modifier-candidature", upload.any(), async (req, res, next) => {
         });
       });
 
-      // supprime l’ancien fichier si aucune référence
+      // supprime l'ancien fichier si aucune référence
       if (count === 0) {
         const oldPath = path.join(__dirname, "../uploads", oldName);
         fs.unlink(oldPath, (err) => {

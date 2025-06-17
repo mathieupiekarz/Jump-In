@@ -1,3 +1,4 @@
+require('dotenv').config();
 var createError = require("http-errors");
 const express = require("express");
 var session = require("./session");

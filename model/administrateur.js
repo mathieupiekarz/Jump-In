@@ -51,12 +51,11 @@ const admin = {
     }
 
     // vérification du format du numéro de téléphone
-    let numValide = num.replace(/\s+/g, "");
-    numValide = /^\+33\d{9}$/.test(numValide);
-    if (!numValide) return callback(null);
+    const numValide = num.replace(/\s+/g, "");
+    if (!/^\+33\d{9}$/.test(numValide)) return callback(null);
 
     // vérification du format de l'email
-    regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) return callback(null);
 
     // vérification si un admin existant a déjà le même email
