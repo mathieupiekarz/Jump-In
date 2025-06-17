@@ -56,7 +56,7 @@ const admin = {
     if (!numValide) return callback(null);
 
     // vérification du format de l'email
-    regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) return callback(null);
 
     // vérification si un admin existant a déjà le même email

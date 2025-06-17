@@ -9,6 +9,7 @@ var util = require("util");
 var query = util.promisify(db.query).bind(db);
 var { geocode } = require("../services/geocode.js");
 var { calculDistance } = require("../services/distance.js");
+var { sendEmail, emailTemplates } = require("../services/email.js");
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -129,7 +130,10 @@ router.get("/demandeChOlist", function (req, res, next) {
 router.get("/login", function (req, res, next) {
   const inactive = req.session.inactiveAccount === true;
   req.session.inactiveAccount = false;
-  res.render("Login", { title: "S'authentifier", inactive });
+  res.render("Login", {
+    title: "S'authentifier",
+    inactive: inactive,
+  });
 });
 
 router.post("/login", function (req, res, next) {
@@ -295,6 +299,8 @@ router.get("/ListeOffres", async (req, res, next) => {
     const uLat = parseFloat(req.query.lat);
     const uLon = parseFloat(req.query.lng);
     const id_can = req.session.id_candidat;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
     const {
       type_metier,
       rythme,
@@ -304,141 +310,180 @@ router.get("/ListeOffres", async (req, res, next) => {
       city,
     } = req.query;
 
-    // Permet d'aller chercher toutes les offres pour lesquelles le candidat ne peut pas postuler et qui sont "publiee"
-    const baseTab = `
-      SELECT 
-        o.numero, o.etat, o.date_validite, o.indication,
-        o.nb_pieces_demandees, f.id_fiche, f.intitule,
-        f.statut_de_poste, f.responsable_hierarchique,
-        f.type_metier, f.lieu_mission, f.rythme,
-        f.fourchette_salaire, f.description, f.siren
-      FROM Offre_Emploi o
-      JOIN Fiche_Poste f ON o.id_fiche = f.id_fiche
-      WHERE o.etat = 'publiee'
-        AND NOT EXISTS (
-          SELECT 1 FROM Candidature c
-          WHERE c.num_OE = o.numero
-            AND c.id_can  = ?
-        )
-    `;
-    const baseParams = [id_can];
-
-    // Récupération des listes de valeurs dans ma table d'offres triées
-    const [typesMetierRows, rythmesRows, statutsRows, salairesRows, datesRows] =
-      await Promise.all([
-        query(
-          `SELECT DISTINCT type_metier FROM (${baseTab}) AS base`,
-          baseParams
-        ),
-        query(`SELECT DISTINCT rythme FROM (${baseTab}) AS base`, baseParams),
-        query(
-          `SELECT DISTINCT statut_de_poste FROM (${baseTab}) AS base`,
-          baseParams
-        ),
-        query(
-          `SELECT DISTINCT fourchette_salaire FROM (${baseTab}) AS base`,
-          baseParams
-        ),
-        query(
-          `SELECT DISTINCT DATE_FORMAT(base.date_validite, '%Y-%m-%d') AS date_validite FROM (${baseTab}) AS base`,
-          baseParams
-        ),
-      ]);
-
-    // Construction dynamique des filtres
-    const clauses = [];
-    const params = [id_can];
-
-    function addFilterCi(field, values) {
-      const arr = Array.isArray(values) ? values : [values];
-      // on met tout en lowercase côté SQL et JS --> (insensibles à la casse)
-      clauses.push(`LOWER(${field}) IN (?)`);
-      params.push(arr.map((v) => v.toLowerCase()));
-    }
-
-    if (type_metier) addFilterCi("base.type_metier", type_metier);
-    if (rythme) addFilterCi("base.rythme", rythme);
-    if (statut_de_poste) addFilterCi("base.statut_de_poste", statut_de_poste);
-    if (fourchette_salaire)
-      addFilterCi("base.fourchette_salaire", fourchette_salaire);
-    if (date_validite) addFilterCi("base.date_validite", date_validite);
-
-    const whereFilters = clauses.length ? " AND " + clauses.join(" AND ") : "";
-
-    // Construction requête finale : baseTab + filtres + join Organisation
-    const finalSql = `
-      SELECT
-        base.*,
-        org.nom           AS organisation_nom,
-        org.siren         AS organisation_siren,
-        org.type          AS organisation_type,
-        org.siege_social  AS organisation_siege
-      FROM (
-        ${baseTab}
-      ) AS base
-      JOIN Organisation org
-        ON base.siren = org.siren
-      ${whereFilters}
-      ORDER BY base.date_validite DESC
-    `;
-    const rows = await query(finalSql, params);
-
-    // Récupération de toute les villes et distances
-    const enriched = await Promise.all(
-      rows.map(async (of) => {
-        let ville = null,
-          distance = Infinity;
-        try {
-          const lieu =
-            typeof of.lieu_mission === "string"
-              ? JSON.parse(of.lieu_mission)
-              : of.lieu_mission;
-          ville = lieu.ville;
-          if (ville && uLat != null && uLon != null) {
-            const { lat, lon } = await geocode(ville);
-            distance = calculDistance(uLat, uLon, lat, lon);
-          }
-        } catch {}
-        return { ...of, ville, distance };
-      })
-    );
-
-    // Filtrage pour une ville, garder la plus petite distance trouvée
-    const cityMap = {};
-    enriched.forEach((of) => {
-      if (of.ville) {
-        const prev = cityMap[of.ville];
-        // si première fois, ou distance plus petite, on met à jour
-        if (prev === undefined || of.distance < prev) {
-          cityMap[of.ville] = of.distance;
+    // Récupérer les offres avec pagination
+    offre.readSansPostulerPaginated(
+      id_can,
+      page,
+      limit,
+      (offres, totalOffres) => {
+        if (!offres) {
+          return res.render("ListeOffres", {
+            title: "Liste des Offres d'Emploi",
+            offres: [],
+            citiesDistances: [],
+            typesMetier: [],
+            rythmes: [],
+            statutsDePoste: [],
+            fourchettesSalaires: [],
+            datesPublication: [],
+            selectedFilters: req.query,
+            pagination: {
+              currentPage: page,
+              totalPages: Math.ceil(totalOffres / limit),
+              totalOffres: totalOffres,
+            },
+          });
         }
+
+        // Récupération des listes de valeurs dans ma table d'offres triées
+        Promise.all([
+          query(`SELECT DISTINCT f.type_metier 
+               FROM Fiche_Poste f 
+               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
+               WHERE o.etat = 'publiee'`),
+          query(`SELECT DISTINCT f.rythme 
+               FROM Fiche_Poste f 
+               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
+               WHERE o.etat = 'publiee'`),
+          query(`SELECT DISTINCT f.statut_de_poste 
+               FROM Fiche_Poste f 
+               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
+               WHERE o.etat = 'publiee'`),
+          query(`SELECT DISTINCT f.fourchette_salaire 
+               FROM Fiche_Poste f 
+               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
+               WHERE o.etat = 'publiee'`),
+          query(`SELECT DISTINCT DATE_FORMAT(o.date_validite, '%Y-%m-%d') AS date_validite 
+               FROM Offre_Emploi o 
+               WHERE o.etat = 'publiee'`),
+        ]).then(
+          ([
+            typesMetierRows,
+            rythmesRows,
+            statutsRows,
+            salairesRows,
+            datesRows,
+          ]) => {
+            // Récupération de toutes les villes et distances
+            Promise.all(
+              offres.map(async (of) => {
+                let ville = null,
+                  distance = Infinity;
+                try {
+                  const lieu =
+                    typeof of.lieu_mission === "string"
+                      ? JSON.parse(of.lieu_mission)
+                      : of.lieu_mission;
+                  ville = lieu.ville;
+                  if (ville && uLat != null && uLon != null) {
+                    const { lat, lon } = await geocode(ville);
+                    distance = calculDistance(uLat, uLon, lat, lon);
+                  }
+                } catch {}
+                return { ...of, ville, distance };
+              })
+            ).then((enriched) => {
+              // Filtrage pour une ville, garder la plus petite distance trouvée
+              const cityMap = {};
+              enriched.forEach((of) => {
+                if (of.ville) {
+                  const prev = cityMap[of.ville];
+                  if (prev === undefined || of.distance < prev) {
+                    cityMap[of.ville] = of.distance;
+                  }
+                }
+              });
+
+              // Transformation en tableau trié pour les checkbox
+              const citiesDistances = Object.entries(cityMap)
+                .map(([ville, distance]) => ({ ville, distance }))
+                .sort((a, b) => a.distance - b.distance);
+
+              // Filtrage final selon la sélection de l'utilisateur
+              let filteredOffres = enriched;
+
+              // Filtrage par ville
+              if (city) {
+                const selection = Array.isArray(city) ? city : [city];
+                filteredOffres = filteredOffres.filter((o) =>
+                  selection.includes(o.ville)
+                );
+              }
+
+              // Filtrage par type de métier
+              if (type_metier) {
+                const selection = Array.isArray(type_metier)
+                  ? type_metier
+                  : [type_metier];
+                filteredOffres = filteredOffres.filter((o) =>
+                  selection.includes(o.type_metier)
+                );
+              }
+
+              // Filtrage par rythme
+              if (rythme) {
+                const selection = Array.isArray(rythme) ? rythme : [rythme];
+                filteredOffres = filteredOffres.filter((o) =>
+                  selection.includes(o.rythme)
+                );
+              }
+
+              // Filtrage par statut de poste
+              if (statut_de_poste) {
+                const selection = Array.isArray(statut_de_poste)
+                  ? statut_de_poste
+                  : [statut_de_poste];
+                filteredOffres = filteredOffres.filter((o) =>
+                  selection.includes(o.statut_de_poste)
+                );
+              }
+
+              // Filtrage par fourchette de salaire
+              if (fourchette_salaire) {
+                const selection = Array.isArray(fourchette_salaire)
+                  ? fourchette_salaire
+                  : [fourchette_salaire];
+                filteredOffres = filteredOffres.filter((o) =>
+                  selection.includes(o.fourchette_salaire)
+                );
+              }
+
+              // Filtrage par date de validité
+              if (date_validite) {
+                const selection = Array.isArray(date_validite)
+                  ? date_validite
+                  : [date_validite];
+                filteredOffres = filteredOffres.filter((o) => {
+                  const offreDate = new Date(o.date_validite)
+                    .toISOString()
+                    .split("T")[0];
+                  return selection.includes(offreDate);
+                });
+              }
+
+              res.render("ListeOffres", {
+                title: "Liste des Offres d'Emploi",
+                offres: filteredOffres,
+                citiesDistances,
+                typesMetier: typesMetierRows.map((r) => r.type_metier),
+                rythmes: rythmesRows.map((r) => r.rythme),
+                statutsDePoste: statutsRows.map((r) => r.statut_de_poste),
+                fourchettesSalaires: salairesRows.map(
+                  (r) => r.fourchette_salaire
+                ),
+                datesPublication: datesRows.map((r) => r.date_validite),
+                selectedFilters: req.query,
+                pagination: {
+                  currentPage: page,
+                  totalPages: Math.ceil(totalOffres / limit),
+                  totalOffres: totalOffres,
+                },
+              });
+            });
+          }
+        );
       }
-    });
-
-    // Transformaion en 1 tableau trié pour les checkbox
-    const citiesDistances = Object.entries(cityMap)
-      .map(([ville, distance]) => ({ ville, distance }))
-      .sort((a, b) => a.distance - b.distance);
-
-    // Filtrage final selon la selection de l'utilisateur
-    let offres = enriched;
-    if (city) {
-      const selection = Array.isArray(city) ? city : [city]; // city peut être un str ou un tableau
-      offres = enriched.filter((o) => selection.includes(o.ville)); // on ne garde que les villes dans selection
-    }
-
-    // Renvoi final
-    res.render("ListeOffres", {
-      title: "Liste des Offres d'Emploi",
-      offres,
-      citiesDistances,
-      typesMetier: typesMetierRows.map((r) => r.type_metier),
-      rythmes: rythmesRows.map((r) => r.rythme),
-      statutsDePoste: statutsRows.map((r) => r.statut_de_poste),
-      fourchettesSalaires: salairesRows.map((r) => r.fourchette_salaire),
-      datesPublication: datesRows.map((r) => r.date_validite),
-      selectedFilters: req.query,
-    });
+    );
   } catch (err) {
     next(err);
   }
@@ -464,11 +509,18 @@ router.post("/inscription", function (req, res, next) {
   // ou si on le met à inactif par défaut et qu'on l'active après validation
   const statut = "actif";
 
-  candidat.creat(email, password, nom, prenom, num, statut, (result) => {
+  candidat.creat(email, password, nom, prenom, num, statut, async (result) => {
     if (!result) {
       return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
     } else {
-      res.redirect("/inscription");
+      // Envoyer l'email de confirmation
+      const template = emailTemplates.compteCree(nom, prenom);
+      await sendEmail(email, template);
+
+      res.render("Login", {
+        title: "S'authentifier",
+        inactive: false,
+      });
     }
   });
 });
@@ -638,7 +690,7 @@ router.post("/modifier-candidature", upload.any(), async (req, res, next) => {
         });
       });
 
-      // supprime l’ancien fichier si aucune référence
+      // supprime l'ancien fichier si aucune référence
       if (count === 0) {
         const oldPath = path.join(__dirname, "../uploads", oldName);
         fs.unlink(oldPath, (err) => {

@@ -1346,3 +1346,31 @@ form {
   background: #f0f0f0;
   color: #333;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.page-link {
+  background-color: #fcfcfc;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.page-link:hover {
+  background-color: #91b7df;
+  border: none;
+}
+
+.page-link.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}

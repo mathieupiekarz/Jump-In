@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var db = require("../model/db.js");
 var session = require("../session.js");
+var { sendEmail, emailTemplates } = require('../services/email.js');
 
 var { geocode } = require("../services/geocode.js");
 var { calculDistance } = require("../services/distance.js");
@@ -358,129 +359,109 @@ router.get("/admins", function (req, res) {
 });
 
 // Route pour approuver une demande de création
-router.post(
-  "/request/creation/:id_can/:siren/approve",
-  function (req, res, next) {
-    const id_can = parseInt(req.params.id_can);
-    const siren = req.params.siren;
+router.post("/request/creation/:id_can/:siren/approve", function (req, res, next) {
+  const id_can = parseInt(req.params.id_can);
+  const siren = req.params.siren;
 
-    // 1. Récupérer les informations de la demande
-    demandeCreation.read(id_can, siren, function (demandeResult) {
-      if (!demandeResult || demandeResult.length === 0) {
-        return res.status(404).send("Demande non trouvée");
+  // 1. Récupérer les informations de la demande
+  demandeCreation.read(id_can, siren, function (demandeResult) {
+    if (!demandeResult || demandeResult.length === 0) {
+      return res.status(404).send("Demande non trouvée");
+    }
+
+    const demande = demandeResult[0];
+    console.log("Informations de la demande:", demande);
+
+    // Parser le JSON du siège social
+    let siege_social;
+    try {
+      siege_social = JSON.parse(demande.siege_social);
+    } catch (error) {
+      console.error("Erreur lors du parsing du siège social:", error);
+      return res.status(400).send("Format de siège social invalide");
+    }
+
+    // 2. Récupérer les informations du candidat
+    candidat.readById(id_can, function (candidatResult) {
+      if (!candidatResult || candidatResult.length === 0) {
+        return res.status(404).send("Candidat non trouvé");
       }
 
-      const demande = demandeResult[0];
-      console.log("Informations de la demande:", demande);
+      const candidatInfo = candidatResult[0];
+      console.log("Informations du candidat:", candidatInfo);
 
-      // Parser le JSON du siège social
-      let siege_social;
-      try {
-        siege_social = JSON.parse(demande.siege_social);
-      } catch (error) {
-        console.error("Erreur lors du parsing du siège social:", error);
-        return res.status(400).send("Format de siège social invalide");
-      }
+      // 3. Créer l'organisation
+      organisation.creat(
+        siren,
+        demande.nom,
+        demande.type,
+        siege_social,
+        "active",
+        function (orgResult) {
+          if (orgResult === null) {
+            console.log("Échec de la création de l'organisation");
+            return res.status(400).send("Erreur lors de la création de l'organisation");
+          }
 
-      // 2. Récupérer les informations du candidat
-      candidat.readById(id_can, function (candidatResult) {
-        if (!candidatResult || candidatResult.length === 0) {
-          return res.status(404).send("Candidat non trouvé");
-        }
+          console.log("Organisation créée avec succès:", orgResult);
 
-        const candidatInfo = candidatResult[0];
-        console.log("Informations du candidat:", candidatInfo);
+          // 4. Créer le compte recruteur
+          recruteur.creat(
+            siren,
+            candidatInfo.email,
+            candidatInfo.mdp,
+            candidatInfo.nom,
+            candidatInfo.prenom,
+            candidatInfo.numero_telephone,
+            "actif",
+            async function (recruteurResult) {
+              if (!recruteurResult) {
+                console.log("Échec de la création du compte recruteur");
+                return res.status(400).send("Erreur lors de la création du compte recruteur");
+              }
 
-        // 3. Créer l'organisation
-        organisation.creat(
-          siren,
-          demande.nom,
-          demande.type,
-          siege_social,
-          "active",
-          function (orgResult) {
-            if (orgResult === null) {
-              console.log("Échec de la création de l'organisation");
-              return res
-                .status(400)
-                .send("Erreur lors de la création de l'organisation");
-            }
+              console.log("Compte recruteur créé avec succès:", recruteurResult);
 
-            console.log("Organisation créée avec succès:", orgResult);
+              // Envoyer l'email de confirmation
+              const template = emailTemplates.demandeOrganisationValidee(
+                candidatInfo.nom,
+                candidatInfo.prenom,
+                demande.nom
+              );
+              await sendEmail(candidatInfo.email, template);
 
-            // 4. Créer le compte recruteur
-            recruteur.creat(
-              siren,
-              candidatInfo.email,
-              candidatInfo.mdp,
-              candidatInfo.nom,
-              candidatInfo.prenom,
-              candidatInfo.numero_telephone,
-              "actif",
-              function (recruteurResult) {
-                if (!recruteurResult) {
-                  console.log("Échec de la création du compte recruteur");
-                  return res
-                    .status(400)
-                    .send("Erreur lors de la création du compte recruteur");
-                }
+              // 5. Mettre à jour le statut de la demande
+              demandeCreation.update(
+                id_can,
+                siren,
+                { statutCrO: "validee" },
+                function (updateResult) {
+                  if (!updateResult) {
+                    console.log("Échec de la mise à jour du statut de la demande");
+                    return res.status(400).send("Erreur lors de la mise à jour du statut de la demande");
+                  }
 
-                console.log(
-                  "Compte recruteur créé avec succès:",
-                  recruteurResult
-                );
+                  console.log("Statut de la demande mis à jour:", updateResult);
 
-                // 5. Mettre à jour le statut de la demande
-                demandeCreation.update(
-                  id_can,
-                  siren,
-                  { statutCrO: "validee" },
-                  function (updateResult) {
-                    if (!updateResult) {
-                      console.log(
-                        "Échec de la mise à jour du statut de la demande"
-                      );
-                      return res
-                        .status(400)
-                        .send(
-                          "Erreur lors de la mise à jour du statut de la demande"
-                        );
+                  // 6. Supprimer le compte candidat
+                  candidat.delete(id_can, function (deleteResult) {
+                    if (!deleteResult) {
+                      console.log("Échec de la suppression du compte candidat");
+                      return res.status(400).send("Erreur lors de la suppression du compte candidat");
                     }
 
-                    console.log(
-                      "Statut de la demande mis à jour:",
-                      updateResult
-                    );
-
-                    // 6. Supprimer le compte candidat
-                    candidat.delete(id_can, function (deleteResult) {
-                      if (!deleteResult) {
-                        console.log(
-                          "Échec de la suppression du compte candidat"
-                        );
-                        return res
-                          .status(400)
-                          .send(
-                            "Erreur lors de la suppression du compte candidat"
-                          );
-                      }
-
-                      console.log(
-                        "Compte candidat supprimé avec succès:",
-                        deleteResult
-                      );
-                      return res.redirect("/admin/requests?tab=creation");
-                    });
-                  }
-                );
-              }
-            );
-          }
-        );
-      });
+                    console.log("Compte candidat supprimé avec succès:", deleteResult);
+                    return res.redirect("/admin/requests?tab=creation");
+                  });
+                }
+              );
+            }
+          );
+        }
+      );
     });
-  }
-);
+  });
+});
 
 // Route pour rejeter une demande de création
 router.post(
@@ -780,21 +761,24 @@ router.post("/create-admin", function (req, res, next) {
       candidatInfo.prenom,
       candidatInfo.numero_telephone,
       "actif",
-      function (adminResult) {
+      async function (adminResult) {
         if (!adminResult) {
           console.log("Échec de la création du compte administrateur");
-          return res
-            .status(400)
-            .send("Erreur lors de la création du compte administrateur");
+          return res.status(400).send("Erreur lors de la création du compte administrateur");
         }
+
+        // Envoyer l'email de confirmation
+        const template = emailTemplates.droitsAdminOctroyes(
+          candidatInfo.nom,
+          candidatInfo.prenom
+        );
+        await sendEmail(candidatInfo.email, template);
 
         // 3. Supprimer le compte candidat
         candidat.delete(id_candidat, function (deleteResult) {
           if (!deleteResult) {
             console.log("Échec de la suppression du compte candidat");
-            return res
-              .status(400)
-              .send("Erreur lors de la suppression du compte candidat");
+            return res.status(400).send("Erreur lors de la suppression du compte candidat");
           }
 
           console.log("Processus terminé avec succès");
