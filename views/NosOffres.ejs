@@ -280,13 +280,13 @@
         <div id="offres" class="tab-content active">
           <div class="search-bar">
             <input type="text" placeholder="Rechercher parmi nos offres..." />
-            <button class="filter-btn">Filtrer</button>
+            <button class="filter-btn">Rechercher</button>
             <button
               type="button"
               class="search-btn"
               onclick="openModalFiltre('filtersModalOffres')"
             >
-              Rechercher
+              Filtrer
             </button>
           </div>
 
@@ -371,13 +371,13 @@
               type="text"
               placeholder="Rechercher parmi nos fiches de poste..."
             />
-            <button class="filter-btn">Filtrer</button>
+            <button class="filter-btn">Rechercher</button>
             <button
               type="button"
               class="search-btn"
               onclick="openModalFiltre('filtersModalFiches')"
             >
-              Rechercher
+              Filtrer
             </button>
           </div>
 
@@ -524,10 +524,18 @@
 
       // Fermer les modals quand on clique en dehors
       window.onclick = function (event) {
-        const modals = document.querySelectorAll(".modal, .confirm-modal");
-        modals.forEach((modal) => {
+        const standardModals = document.querySelectorAll(
+          ".modal:not(.filters-modal), .confirm-modal"
+        );
+        standardModals.forEach((modal) => {
           if (event.target === modal) {
             modal.style.display = "none";
+          }
+        });
+        const filterModals = document.querySelectorAll(".filters-modal");
+        filterModals.forEach((modal) => {
+          if (event.target === modal) {
+            modal.classList.remove("active");
           }
         });
       };
@@ -1236,7 +1244,7 @@
       <div class="modal-content2">
         <div class="modal-header">
           <h2 class="modal-title">Filtres — Offres</h2>
-          <span class="close" onclick="closeModal('filtersModalOffres')"
+          <span class="close" onclick="closeModalFiltre('filtersModalOffres')"
             >&times;</span
           >
         </div>
@@ -1271,7 +1279,10 @@
           </section>
 
           <div class="form-buttons">
-            <button type="button" onclick="closeModal('filtersModalOffres')">
+            <button
+              type="button"
+              onclick="closeModalFiltre('filtersModalOffres')"
+            >
               Annuler
             </button>
             <button type="submit">Appliquer</button>
@@ -1285,7 +1296,7 @@
       <div class="modal-content2">
         <div class="modal-header">
           <h2 class="modal-title">Filtres — Fiches de poste</h2>
-          <span class="close" onclick="closeModal('filtersModalFiches')"
+          <span class="close" onclick="closeModalFiltre('filtersModalFiches')"
             >&times;</span
           >
         </div>
@@ -1347,7 +1358,10 @@
           </section>
 
           <div class="form-buttons">
-            <button type="button" onclick="closeModal('filtersModalFiches')">
+            <button
+              type="button"
+              onclick="closeModalFiltre('filtersModalFiches')"
+            >
               Annuler
             </button>
             <button type="submit">Appliquer</button>

@@ -10,6 +10,56 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
     />
+
+    <style>
+      /* Styles pour les modals */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: #333;
+      }
+
+      .adresse-section h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+    </style>
+    >
   </head>
 
   <body>
@@ -127,7 +177,14 @@
         >
           <div class="search-bar">
             <input type="text" placeholder="Rechercher un membre..." />
-            <button class="search-btn">Rechercher</button>
+            <button class="filter-btn">Rechercher</button>
+            <button
+              type="button"
+              class="search-btn"
+              onclick="openModalFiltre('filtersModalUtilisateur')"
+            >
+              Filtrer
+            </button>
           </div>
 
           <% if (candidats && candidats.length > 0) { %>
@@ -201,7 +258,14 @@
         >
           <div class="search-bar">
             <input type="text" placeholder="Rechercher un recruteur..." />
-            <button class="search-btn">Rechercher</button>
+            <button class="filter-btn">Rechercher</button>
+            <button
+              type="button"
+              class="search-btn"
+              onclick="openModalFiltre('filtersModalUtilisateur')"
+            >
+              Filtrer
+            </button>
           </div>
 
           <% if (recruteurs && recruteurs.length > 0) { %>
@@ -279,7 +343,14 @@
         >
           <div class="search-bar">
             <input type="text" placeholder="Rechercher une organisation..." />
-            <button class="search-btn">Rechercher</button>
+            <button class="filter-btn">Rechercher</button>
+            <button
+              type="button"
+              class="search-btn"
+              onclick="openModalFiltre('filtersModalOrganisation')"
+            >
+              Filtrer
+            </button>
           </div>
 
           <% if (organisations && organisations.length > 0) { %>
@@ -374,7 +445,14 @@
         >
           <div class="search-bar">
             <input type="text" placeholder="Rechercher un administrateur..." />
-            <button class="search-btn">Rechercher</button>
+            <button class="filter-btn">Rechercher</button>
+            <button
+              type="button"
+              class="search-btn"
+              onclick="openModalFiltre('filtersModalUtilisateur')"
+            >
+              Filtrer
+            </button>
           </div>
 
           <% if (admins && admins.length > 0) { %>
@@ -488,6 +566,184 @@
       </div>
     </div>
 
+    <!-- Modal filtres — Utilisateurs -->
+    <div id="filtersModalUtilisateur" class="modal filters-modal">
+      <div class="modal-content2">
+        <div class="modal-header">
+          <h2 class="modal-title">Filtres — Utilisateurs</h2>
+          <span
+            class="close"
+            onclick="closeModalFiltre('filtersModalUtilisateur')"
+            >&times;</span
+          >
+        </div>
+        <form method="GET" action="/admin/dashboard">
+          <input type="hidden" name="tab" value="<%= activeTab %>" />
+
+          <!-- Statut -->
+          <section class="filter-section">
+            <h4>Statut</h4>
+            <% statutsPossibles.forEach(e => { %>
+            <label>
+              <input type="checkbox" name="statut" value="<%= e %>" <%=
+              selectedFilters.statut &&
+              [].concat(selectedFilters.statut).includes(e) ? 'checked' : '' %>
+              /> <%= e.charAt(0).toUpperCase() + e.slice(1) %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Nom -->
+          <section class="filter-section">
+            <h4>Nom</h4>
+            <% nomsPossibles.forEach(e => { %>
+            <label>
+              <input type="checkbox" name="nom" value="<%= e %>" <%=
+              selectedFilters.nom && [].concat(selectedFilters.nom).includes(e)
+              ? 'checked' : '' %> /> <%= e %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Prénom -->
+          <section class="filter-section">
+            <h4>Prénom</h4>
+            <% prenomsPossibles.forEach(e => { %>
+            <label>
+              <input type="checkbox" name="prenom" value="<%= e %>" <%=
+              selectedFilters.prenom &&
+              [].concat(selectedFilters.prenom).includes(e) ? 'checked' : '' %>
+              /> <%= e %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Email -->
+          <section class="filter-section">
+            <h4>Email</h4>
+            <% emailsPossibles.forEach(e => { %>
+            <label>
+              <input type="checkbox" name="email" value="<%= e %>" <%=
+              selectedFilters.email &&
+              [].concat(selectedFilters.email).includes(e) ? 'checked' : '' %>
+              /> <%= e %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Téléphone -->
+          <section class="filter-section">
+            <h4>Numéro de téléphone</h4>
+            <% numerosPossibles.forEach(e => { %>
+            <label>
+              <input type="checkbox" name="numero_telephone" value="<%= e %>"
+              <%= selectedFilters.numero_telephone &&
+              [].concat(selectedFilters.numero_telephone).includes(e) ?
+              'checked' : '' %> /> <%= e %>
+            </label>
+            <% }) %>
+          </section>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              onclick="closeModalFiltre('filtersModalUtilisateur')"
+            >
+              Annuler
+            </button>
+            <button type="submit">Appliquer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal filtres — Organisations -->
+    <div id="filtersModalOrganisation" class="modal filters-modal">
+      <div class="modal-content2">
+        <div class="modal-header">
+          <h2 class="modal-title">Filtres — Organisations</h2>
+          <span
+            class="close"
+            onclick="closeModalFiltre('filtersModalOrganisation')"
+            >&times;</span
+          >
+        </div>
+        <form
+          method="GET"
+          action="/admin/dashboard"
+          onsubmit="return requestlocation(event)"
+        >
+          <input type="hidden" name="tab" value="organisations" />
+
+          <!-- SIREN -->
+          <section class="filter-section">
+            <h4>SIREN</h4>
+            <% sirensPossibles.forEach(siren => { %>
+            <label>
+              <input type="checkbox" name="siren" value="<%= siren %>" <%=
+              selectedFilters.siren &&
+              [].concat(selectedFilters.siren).includes(siren) ? 'checked' : ''
+              %> /> <%= siren %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Nom -->
+          <section class="filter-section">
+            <h4>Nom</h4>
+            <% nomsOrgsPossibles.forEach(nom => { %>
+            <label>
+              <input type="checkbox" name="nom_org" value="<%= nom %>" <%=
+              selectedFilters.nom_org &&
+              [].concat(selectedFilters.nom_org).includes(nom) ? 'checked' : ''
+              %> /> <%= nom %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Type -->
+          <section class="filter-section">
+            <h4>Type</h4>
+            <% typesOrgsPossibles.forEach(type => { %>
+            <label>
+              <input type="checkbox" name="type_org" value="<%= type %>" <%=
+              selectedFilters.type_org &&
+              [].concat(selectedFilters.type_org).includes(type) ? 'checked' :
+              '' %> /> <%= type %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Ville -->
+          <section class="filter-section">
+            <h4>Ville</h4>
+            <% villesPossibles.forEach(({ ville, distance }) => { %>
+            <label>
+              <input type="checkbox" name="ville" value="<%= ville %>" <%=
+              selectedFilters.ville &&
+              [].concat(selectedFilters.ville).includes(ville) ? 'checked' : ''
+              %> /> <%= ville %> (<%= distance != null ? (distance.toFixed(1) +
+              ' km') : 'distance inconnue' %>)
+            </label>
+            <% }) %>
+          </section>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              onclick="closeModalFiltre('filtersModalOrganisation')"
+            >
+              Annuler
+            </button>
+            <button type="submit">Appliquer</button>
+          </div>
+
+          <input type="hidden" id="inputLat" name="lat" />
+          <input type="hidden" id="inputLng" name="lng" />
+        </form>
+      </div>
+    </div>
+
     <script>
       // Fonction pour ouvrir le modal
       function openNewAdminModal() {
@@ -499,6 +755,14 @@
         document.getElementById("newAdminModal").style.display = "none";
       }
 
+      function openModalFiltre(modalId) {
+        document.getElementById(modalId).classList.add("active");
+      }
+
+      function closeModalFiltre(modalId) {
+        document.getElementById(modalId).classList.remove("active");
+      }
+
       // Ajouter l'événement click au bouton "Nouvel administrateur"
       document
         .querySelector(".admin-actions .action-button:last-child")
@@ -506,6 +770,39 @@
           e.preventDefault();
           openNewAdminModal();
         });
+
+      // Fermer les modals quand on clique en dehors
+      window.onclick = function (event) {
+        const standardModals = document.querySelectorAll(
+          ".modal:not(.filters-modal), .confirm-modal"
+        );
+        standardModals.forEach((modal) => {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+        const filterModals = document.querySelectorAll(".filters-modal");
+        filterModals.forEach((modal) => {
+          if (event.target === modal) {
+            modal.classList.remove("active");
+          }
+        });
+      };
+
+      // fonction pour la géolocalisation
+      function requestlocation(event) {
+        event.preventDefault();
+        if (!navigator.geolocation) return event.target.submit();
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            document.getElementById("inputLat").value = pos.coords.latitude;
+            document.getElementById("inputLng").value = pos.coords.longitude;
+            event.target.submit();
+          },
+          () => event.target.submit()
+        );
+        return false;
+      }
     </script>
   </body>
 </html>

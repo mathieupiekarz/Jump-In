@@ -3,6 +3,9 @@ var router = express.Router();
 var db = require("../model/db.js");
 var session = require("../session.js");
 
+var { geocode } = require("../services/geocode.js");
+var { calculDistance } = require("../services/distance.js");
+
 var candidat = require("../model/candidat.js");
 var recruteur = require("../model/recruteur.js");
 var organisation = require("../model/organisation.js");
@@ -63,6 +66,7 @@ router.get("/", function (req, res) {
   res.redirect("/admin/dashboard");
 });
 
+/*
 // Route principale du tableau de bord avec onglet paramétrable
 router.get("/dashboard", function (req, res, next) {
   // Déterminer l'onglet actif à partir du paramètre de requête, sinon utiliser "candidats" par défaut
@@ -105,6 +109,158 @@ router.get("/dashboard", function (req, res, next) {
       console.error("Erreur lors de la récupération des données:", error);
       res.status(500).send("Erreur serveur");
     });
+});
+*/
+
+// Route principale du tableau de bord avec filtres dynamiques
+router.get("/dashboard", async function (req, res, next) {
+  const activeTab = req.query.tab || "candidats";
+
+  try {
+    const dataPromises = fetchAllData();
+    const [candidats, recruteurs, organisations, admins] = await Promise.all([
+      dataPromises.getCandidats,
+      dataPromises.getRecruteurs,
+      dataPromises.getOrganisations,
+      dataPromises.getAdmins,
+    ]);
+
+    const {
+      statut,
+      nom,
+      prenom,
+      email,
+      numero_telephone,
+      siren,
+      nom_org,
+      type_org,
+      ville,
+      lat,
+      lng,
+    } = req.query;
+
+    const match = (filter, value) => {
+      const f = [].concat(filter || []);
+      return (
+        f.length === 0 ||
+        f.some((v) => value?.toLowerCase() === v.toLowerCase())
+      );
+    };
+
+    const filterFn = (user) => {
+      if (!match(statut, user.statut)) return false;
+      if (!match(nom, user.nom)) return false;
+      if (!match(prenom, user.prenom)) return false;
+      if (!match(email, user.email)) return false;
+      if (!match(numero_telephone, user.numero_telephone)) return false;
+      return true;
+    };
+
+    let filteredCandidats = candidats;
+    let filteredRecruteurs = recruteurs;
+    let filteredAdmins = admins;
+    let filteredOrganisations = organisations;
+
+    // enrichissement organisations + géodistance
+    const uLat = parseFloat(lat);
+    const uLng = parseFloat(lng);
+
+    const allOrganisationsEnriched = await Promise.all(
+      organisations.map(async (org) => {
+        let ville = null;
+        let distance = Infinity;
+        try {
+          const siege = JSON.parse(org.siege_social);
+          ville = siege.ville;
+          if (ville && !isNaN(uLat) && !isNaN(uLng)) {
+            const { lat: orgLat, lon: orgLng } = await geocode(ville);
+            distance = calculDistance(uLat, uLng, orgLat, orgLng);
+          }
+        } catch {}
+        return { ...org, ville, distance };
+      })
+    );
+
+    if (activeTab === "candidats") {
+      filteredCandidats = candidats.filter(filterFn);
+    } else if (activeTab === "recruteurs") {
+      filteredRecruteurs = recruteurs
+        .map((rec) => ({
+          ...rec,
+          organisation: organisations.find((o) => o.siren === rec.siren),
+        }))
+        .filter(filterFn);
+    } else if (activeTab === "admins") {
+      filteredAdmins = admins.filter(filterFn);
+    } else if (activeTab === "organisations") {
+      filteredOrganisations = allOrganisationsEnriched.filter((org) => {
+        if (!match(siren, org.siren)) return false;
+        if (!match(nom_org, org.nom)) return false;
+        if (!match(type_org, org.type)) return false;
+        if (!match(ville, org.ville)) return false;
+        return true;
+      });
+    }
+
+    let usersFiltres = [];
+    if (activeTab === "candidats") usersFiltres = candidats;
+    else if (activeTab === "recruteurs") usersFiltres = recruteurs;
+    else if (activeTab === "admins") usersFiltres = admins;
+    else if (activeTab === "organisations") usersFiltres = organisations;
+
+    const orgsFiltres = allOrganisationsEnriched;
+
+    const unique = (list, key) => [
+      ...new Set(list.map((item) => item[key]).filter(Boolean)),
+    ];
+
+    // Construction des villes possibles (même sans distance)
+    const villesDistances = {};
+    for (const org of allOrganisationsEnriched) {
+      if (org.ville) {
+        if (
+          !villesDistances[org.ville] ||
+          (isFinite(org.distance) && villesDistances[org.ville] > org.distance)
+        ) {
+          villesDistances[org.ville] = isFinite(org.distance)
+            ? org.distance
+            : null;
+        }
+      }
+    }
+
+    const villesPossibles = Object.entries(villesDistances)
+      .map(([ville, distance]) => ({ ville, distance }))
+      .sort((a, b) => {
+        if (a.distance == null) return 1;
+        if (b.distance == null) return -1;
+        return a.distance - b.distance;
+      });
+
+    const viewData = {
+      title: "Tableau de bord administrateur",
+      activeTab,
+      candidats: filteredCandidats,
+      recruteurs: filteredRecruteurs,
+      organisations: filteredOrganisations,
+      admins: filteredAdmins,
+      selectedFilters: req.query,
+      statutsPossibles: unique(usersFiltres, "statut"),
+      nomsPossibles: unique(usersFiltres, "nom"),
+      prenomsPossibles: unique(usersFiltres, "prenom"),
+      emailsPossibles: unique(usersFiltres, "email"),
+      numerosPossibles: unique(usersFiltres, "numero_telephone"),
+      villesPossibles,
+      sirensPossibles: unique(orgsFiltres, "siren"),
+      nomsOrgsPossibles: unique(orgsFiltres, "nom"),
+      typesOrgsPossibles: unique(orgsFiltres, "type"),
+    };
+
+    res.render("AdminBoard", viewData);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données:", error);
+    res.status(500).send("Erreur serveur");
+  }
 });
 
 // Route pour la page des demandes d'organisations avec onglet paramétrable

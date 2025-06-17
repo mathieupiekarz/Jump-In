@@ -75,8 +75,8 @@ const recruteur = {
     }
 
     // vérification du format du numéro de téléphone
-    let numValide = num.replace(/\s+/g, "");
-    numValide = /^\+33\d{9}$/.test(numValide);
+    let numSansEspace = num.replace(/\s+/g, "");
+    numValide = /^\+33\d{9}$/.test(numSansEspace);
     if (!numValide) return callback(null);
 
     // vérification du format de l'email
@@ -114,7 +114,7 @@ const recruteur = {
           });
           db.query(
             sql,
-            [siren, email, mdp, nom, prenom, numValide, dateC, statut],
+            [siren, email, mdp, nom, prenom, numSansEspace, dateC, statut],
             (err, results) => {
               if (err) {
                 console.error(

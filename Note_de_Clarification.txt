@@ -81,7 +81,7 @@ api : navigator.geolocation
 
 MATHIEU : 
 test routes 
-filtres et barre de recherche / revenri sur fiche au lieu de offres
+filtres et barre de recherche / revenir sur fiche au lieu de offres
 vulnérabilités 3 --> Contrôle d'accès/Upload non sécurisé/XSS       --> mais quelques exemples et c'est tout 
 
 faire en sorte que sur tel le drag s'enlève dans les offres  

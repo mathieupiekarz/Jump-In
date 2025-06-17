@@ -445,7 +445,7 @@ router.get("/ListeOffres", async (req, res, next) => {
 });
 
 router.get("/inscription", function (req, res, next) {
-  res.render("inscription", { title: "Créer un compte" });
+  res.render("inscription", { title: "Créer un compte", inactive: false });
 });
 
 router.post("/inscription", function (req, res, next) {
@@ -463,13 +463,12 @@ router.post("/inscription", function (req, res, next) {
   // Statut = actif par défaut, à voir si on le garde
   // ou si on le met à inactif par défaut et qu'on l'active après validation
   const statut = "actif";
-  console.log(password);
 
   candidat.creat(email, password, nom, prenom, num, statut, (result) => {
     if (!result) {
       return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
     } else {
-      res.render("Login", { title: "S'authentifier" });
+      res.redirect("/inscription");
     }
   });
 });

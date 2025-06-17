@@ -52,8 +52,8 @@ const candidat = {
     }
 
     // vérification du format du numéro de téléphone
-    let numValide = num.replace(/\s+/g, "");
-    numValide = /^\+33\d{9}$/.test(numValide);
+    let numSansEspace = num.replace(/\s+/g, "");
+    numValide = /^\+33\d{9}$/.test(numSansEspace);
     if (!numValide) return callback(null);
 
     // vérification de la composition du mot de passe
@@ -77,7 +77,7 @@ const candidat = {
         const dateC = new Date().toISOString().split("T")[0];
         db.query(
           sql,
-          [email, mdp, nom, prenom, numValide, dateC, statut],
+          [email, mdp, nom, prenom, numSansEspace, dateC, statut],
           (err, results) => {
             if (err) {
               console.error(
