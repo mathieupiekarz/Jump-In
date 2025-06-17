@@ -4,6 +4,9 @@ var db = require("../model/db.js");
 var path = require("path");
 var archiver = require("archiver");
 
+var { geocode } = require("../services/geocode.js");
+var { calculDistance } = require("../services/distance.js");
+
 var organisation = require("../model/organisation.js");
 var offre = require("../model/offre_emploi.js");
 var candidature = require("../model/candidature.js");
@@ -13,43 +16,174 @@ var dcho = require("../model/Demande_changer_organisation.js");
 var pjt = require("../model/piece_jointe_temporaire.js");
 
 // Route pour afficher les offres d'une organisation spécifique
-router.get("/:entreprise_id/NosOffres", function (req, res, next) {
-  const siren = req.params.entreprise_id;
-
-  // Vérifier si l'organisation existe
-  organisation.read(siren, function (orgResult) {
-    if (!orgResult || orgResult.length === 0) {
+router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
+  try {
+    const siren = req.params.entreprise_id;
+    // Vérification de l’organisation
+    const orgRes = await new Promise((y, e) =>
+      organisation.read(siren, (r) => (r ? y(r) : e("not found")))
+    );
+    if (!orgRes.length)
       return res.status(404).send("Organisation non trouvée.");
+
+    // Chargement des offres et des fiches en parallèle
+    const [offres, fichesPoste] = await Promise.all([
+      new Promise((y) => offre.readAllByOrganisationValide(siren, y)),
+      new Promise((y) => fp.readByOrganisation(siren, y)),
+    ]);
+
+    // Lecture de tous les filtres GET
+    const {
+      etat,
+      date_validite,
+      type_metier,
+      rythme,
+      statut_de_poste,
+      fourchette_salaire,
+      city,
+      lat,
+      lng,
+    } = req.query;
+
+    // Application des filtres sur les OFFRES si besoin
+    let filteredOffres = offres;
+    if (etat || date_validite) {
+      if (etat) {
+        const selection = Array.isArray(etat) ? etat : [etat];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.etat)
+        );
+      }
+      if (date_validite) {
+        const selection = Array.isArray(date_validite)
+          ? date_validite
+          : [date_validite];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.date_validite.toISOString().slice(0, 10))
+        );
+      }
     }
 
-    // Utiliser des promesses pour récupérer les offres et les fiches de poste en parallèle
-    const getOffres = new Promise((resolve) => {
-      offre.readAllByOrganisationValide(siren, (results) => {
-        resolve(results);
-      });
-    });
+    // Sinon, on prépare le filtrage des FICHES de poste
+    //    - on calcule distances si on a une position
+    //    - on construit citiesDistances pour la sidebar
+    //    - on filtre selon city si coché
+    let filteredFiches = [];
+    let citiesDistances = [];
 
-    const getFiches = new Promise((resolve) => {
-      fp.readByOrganisation(siren, (results) => {
-        resolve(results);
-      });
-    });
+    // Il ne faut pas avoir déjà filtré les offres
+    if (!etat && !date_validite) {
+      const uLat = parseFloat(lat),
+        uLon = parseFloat(lng);
 
-    // Attendre que les deux requêtes soient terminées
-    Promise.all([getOffres, getFiches])
-      .then(([offres, fichesPoste]) => {
-        res.render("NosOffres", {
-          title: "Offres de " + orgResult[0].nom,
-          offres: offres,
-          fichesPoste: fichesPoste,
-          organisation: orgResult[0],
-        });
-      })
-      .catch((error) => {
-        console.error("Erreur lors de la récupération des données:", error);
-        res.status(500).send("Erreur serveur");
+      // Enrichissement des fiches possibles
+      const enriched = await Promise.all(
+        fichesPoste.map(async (f) => {
+          let ville = null,
+            distance = Infinity;
+          try {
+            // on s'assure que lieu correspond bien à un object java
+            const lieu =
+              typeof f.lieu_mission === "string"
+                ? JSON.parse(f.lieu_mission)
+                : f.lieu_mission;
+            ville = lieu.ville;
+            if (ville && !isNaN(uLat) && !isNaN(uLon)) {
+              // lat et lon prennent les valeurs des latitudes et longitudes de la vile
+              const { lat: vLat, lon: vLon } = await geocode(ville);
+              distance = calculDistance(uLat, uLon, vLat, vLon);
+            }
+          } catch {}
+          return { ...f, ville, distance };
+        })
+      );
+      // Pour chaque villes, on prend la plus courte distance
+      const cityMap = {};
+      enriched.forEach((f) => {
+        if (f.ville) {
+          if (cityMap[f.ville] === undefined || f.distance < cityMap[f.ville]) {
+            cityMap[f.ville] = f.distance;
+          }
+        }
       });
-  });
+
+      // Tri dans l'ordre croissant
+      citiesDistances = Object.entries(cityMap)
+        .map(([ville, distance]) => ({ ville, distance }))
+        .sort((a, b) => a.distance - b.distance);
+
+      // application des autres filtres sur les fiches
+      filteredFiches = enriched;
+      if (type_metier) {
+        const selection = Array.isArray(type_metier)
+          ? type_metier
+          : [type_metier];
+        filteredFiches = filteredFiches.filter((f) =>
+          selection.includes(f.type_metier)
+        );
+      }
+      if (rythme) {
+        const selection = Array.isArray(rythme) ? rythme : [rythme];
+        filteredFiches = filteredFiches.filter((f) =>
+          selection.includes(f.rythme)
+        );
+      }
+      if (statut_de_poste) {
+        const selection = Array.isArray(statut_de_poste)
+          ? statut_de_poste
+          : [statut_de_poste];
+        filteredFiches = filteredFiches.filter((f) =>
+          selection.includes(f.statut_de_poste)
+        );
+      }
+      if (fourchette_salaire) {
+        const selection = Array.isArray(fourchette_salaire)
+          ? fourchette_salaire
+          : [fourchette_salaire];
+        filteredFiches = filteredFiches.filter((f) =>
+          selection.includes(f.fourchette_salaire)
+        );
+      }
+      if (city) {
+        const selection = Array.isArray(city) ? city : [city];
+        filteredFiches = filteredFiches.filter((f) =>
+          selection.includes(f.ville)
+        );
+      }
+    }
+
+    // Envoi final
+    res.render("NosOffres", {
+      title: "Offres de " + orgRes[0].nom,
+      organisation: orgRes[0],
+      offres: filteredOffres,
+      fichesPoste: !etat && !date_validite ? filteredFiches : [],
+      // on n’affiche les fiches que si on n’a pas filter les offres
+      citiesDistances,
+      // pour pré-cocher dans les modales
+      selectedFilters: req.query,
+      // pour reconstruire la liste des dates (côté EJS)
+      datesPublication: offres.map((o) =>
+        o.date_validite.toISOString().slice(0, 10)
+      ),
+
+      // permet de garder qu'une seule instance de chaque valeur possible
+      typesMetier: fichesPoste
+        .map((f) => f.type_metier)
+        .filter((v, i, a) => a.indexOf(v) === i),
+      rythmes: fichesPoste
+        .map((f) => f.rythme)
+        .filter((v, i, a) => a.indexOf(v) === i),
+      statutsDePoste: fichesPoste
+        .map((f) => f.statut_de_poste)
+        .filter((v, i, a) => a.indexOf(v) === i),
+      fourchettesSalaires: fichesPoste
+        .map((f) => f.fourchette_salaire)
+        .filter((v, i, a) => a.indexOf(v) === i),
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Route pour voir les candidats d'une offre spécifique

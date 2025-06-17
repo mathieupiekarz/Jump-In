@@ -281,7 +281,13 @@
           <div class="search-bar">
             <input type="text" placeholder="Rechercher parmi nos offres..." />
             <button class="filter-btn">Filtrer</button>
-            <button class="search-btn">Rechercher</button>
+            <button
+              type="button"
+              class="search-btn"
+              onclick="openModalFiltre('filtersModalOffres')"
+            >
+              Rechercher
+            </button>
           </div>
 
           <% if (offres.length === 0) { %>
@@ -366,7 +372,13 @@
               placeholder="Rechercher parmi nos fiches de poste..."
             />
             <button class="filter-btn">Filtrer</button>
-            <button class="search-btn">Rechercher</button>
+            <button
+              type="button"
+              class="search-btn"
+              onclick="openModalFiltre('filtersModalFiches')"
+            >
+              Rechercher
+            </button>
           </div>
 
           <% if (fichesPoste.length === 0) { %>
@@ -502,6 +514,14 @@
         document.getElementById(modalId).style.display = "none";
       }
 
+      function openModalFiltre(modalId) {
+        document.getElementById(modalId).classList.add("active");
+      }
+
+      function closeModalFiltre(modalId) {
+        document.getElementById(modalId).classList.remove("active");
+      }
+
       // Fermer les modals quand on clique en dehors
       window.onclick = function (event) {
         const modals = document.querySelectorAll(".modal, .confirm-modal");
@@ -606,6 +626,21 @@
         };
 
         openModal("deleteConfirmModal");
+      }
+
+      // fonction pour la géolocalisation
+      function requestlocation(event) {
+        event.preventDefault();
+        if (!navigator.geolocation) return event.target.submit();
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            document.getElementById("inputLat").value = pos.coords.latitude;
+            document.getElementById("inputLng").value = pos.coords.longitude;
+            event.target.submit();
+          },
+          () => event.target.submit()
+        );
+        return false;
       }
     </script>
 
@@ -1193,6 +1228,134 @@
             Supprimer
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal filtres OFFRES -->
+    <div id="filtersModalOffres" class="modal filters-modal">
+      <div class="modal-content2">
+        <div class="modal-header">
+          <h2 class="modal-title">Filtres — Offres</h2>
+          <span class="close" onclick="closeModal('filtersModalOffres')"
+            >&times;</span
+          >
+        </div>
+        <form
+          method="GET"
+          action="/recruteur/<%= organisation.siren %>/NosOffres"
+          onsubmit="return requestlocation(event)"
+        >
+          <!-- État de l’offre -->
+          <section class="filter-section">
+            <h4>État de l’offre</h4>
+            <% ['publiee','non_publiee','expiree'].forEach(e=>{ %>
+            <label>
+              <input type="checkbox" name="etat" value="<%=e%>" <%=
+              selectedFilters.etat&&[].concat(selectedFilters.etat).includes(e)?'checked':''
+              %>/> <%= e.replace('_',' ') %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Date de publication -->
+          <section class="filter-section">
+            <h4>Date de publication</h4>
+            <% (datesPublication||[]).forEach(v=>{ const [Y,M,D]=v.split('-'),
+            dt=new Date(Y,M-1,D); %>
+            <label>
+              <input type="checkbox" name="date_validite" value="<%=v%>" <%=
+              selectedFilters.date_validite&&[].concat(selectedFilters.date_validite).includes(v)?'checked':''
+              %>/> <%= dt.toLocaleDateString('fr-FR') %>
+            </label>
+            <% }) %>
+          </section>
+
+          <div class="form-buttons">
+            <button type="button" onclick="closeModal('filtersModalOffres')">
+              Annuler
+            </button>
+            <button type="submit">Appliquer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal filtres FICHES -->
+    <div id="filtersModalFiches" class="modal filters-modal">
+      <div class="modal-content2">
+        <div class="modal-header">
+          <h2 class="modal-title">Filtres — Fiches de poste</h2>
+          <span class="close" onclick="closeModal('filtersModalFiches')"
+            >&times;</span
+          >
+        </div>
+        <form
+          method="GET"
+          action="/recruteur/<%= organisation.siren %>/NosOffres"
+          onsubmit="return requestlocation(event)"
+        >
+          <!-- Type de métier -->
+          <section class="filter-section">
+            <h4>Type de métier</h4>
+            <% typesMetier.forEach(metier => { %>
+            <label>
+              <input type="checkbox" name="type_metier" value="<%= metier %>"
+              <%= selectedFilters.type_metier &&
+              [].concat(selectedFilters.type_metier).includes(metier) ?
+              "checked" : "" %> /> <%= metier %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Rythme -->
+          <section class="filter-section">
+            <h4>Rythme</h4>
+            <% rythmes.forEach(r => { %>
+            <label>
+              <input type="checkbox" name="rythme" value="<%= r %>" <%=
+              selectedFilters.rythme &&
+              [].concat(selectedFilters.rythme).includes(r) ? "checked" : "" %>
+              /> <%= r %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Fourchette de salaire -->
+          <section class="filter-section">
+            <h4>Fourchette de salaire</h4>
+            <% fourchettesSalaires.forEach(f => { %>
+            <label>
+              <input type="checkbox" name="fourchette_salaire" value="<%= f %>"
+              <%= selectedFilters.fourchette_salaire &&
+              [].concat(selectedFilters.fourchettes_salaire).includes(f) ?
+              "checked" : "" %> /> <%= f %>
+            </label>
+            <% }) %>
+          </section>
+
+          <!-- Position géographique -->
+          <section class="filter-section">
+            <h4>Position géographique</h4>
+            <% citiesDistances.forEach(cd=>{ %>
+            <label>
+              <input type="checkbox" name="city" value="<%=cd.ville%>" <%=
+              selectedFilters.city&&[].concat(selectedFilters.city).includes(cd.ville)?'checked':''%>
+              /> <%=cd.ville%> <% if(isFinite(cd.distance)){ %>
+              (<%=cd.distance.toFixed(1)%> km) <% } else { %> (inconnue) <% } %>
+            </label>
+            <% }) %>
+          </section>
+
+          <div class="form-buttons">
+            <button type="button" onclick="closeModal('filtersModalFiches')">
+              Annuler
+            </button>
+            <button type="submit">Appliquer</button>
+          </div>
+
+          <input type="hidden" id="inputLat" name="lat" value="" />
+          <input type="hidden" id="inputLng" name="lng" value="" />
+        </form>
       </div>
     </div>
   </body>
