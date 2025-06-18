@@ -116,6 +116,7 @@
           <button id="closeModalBtn" class="close-btn">&times;</button>
         </div>
         <form
+          id="postulerForm"
           method="post"
           action="/users/postuler"
           enctype="multipart/form-data"
@@ -381,5 +382,45 @@
         modal.style.display = "none";
       }
     });
+
+    // traitement des erreurs sur les fichiers --> alert()
+    document
+      .getElementById("postulerForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            // Redirection si succès
+            window.location.href = "/users/ListeOffres";
+          } else {
+            const result = await response.json();
+            if (result.code === "EXTENSION_NON_AUTORISEE") {
+              alert(
+                "Extension non autorisée. Veuillez choisir un fichier valide (pdf, docx, etc)."
+              );
+            } else if (result.code === "LIMIT_FILE_SIZE") {
+              alert("Le fichier est trop volumineux. Limite : 200 Ko.");
+            } else if (result.message?.includes("contenu interdit")) {
+              alert(
+                "Un ou plusieurs fichiers contiennent du contenu interdit (ex: eval, shell_exec...)."
+              );
+            } else {
+              alert(result.message || "Une erreur est survenue.");
+            }
+          }
+        } catch (error) {
+          alert("Erreur réseau ou serveur inattendue.");
+          console.error("Erreur formulaire postuler :", error);
+        }
+      });
   </script>
 </html>

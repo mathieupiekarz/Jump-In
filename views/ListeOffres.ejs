@@ -179,64 +179,62 @@
         <div class="no-results">
           Aucune offre ne correspond à votre recherche.
         </div>
-        <% } else { %> 
-          <% offres.forEach((offre) => { %>
-          <div class="job">
-            <div class="job-header">
-              <img
-                src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
-                alt="<%= offre.organisation_nom %>"
-              />
-              <div>
-                <h2><%= offre.intitule %></h2>
-                <p><%= offre.organisation_nom %></p>
-              </div>
-            </div>
-
-            <div class="job-context">
-              <p><%= offre.description %></p>
-            </div>
-
-            <div class="job-footer">
-              <a href="/users/offre/<%= offre.numero %>">
-                <i
-                  class="bi bi-eye-fill"
-                  style="color: #333; font-size: 30px"
-                ></i>
-              </a>
-              <button
-                class="btn openModalBtn"
-                data-offre-id="<%= offre.numero %>"
-                data-indication="<%= offre.indication %>"
-                data-nb-pieces="<%= offre.nb_pieces_demandees %>"
-              >
-                Postuler
-              </button>
+        <% } else { %> <% offres.forEach((offre) => { %>
+        <div class="job">
+          <div class="job-header">
+            <img
+              src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
+              alt="<%= offre.organisation_nom %>"
+            />
+            <div>
+              <h2><%= offre.intitule %></h2>
+              <p><%= offre.organisation_nom %></p>
             </div>
           </div>
-          <% }) %> 
 
-          <!-- Pagination -->
-          <% if (pagination.totalPages > 1) { %>
-          <div class="pagination">
-            <% if (pagination.currentPage > 1) { %>
-              <a href="?page=<%= pagination.currentPage - 1 %>" class="page-link">&laquo; Précédent</a>
-            <% } %>
-
-            <% for(let i = 1; i <= pagination.totalPages; i++) { %>
-              <% if (i === pagination.currentPage) { %>
-                <span class="page-link active"><%= i %></span>
-              <% } else { %>
-                <a href="?page=<%= i %>" class="page-link"><%= i %></a>
-              <% } %>
-            <% } %>
-
-            <% if (pagination.currentPage < pagination.totalPages) { %>
-              <a href="?page=<%= pagination.currentPage + 1 %>" class="page-link">Suivant &raquo;</a>
-            <% } %>
+          <div class="job-context">
+            <p><%= offre.description %></p>
           </div>
+
+          <div class="job-footer">
+            <a href="/users/offre/<%= offre.numero %>">
+              <i
+                class="bi bi-eye-fill"
+                style="color: #333; font-size: 30px"
+              ></i>
+            </a>
+            <button
+              class="btn openModalBtn"
+              data-offre-id="<%= offre.numero %>"
+              data-indication="<%= offre.indication %>"
+              data-nb-pieces="<%= offre.nb_pieces_demandees %>"
+            >
+              Postuler
+            </button>
+          </div>
+        </div>
+        <% }) %>
+
+        <!-- Pagination -->
+        <% if (pagination.totalPages > 1) { %>
+        <div class="pagination">
+          <% if (pagination.currentPage > 1) { %>
+          <a href="?page=<%= pagination.currentPage - 1 %>" class="page-link"
+            >&laquo; Précédent</a
+          >
+          <% } %> <% for(let i = 1; i <= pagination.totalPages; i++) { %> <% if
+          (i === pagination.currentPage) { %>
+          <span class="page-link active"><%= i %></span>
+          <% } else { %>
+          <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+          <% } %> <% } %> <% if (pagination.currentPage < pagination.totalPages)
+          { %>
+          <a href="?page=<%= pagination.currentPage + 1 %>" class="page-link"
+            >Suivant &raquo;</a
+          >
           <% } %>
-        <% } %>
+        </div>
+        <% } %> <% } %>
       </main>
 
       <!-- Création Modale dans la boucle forEach-->
@@ -250,6 +248,7 @@
             <button id="closeModalBtn" class="close-btn">&times;</button>
           </div>
           <form
+            id="postulerForm"
             method="post"
             action="/users/postuler"
             enctype="multipart/form-data"
@@ -516,6 +515,46 @@
         modal.style.display = "none";
       }
     });
+
+    document
+      .getElementById("postulerForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            // Redirection si succès
+            window.location.href = "/users/ListeOffres";
+          } else {
+            const result = await response.json();
+
+            if (result.code === "EXTENSION_NON_AUTORISEE") {
+              alert(
+                "Extension non autorisée. Veuillez choisir un fichier valide (PDF, DOCX, etc.)."
+              );
+            } else if (result.code === "LIMIT_FILE_SIZE") {
+              alert("Le fichier est trop volumineux. Limite : 200 Ko.");
+            } else if (result.message?.includes("contenu interdit")) {
+              alert(
+                "Un ou plusieurs fichiers contiennent du contenu interdit (ex: <?php, eval, shell_exec...)."
+              );
+            } else {
+              alert(result.message || "Une erreur est survenue.");
+            }
+          }
+        } catch (error) {
+          alert("Erreur réseau ou serveur inattendue.");
+          console.error("Erreur formulaire postuler :", error);
+        }
+      });
 
     function requestlocation(event) {
       // évite le submit immédiat

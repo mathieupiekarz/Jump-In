@@ -673,7 +673,16 @@
           fileInput.value = "";
           nomFichierInput.value = "";
         } else {
-          alert(result.message || "Erreur lors de l'envoie du fichier.");
+          console.log(result.code);
+          if (result.code === "EXTENSION_NON_AUTORISEE") {
+            alert(result.message);
+          } else if (result.code === "LIMIT_FILE_SIZE") {
+            alert(result.message);
+          } else if (result.code === "UPLOAD_ERROR") {
+            alert(result.message);
+          } else {
+            alert(result.message || "Erreur lors de l'envoie du fichier.");
+          }
         }
       });
     </script>
