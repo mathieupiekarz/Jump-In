@@ -192,7 +192,6 @@ router.post("/login", function (req, res, next) {
                   "/users/login?error=" + encodeURIComponent("Erreur serveur")
                 );
             }
-
             const statutRec = recStatuts[0].statut;
             if (statutRec === "inactif") {
               req.session.inactiveAccount = true;
@@ -207,7 +206,6 @@ router.post("/login", function (req, res, next) {
                     encodeURIComponent("Email ou mot de passe incorrect")
                 );
               }
-
               session.creatSession(
                 req.session,
                 {

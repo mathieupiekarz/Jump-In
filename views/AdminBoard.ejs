@@ -406,15 +406,6 @@
                         <button type="submit" class="action-button danger">
                           <i class="bi bi-x-circle"></i> Désactiver
                         </button>
-                        <% } else if (organisation.statut === 'inactive') { %>
-                        <input
-                          type="hidden"
-                          name="newStatus"
-                          value="en_cours"
-                        />
-                        <button type="submit" class="action-button warning">
-                          <i class="bi bi-clock"></i> En cours
-                        </button>
                         <% } else { %>
                         <input type="hidden" name="newStatus" value="active" />
                         <button

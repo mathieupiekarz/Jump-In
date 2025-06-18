@@ -19,20 +19,27 @@ var pjt = require("../model/piece_jointe_temporaire.js");
 router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
   try {
     const siren = req.params.entreprise_id;
+
     // Vérification de l’organisation
-    const orgRes = await new Promise((y, e) =>
-      organisation.read(siren, (r) => (r ? y(r) : e("not found")))
+    const orgRes = await new Promise((resolve, reject) =>
+      organisation.read(siren, (res) =>
+        res ? resolve(res) : reject("not found")
+      )
     );
     if (!orgRes.length)
       return res.status(404).send("Organisation non trouvée.");
 
     // Chargement des offres et des fiches en parallèle
     const [offres, fichesPoste] = await Promise.all([
-      new Promise((y) => offre.readAllByOrganisationValide(siren, y)),
-      new Promise((y) => fp.readByOrganisation(siren, y)),
+      new Promise((resolve) =>
+        offre.readAllByOrganisationValide(siren, (res) => resolve(res || []))
+      ),
+      new Promise((resolve) =>
+        fp.readByOrganisation(siren, (res) => resolve(res || []))
+      ),
     ]);
 
-    // Lecture de tous les filtres GET
+    // Lecture des filtres GET
     const {
       etat,
       date_validite,
@@ -45,7 +52,7 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
       lng,
     } = req.query;
 
-    // Application des filtres sur les OFFRES si besoin
+    // Filtrage des offres
     let filteredOffres = offres;
     if (etat || date_validite) {
       if (etat) {
@@ -64,32 +71,25 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
       }
     }
 
-    // Sinon, on prépare le filtrage des FICHES de poste
-    //    - on calcule distances si on a une position
-    //    - on construit citiesDistances pour la sidebar
-    //    - on filtre selon city si coché
+    // Préparation des fiches de poste
     let filteredFiches = [];
     let citiesDistances = [];
 
-    // Il ne faut pas avoir déjà filtré les offres
     if (!etat && !date_validite) {
-      const uLat = parseFloat(lat),
-        uLon = parseFloat(lng);
+      const uLat = parseFloat(lat);
+      const uLon = parseFloat(lng);
 
-      // Enrichissement des fiches possibles
       const enriched = await Promise.all(
         fichesPoste.map(async (f) => {
           let ville = null,
             distance = Infinity;
           try {
-            // on s'assure que lieu correspond bien à un object java
             const lieu =
               typeof f.lieu_mission === "string"
                 ? JSON.parse(f.lieu_mission)
                 : f.lieu_mission;
             ville = lieu.ville;
             if (ville && !isNaN(uLat) && !isNaN(uLon)) {
-              // lat et lon prennent les valeurs des latitudes et longitudes de la vile
               const { lat: vLat, lon: vLon } = await geocode(ville);
               distance = calculDistance(uLat, uLon, vLat, vLon);
             }
@@ -97,23 +97,22 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
           return { ...f, ville, distance };
         })
       );
-      // Pour chaque villes, on prend la plus courte distance
+
       const cityMap = {};
       enriched.forEach((f) => {
         if (f.ville) {
-          if (cityMap[f.ville] === undefined || f.distance < cityMap[f.ville]) {
+          if (!cityMap[f.ville] || f.distance < cityMap[f.ville]) {
             cityMap[f.ville] = f.distance;
           }
         }
       });
 
-      // Tri dans l'ordre croissant
       citiesDistances = Object.entries(cityMap)
         .map(([ville, distance]) => ({ ville, distance }))
         .sort((a, b) => a.distance - b.distance);
 
-      // application des autres filtres sur les fiches
       filteredFiches = enriched;
+
       if (type_metier) {
         const selection = Array.isArray(type_metier)
           ? type_metier
@@ -152,32 +151,27 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
       }
     }
 
-    // Envoi final
+    // Rendu final
     res.render("NosOffres", {
       title: "Offres de " + orgRes[0].nom,
       organisation: orgRes[0],
       offres: filteredOffres,
       fichesPoste: !etat && !date_validite ? filteredFiches : [],
-      // on n’affiche les fiches que si on n’a pas filter les offres
       citiesDistances,
-      // pour pré-cocher dans les modales
       selectedFilters: req.query,
-      // pour reconstruire la liste des dates (côté EJS)
-      datesPublication: offres.map((o) =>
+      datesPublication: (offres || []).map((o) =>
         o.date_validite.toISOString().slice(0, 10)
       ),
-
-      // permet de garder qu'une seule instance de chaque valeur possible
-      typesMetier: fichesPoste
+      typesMetier: (fichesPoste || [])
         .map((f) => f.type_metier)
         .filter((v, i, a) => a.indexOf(v) === i),
-      rythmes: fichesPoste
+      rythmes: (fichesPoste || [])
         .map((f) => f.rythme)
         .filter((v, i, a) => a.indexOf(v) === i),
-      statutsDePoste: fichesPoste
+      statutsDePoste: (fichesPoste || [])
         .map((f) => f.statut_de_poste)
         .filter((v, i, a) => a.indexOf(v) === i),
-      fourchettesSalaires: fichesPoste
+      fourchettesSalaires: (fichesPoste || [])
         .map((f) => f.fourchette_salaire)
         .filter((v, i, a) => a.indexOf(v) === i),
     });
@@ -278,13 +272,11 @@ router.post(
     const offre_id = req.params.offre_id;
     const { etat, date_validite, indication, nb_pieces_demandees } = req.body;
 
-    console.log("caca1");
     // Vérifier si l'organisation existe
     organisation.read(siren, function (orgResult) {
       if (!orgResult || orgResult.length === 0) {
         return res.status(404).send("Organisation non trouvée.");
       }
-      console.log("caca2");
       // Créer l'objet de mise à jour avec les champs modifiés
       const updateData = {
         etat: etat,
@@ -292,10 +284,8 @@ router.post(
         indication: indication || null,
         nb_pieces_demandees: parseInt(nb_pieces_demandees),
       };
-      console.log("caca3");
       // Mettre à jour l'offre
       offre.update(parseInt(offre_id), updateData, function (err, result) {
-        console.log("caca4");
         if (!result) {
           return res
             .status(400)
