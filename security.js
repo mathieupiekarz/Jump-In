@@ -41,26 +41,3 @@ async function checkFileContent(filePath) {
 }
 
 module.exports = { checkFileContent };
-/*
-// Expression régulière avec le flag "g" pour trouver toutes les occurrences
-const suspiciousPattern = /(<?php|shell_exec|eval|base64_decode|exec|system)/gi;
-
-function checkFileContent(filePath) {
-  const content = fs.readFileSync(filePath, "utf-8");
-
-  const matches = content.match(suspiciousPattern);
-
-  if (matches && matches.length > 0) {
-    console.log(
-      `Contenu interdit trouvé dans ${filePath} : ${[...new Set(matches)].join(
-        ", "
-      )}`
-    );
-    return true;
-  }
-
-  return false;
-}
-
-module.exports = { checkFileContent };
-*/

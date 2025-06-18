@@ -76,7 +76,7 @@ demande CrO :
 390989580
 
 
-install multer, archiver, uiid, mammoth
+install multer, archiver, uiid, mammoth, bcrypt
 api : navigator.geolocation
 
 MATHIEU : 
