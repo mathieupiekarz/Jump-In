@@ -56,11 +56,12 @@ const candidat = {
     numValide = /^\+33\d{9}$/.test(numSansEspace);
     if (!numValide) return callback(null);
 
+    /*
     // vérification de la composition du mot de passe
     const isValide = await candidat.areValide(mdp);
     if (!isValide) {
       return callback(null);
-    }
+    }*/
 
     // vérification du format de l'email
     regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -130,13 +131,14 @@ const candidat = {
           )
             return callback(null);
 
+          /*
           // vérification si le nouveau mdp est dans le bon format
           if ("mdp" in nvdict) {
             const isValide = await candidat.areValide(nvdict.mdp);
             if (!isValide) {
               return callback(null);
             }
-          }
+          }*/
 
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {

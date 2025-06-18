@@ -2,11 +2,10 @@ var db = require("./db.js");
 
 const admin = {
   read: (email, callback) => {
-    let sql = "SELECT * FROM Administrateur WHERE email = ?";
+    const sql = "SELECT * FROM Administrateur WHERE email = ?";
     db.query(sql, [email], (err, results) => {
-      if (err) throw err;
-      if (results.length === 0) return callback(null);
-      callback(results);
+      if (err) return callback(err, null);
+      callback(null, results);
     });
   },
   readall: (callback) => {
@@ -25,8 +24,8 @@ const admin = {
       resolve(regex.test(pwd));
     });
   },
-  creat: async (email, mdp, nom, prenom, num, statut, callback) => {
-    // vérification non null et types cohérents
+  creat: async (email, mdp, nom, prenom, num, statut) => {
+    // Vérification des champs
     if (
       !email ||
       typeof email !== "string" ||
@@ -41,40 +40,51 @@ const admin = {
       !statut ||
       !["actif", "inactif"].includes(statut)
     ) {
-      return callback(null);
+      return null;
     }
 
-    // vérification de la composition du mot de passe
-    const isValide = await admin.areValide(mdp);
-    if (!isValide) {
-      return callback(null);
-    }
+    // Nettoyage du numéro
+    const numSansEspace = num.replace(/\s+/g, "");
+    const numValide = /^\+33\d{9}$/.test(numSansEspace);
+    if (!numValide) return null;
 
-    // vérification du format du numéro de téléphone
-    let numSansEspace = num.replace(/\s+/g, "");
-    numValide = /^\+33\d{9}$/.test(numSansEspace);
-    if (!numValide) return callback(null);
-
-    // vérification du format de l'email
+    // Vérification email
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!regex.test(email)) return callback(null);
+    if (!regex.test(email)) return null;
 
-    // vérification si un admin existant a déjà le même email
-    admin.read(email, (result) => {
-      if (result && result.length > 0) return callback(null);
-      else {
-        let sql =
-          "INSERT INTO Administrateur (email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        const dateC = new Date().toISOString().split("T")[0];
-        db.query(
-          sql,
-          [email, mdp, nom, prenom, numSansEspace, dateC, statut],
-          (err, results) => {
-            if (err) throw err;
-            callback(results.insertId);
+    // Vérification de l'unicité de l'email
+    const adminExistants = await new Promise((resolve, reject) => {
+      admin.read(email, (err, res) => {
+        if (err) {
+          console.error("Erreur dans admin.read :", err);
+          return reject(err);
+        }
+        resolve(res);
+      });
+    });
+
+    if (adminExistants && adminExistants.length > 0) return null;
+
+    // Insertion en base
+    const sql = `INSERT INTO Administrateur 
+      (email, mdp, nom, prenom, numero_telephone, date_creation, statut) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+    const dateC = new Date().toISOString().split("T")[0];
+
+    return new Promise((resolve, reject) => {
+      db.query(
+        sql,
+        [email, mdp, nom, prenom, numSansEspace, dateC, statut],
+        (err, results) => {
+          console.log(results);
+          if (err) {
+            console.error("Erreur lors de l'insertion du candidat :", err);
+            return resolve(null);
           }
-        );
-      }
+          resolve(results.insertId); // ou true si tu préfères
+        }
+      );
     });
   },
   // prend en argument un dictionnaire qui contient tous les arguments de Administrateur en clé
@@ -115,13 +125,14 @@ const admin = {
           )
             return callback(null);
 
+          /*
           // vérification si le nouveau mdp est dans le bon format
           if ("mdp" in nvdict) {
             const isValide = await admin.areValide(nvdict.mdp);
             if (!isValide) {
               return callback(null);
             }
-          }
+          }*/
 
           // vérification si le nouveau téléphone est dans le bon format
           if ("numero_telephone" in nvdict) {

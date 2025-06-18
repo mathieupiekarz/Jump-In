@@ -1,291 +1,355 @@
 <!DOCTYPE html>
 <html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %> - Jump'In</title>
 
     <link rel="stylesheet" href="/stylesheets/style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-</head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+  </head>
 
-<body>
+  <body>
     <header class="header">
-        <div>
-            <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80">
-        </div>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="/admin/dashboard">Administration</a></li>
-                <li><a href="/admin/requests" class="active">Demandes</a></li>
-                <li><div class="btn-connexion"><i class="bi bi-shield-check" style="color: #ffffff; font-size: 30px;"></i>Admin</div></li>
-            </ul>
-
-            <div class="burger" onclick="toggleMenu()">
-                <div></div>
-                <div></div>
-                <div></div>
+      <div>
+        <img src="/images/JumpIn_Logo.png" alt="Jump'In Logo" height="80" />
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/users/login" class="active">Connexion</a></li>
+          <li><a href="/admin/dashboard">Administration</a></li>
+          <li><a href="/admin/requests" class="active">Demandes</a></li>
+          <li>
+            <div class="btn-connexion">
+              <i
+                class="bi bi-shield-check"
+                style="color: #ffffff; font-size: 30px"
+              ></i
+              >Admin
             </div>
-        </nav>
+          </li>
+        </ul>
+
+        <div class="burger" onclick="toggleMenu()">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </nav>
     </header>
 
     <script>
-        function toggleMenu() {
-            document.querySelector(".nav-links").classList.toggle("active");
-        }
+      function toggleMenu() {
+        document.querySelector(".nav-links").classList.toggle("active");
+      }
     </script>
 
     <div class="container">
-        <main class="job-list">
-            <div class="admin-header">
-                <h2>Gestion des demandes</h2>
-                <div class="admin-actions">
-                    <a href="/admin/dashboard" class="action-button">
-                        <i class="bi bi-speedometer2"></i> Retour au tableau de bord
-                    </a>
-                </div>
-            </div>
+      <main class="job-list">
+        <div class="admin-header">
+          <h2>Gestion des demandes</h2>
+          <div class="admin-actions">
+            <a href="/admin/dashboard" class="action-button">
+              <i class="bi bi-speedometer2"></i> Retour au tableau de bord
+            </a>
+          </div>
+        </div>
 
-            <div class="admin-cards-row">
-                <div class="admin-card">
-                    <div class="admin-card-title">Demandes de création</div>
-                    <div class="admin-count"><%= demandesCreation ? demandesCreation.length : 0 %></div>
-                    <div class="admin-card-content">Création d'organisations</div>
-                </div>
-                <div class="admin-card">
-                    <div class="admin-card-title">Demandes de changement</div>
-                    <div class="admin-count"><%= demandesChangement ? demandesChangement.length : 0 %></div>
-                    <div class="admin-card-content">Changement d'organisations</div>
-                </div>
+        <div class="admin-cards-row">
+          <div class="admin-card">
+            <div class="admin-card-title">Demandes de création</div>
+            <div class="admin-count">
+              <%= demandesCreation ? demandesCreation.length : 0 %>
             </div>
-            
-            <div class="tabs">
-                <a href="/admin/requests?tab=creation" class="tab <%= !activeTab || activeTab === 'creation' ? 'active' : '' %>" data-tab="creation">
-                    Demandes de création (<%= demandesCreation ? demandesCreation.length : 0 %>)
-                </a>
-                <a href="/admin/requests?tab=changement" class="tab <%= activeTab === 'changement' ? 'active' : '' %>" data-tab="changement">
-                    Demandes de changement (<%= demandesChangement ? demandesChangement.length : 0 %>)
-                </a>
-                <a href="/admin/requests?tab=recrutement" class="tab <%= activeTab === 'recrutement' ? 'active' : '' %>" data-tab="recrutement">
-                    Demandes de recrutement (<%= demandesRecrutement ? demandesRecrutement.length : 0 %>)
-                </a>
+            <div class="admin-card-content">Création d'organisations</div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Demandes de changement</div>
+            <div class="admin-count">
+              <%= demandesChangement ? demandesChangement.length : 0 %>
             </div>
-            
-            <!-- Tab content for création demandes -->
-            <div id="creation" class="tab-content <%= !activeTab || activeTab === 'creation' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher une demande...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (demandesCreation && demandesCreation.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Candidat</th>
-                                <th>SIREN</th>
-                                <th>Description</th>
-                                <th>Date de demande</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% demandesCreation.forEach(demande => { %>
-                                <tr>
-                                    <td>
-                                        <% if (demande.candidat) { %>
-                                            <%= demande.candidat.prenom %> <%= demande.candidat.nom %>
-                                        <% } else { %>
-                                            ID: <%= demande.id_can %>
-                                        <% } %>
-                                    </td>
-                                    <td><%= demande.siren %></td>
-                                    <td><%= demande.descriptionCrO %></td>
-                                    <td><%= new Date(demande.dateDemandeCrO).toLocaleDateString() %></td>
-                                    <td>
-                                        <span class="status-badge 
-                                            <%= demande.statutCrO === 'validee' ? 'status-active' : 
-                                               (demande.statutCrO === 'refusee' ? 'status-inactive' : 'status-pending') %>">
-                                            <%= demande.statutCrO %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <% if (demande.statutCrO === 'en_attente') { %>
-                                            <div class="actions-buttons">
-                                                <form action="/admin/request/creation/<%= demande.id_can %>/<%= demande.siren %>/approve" method="POST" style="display: inline;">
-                                                    <button type="submit" class="action-button status-active">
-                                                        <i class="bi bi-check-circle"></i> Accepter
-                                                    </button>
-                                                </form>
-                                                <form action="/admin/request/creation/<%= demande.id_can %>/<%= demande.siren %>/reject" method="POST" style="display: inline;">
-                                                    <button type="submit" class="action-button danger">
-                                                        <i class="bi bi-x-circle"></i> Refuser
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        <% } else { %>
-                                            <em>Demande traitée</em>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucune demande de création</h3>
-                        <p>Il n'y a pas de demandes de création d'organisation en attente.</p>
-                    </div>
-                <% } %>
-            </div>
-            
-            <!-- Tab content for changement demandes -->
-            <div id="changement" class="tab-content <%= activeTab === 'changement' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher une demande...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (demandesChangement && demandesChangement.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Recruteur</th>
-                                <th>SIREN</th>
-                                <th>Description</th>
-                                <th>Date de demande</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% demandesChangement.forEach(demande => { %>
-                                <tr>
-                                    <td>
-                                        <% if (demande.recruteur) { %>
-                                            <%= demande.recruteur.prenom %> <%= demande.recruteur.nom %>
-                                        <% } else { %>
-                                            ID: <%= demande.id_rec %>
-                                        <% } %>
-                                    </td>
-                                    <td><%= demande.siren %></td>
-                                    <td><%= demande.descriptionChO %></td>
-                                    <td><%= new Date(demande.dateDemandeChO).toLocaleDateString() %></td>
-                                    <td>
-                                        <span class="status-badge 
-                                            <%= demande.statutChO === 'validee' ? 'status-active' : 
-                                               (demande.statutChO === 'refusee' ? 'status-inactive' : 'status-pending') %>">
-                                            <%= demande.statutChO %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <% if (demande.statutChO === 'en_attente') { %>
-                                            <div class="actions-buttons">
-                                                <form action="/admin/request/changement/<%= demande.id_rec %>/<%= demande.siren %>/approve" method="POST" style="display: inline;">
-                                                    <button type="submit" class="action-button status-active">
-                                                        <i class="bi bi-check-circle"></i> Accepter
-                                                    </button>
-                                                </form>
-                                                <form action="/admin/request/changement/<%= demande.id_rec %>/<%= demande.siren %>/reject" method="POST" style="display: inline;">
-                                                    <button type="submit" class="action-button danger">
-                                                        <i class="bi bi-x-circle"></i> Refuser
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        <% } else { %>
-                                            <em>Demande traitée</em>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucune demande de changement</h3>
-                        <p>Il n'y a pas de demandes de changement d'organisation en attente.</p>
-                    </div>
-                <% } %>
-            </div>
-            
-            <!-- Tab content for recrutement demandes -->
-            <div id="recrutement" class="tab-content <%= activeTab === 'recrutement' ? 'active' : '' %>">
-                <div class="search-bar">
-                    <input type="text" placeholder="Rechercher une demande...">
-                    <button class="search-btn">Rechercher</button>
-                </div>
-                
-                <% if (demandesRecrutement && demandesRecrutement.length > 0) { %>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Candidat</th>
-                                <th>Organisation</th>
-                                <th>Description</th>
-                                <th>Date de demande</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% demandesRecrutement.forEach(demande => { %>
-                                <tr>
-                                    <td>
-                                        <% if (demande.candidat) { %>
-                                            <%= demande.candidat.prenom %> <%= demande.candidat.nom %>
-                                        <% } else { %>
-                                            ID: <%= demande.id_can %>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <% if (demande.organisation) { %>
-                                            <%= demande.organisation.nom %> (<%= demande.siren %>)
-                                        <% } else { %>
-                                            SIREN: <%= demande.siren %>
-                                        <% } %>
-                                    </td>
-                                    <td><%= demande.descriptionDR %></td>
-                                    <td><%= new Date(demande.dateDemandeDR).toLocaleDateString() %></td>
-                                    <td>
-                                        <span class="status-badge 
-                                            <%= demande.statutDR === 'validee' ? 'status-active' : 
-                                               (demande.statutDR === 'refusee' ? 'status-inactive' : 'status-pending') %>">
-                                            <%= demande.statutDR %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <% if (demande.statutDR === 'en_attente') { %>
-                                            <div class="actions-buttons">
-                                                <form action="/admin/request/recrutement/<%= demande.id_can %>/<%= demande.siren %>/approve" method="POST" style="display: inline;">
-                                                    <button type="submit" class="action-button status-active">
-                                                        <i class="bi bi-check-circle"></i> Accepter
-                                                    </button>
-                                                </form>
-                                                <form action="/admin/request/recrutement/<%= demande.id_can %>/<%= demande.siren %>/reject" method="POST" style="display: inline;">
-                                                    <button type="submit" class="action-button danger">
-                                                        <i class="bi bi-x-circle"></i> Refuser
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        <% } else { %>
-                                            <em>Demande traitée</em>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="no-candidatures">
-                        <h3>Aucune demande de recrutement</h3>
-                        <p>Il n'y a pas de demandes de recrutement en attente.</p>
-                    </div>
-                <% } %>
-            </div>
-        </main>
+            <div class="admin-card-content">Changement d'organisations</div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <a
+            href="/admin/requests?tab=creation"
+            class="tab <%= !activeTab || activeTab === 'creation' ? 'active' : '' %>"
+            data-tab="creation"
+          >
+            Demandes de création (<%= demandesCreation ? demandesCreation.length
+            : 0 %>)
+          </a>
+          <a
+            href="/admin/requests?tab=changement"
+            class="tab <%= activeTab === 'changement' ? 'active' : '' %>"
+            data-tab="changement"
+          >
+            Demandes de changement (<%= demandesChangement ?
+            demandesChangement.length : 0 %>)
+          </a>
+          <a
+            href="/admin/requests?tab=recrutement"
+            class="tab <%= activeTab === 'recrutement' ? 'active' : '' %>"
+            data-tab="recrutement"
+          >
+            Demandes de recrutement (<%= demandesRecrutement ?
+            demandesRecrutement.length : 0 %>)
+          </a>
+        </div>
+
+        <!-- Tab content for création demandes -->
+        <div
+          id="creation"
+          class="tab-content <%= !activeTab || activeTab === 'creation' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher une demande..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (demandesCreation && demandesCreation.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Candidat</th>
+                <th>SIREN</th>
+                <th>Description</th>
+                <th>Date de demande</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% demandesCreation.forEach(demande => { %>
+              <tr>
+                <td>
+                  <% if (demande.candidat) { %> <%= demande.candidat.prenom %>
+                  <%= demande.candidat.nom %> <% } else { %> ID: <%=
+                  demande.id_can %> <% } %>
+                </td>
+                <td><%= demande.siren %></td>
+                <td><%= demande.descriptionCrO %></td>
+                <td>
+                  <%= new Date(demande.dateDemandeCrO).toLocaleDateString() %>
+                </td>
+                <td>
+                  <span
+                    class="status-badge <%= demande.statutCrO === 'validee' ? 'status-active' : (demande.statutCrO === 'refusee' ? 'status-inactive' : 'status-pending') %>"
+                  >
+                    <%= demande.statutCrO %>
+                  </span>
+                </td>
+                <td>
+                  <% if (demande.statutCrO === 'en_attente') { %>
+                  <div class="actions-buttons">
+                    <form
+                      action="/admin/request/creation/<%= demande.id_can %>/<%= demande.siren %>/approve"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="action-button status-active">
+                        <i class="bi bi-check-circle"></i> Accepter
+                      </button>
+                    </form>
+                    <form
+                      action="/admin/request/creation/<%= demande.id_can %>/<%= demande.siren %>/reject"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="action-button danger">
+                        <i class="bi bi-x-circle"></i> Refuser
+                      </button>
+                    </form>
+                  </div>
+                  <% } else { %>
+                  <em>Demande traitée</em>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucune demande de création</h3>
+            <p>
+              Il n'y a pas de demandes de création d'organisation en attente.
+            </p>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Tab content for changement demandes -->
+        <div
+          id="changement"
+          class="tab-content <%= activeTab === 'changement' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher une demande..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (demandesChangement && demandesChangement.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Recruteur</th>
+                <th>SIREN</th>
+                <th>Description</th>
+                <th>Date de demande</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% demandesChangement.forEach(demande => { %>
+              <tr>
+                <td>
+                  <% if (demande.recruteur) { %> <%= demande.recruteur.prenom %>
+                  <%= demande.recruteur.nom %> <% } else { %> ID: <%=
+                  demande.id_rec %> <% } %>
+                </td>
+                <td><%= demande.siren %></td>
+                <td><%= demande.descriptionChO %></td>
+                <td>
+                  <%= new Date(demande.dateDemandeChO).toLocaleDateString() %>
+                </td>
+                <td>
+                  <span
+                    class="status-badge <%= demande.statutChO === 'validee' ? 'status-active' : (demande.statutChO === 'refusee' ? 'status-inactive' : 'status-pending') %>"
+                  >
+                    <%= demande.statutChO %>
+                  </span>
+                </td>
+                <td>
+                  <% if (demande.statutChO === 'en_attente') { %>
+                  <div class="actions-buttons">
+                    <form
+                      action="/admin/request/changement/<%= demande.id_rec %>/<%= demande.siren %>/approve"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="action-button status-active">
+                        <i class="bi bi-check-circle"></i> Accepter
+                      </button>
+                    </form>
+                    <form
+                      action="/admin/request/changement/<%= demande.id_rec %>/<%= demande.siren %>/reject"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="action-button danger">
+                        <i class="bi bi-x-circle"></i> Refuser
+                      </button>
+                    </form>
+                  </div>
+                  <% } else { %>
+                  <em>Demande traitée</em>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucune demande de changement</h3>
+            <p>
+              Il n'y a pas de demandes de changement d'organisation en attente.
+            </p>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Tab content for recrutement demandes -->
+        <div
+          id="recrutement"
+          class="tab-content <%= activeTab === 'recrutement' ? 'active' : '' %>"
+        >
+          <div class="search-bar">
+            <input type="text" placeholder="Rechercher une demande..." />
+            <button class="search-btn">Rechercher</button>
+          </div>
+
+          <% if (demandesRecrutement && demandesRecrutement.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Candidat</th>
+                <th>Organisation</th>
+                <th>Description</th>
+                <th>Date de demande</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% demandesRecrutement.forEach(demande => { %>
+              <tr>
+                <td>
+                  <% if (demande.candidat) { %> <%= demande.candidat.prenom %>
+                  <%= demande.candidat.nom %> <% } else { %> ID: <%=
+                  demande.id_can %> <% } %>
+                </td>
+                <td>
+                  <% if (demande.organisation) { %> <%= demande.organisation.nom
+                  %> (<%= demande.siren %>) <% } else { %> SIREN: <%=
+                  demande.siren %> <% } %>
+                </td>
+                <td><%= demande.descriptionDR %></td>
+                <td>
+                  <%= new Date(demande.dateDemandeDR).toLocaleDateString() %>
+                </td>
+                <td>
+                  <span
+                    class="status-badge <%= demande.statutDR === 'validee' ? 'status-active' : (demande.statutDR === 'refusee' ? 'status-inactive' : 'status-pending') %>"
+                  >
+                    <%= demande.statutDR %>
+                  </span>
+                </td>
+                <td>
+                  <% if (demande.statutDR === 'en_attente') { %>
+                  <div class="actions-buttons">
+                    <form
+                      action="/admin/request/recrutement/<%= demande.id_can %>/<%= demande.siren %>/approve"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="action-button status-active">
+                        <i class="bi bi-check-circle"></i> Accepter
+                      </button>
+                    </form>
+                    <form
+                      action="/admin/request/recrutement/<%= demande.id_can %>/<%= demande.siren %>/reject"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="action-button danger">
+                        <i class="bi bi-x-circle"></i> Refuser
+                      </button>
+                    </form>
+                  </div>
+                  <% } else { %>
+                  <em>Demande traitée</em>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="no-candidatures">
+            <h3>Aucune demande de recrutement</h3>
+            <p>Il n'y a pas de demandes de recrutement en attente.</p>
+          </div>
+          <% } %>
+        </div>
+      </main>
     </div>
-</body>
-
-</html> 
+  </body>
+</html>

@@ -11,6 +11,8 @@ var { geocode } = require("../services/geocode.js");
 var { calculDistance } = require("../services/distance.js");
 var { sendEmail, emailTemplates } = require("../services/email.js");
 const { checkFileContent } = require("../security.js");
+var bcrypt = require("bcrypt");
+var saltRounds = 10;
 
 var candidat = require("../model/candidat.js");
 var admin = require("../model/administrateur.js");
@@ -24,6 +26,8 @@ var candidature = require("../model/candidature.js");
 var pjt = require("../model/piece_jointe_temporaire.js");
 var rec = require("../model/recruteur.js");
 var demandeChO = require("../model/Demande_changer_organisation.js");
+
+// const DISABLE_ENCRYPTION = true;
 
 router.get("/userlist", function (req, res, next) {
   result = candidat.readall((result) => {
@@ -139,80 +143,47 @@ router.get("/login", function (req, res, next) {
 
 router.post("/login", function (req, res, next) {
   const { email, password } = req.body;
-
   // ADMIN
-  admin.read(email, (adminResult) => {
+  admin.read(email, (err, adminResult) => {
+    if (err) {
+      console.error("Erreur lors de la lecture admin :", err);
+      return res
+        .status(500)
+        .redirect("/users/login?error=" + encodeURIComponent("Erreur serveur"));
+    }
     if (adminResult && adminResult.length > 0) {
       const adminUser = adminResult[0];
-      if (adminUser.mdp === password) {
-        session.creatSession(
-          req.session,
-          {
-            id: adminUser.id_admin,
-            email: adminUser.email,
-          },
-          "admin"
-        );
-        return res.redirect("/admin/dashboard");
-      }
-      // sinon on continue vers RECRUTEUR
-    }
 
-    // RECRUTEUR
-    rec.read(email, (recruteurResult) => {
-      if (recruteurResult && recruteurResult.length > 0) {
-        const recruteur = recruteurResult[0];
-        // on récupère le statut en base
-        const sqlRec = "SELECT statut FROM Recruteur WHERE id_rec = ?";
-        db.query(sqlRec, [recruteur.id_rec], (err, recStatuts) => {
-          if (err) {
-            console.error(err);
-            return res
-              .status(500)
-              .redirect(
-                "/users/login?error=" + encodeURIComponent("Erreur serveur")
-              );
-          }
-
-          const statutRec = recStatuts[0].statut;
-          if (statutRec === "inactif") {
-            // drapeau en session, puis redirection sans query
-            req.session.inactiveAccount = true;
-            return res.redirect("/users/login");
-          }
-
-          if (recruteur.mdp !== password) {
-            return res.redirect(
-              "/users/login?error=" +
-                encodeURIComponent("Email ou mot de passe incorrect")
-            );
-          }
-
-          // tout est ok
+      return bcrypt.compare(password, adminUser.mdp, (err, isMatch) => {
+        // (!isMatch && password !== "non")
+        if (err || !isMatch) {
+          // continuer vers RECRUTEUR
+        } else {
           session.creatSession(
             req.session,
             {
-              id: recruteur.id_rec,
-              email: recruteur.email,
-              siren: recruteur.siren,
+              id: adminUser.id_admin,
+              email: adminUser.email,
             },
-            "recruteur"
+            "admin"
           );
-          return res.redirect(`/recruteur/${recruteur.siren}/NosOffres`);
-        });
-      } else {
-        // CANDIDAT
-        candidat.read(email, (candidatResult) => {
-          if (!candidatResult || candidatResult.length === 0) {
-            return res.redirect(
-              "/users/login?error=" +
-                encodeURIComponent("Email ou mot de passe incorrect")
-            );
-          }
+          return res.redirect("/admin/dashboard");
+        }
 
-          const candidat = candidatResult[0];
-          const sqlCan = "SELECT statut FROM Candidat WHERE id_can = ?";
-          db.query(sqlCan, [candidat.id_can], (err, canStatuts) => {
+        // si échec, continue vers RECRUTEUR
+        proceedToRecruteur();
+      });
+    } else {
+      proceedToRecruteur();
+    }
+
+    function proceedToRecruteur() {
+      rec.read(email, (recruteurResult) => {
+        if (recruteurResult && recruteurResult.length > 0) {
+          const recruteur = recruteurResult[0];
+
+          const sqlRec = "SELECT statut FROM Recruteur WHERE id_rec = ?";
+          db.query(sqlRec, [recruteur.id_rec], (err, recStatuts) => {
             if (err) {
               console.error(err);
               return res
@@ -222,32 +193,86 @@ router.post("/login", function (req, res, next) {
                 );
             }
 
-            const statutCan = canStatuts[0].statut;
-            if (statutCan === "inactif") {
+            const statutRec = recStatuts[0].statut;
+            if (statutRec === "inactif") {
               req.session.inactiveAccount = true;
               return res.redirect("/users/login");
             }
 
-            if (candidat.mdp !== password) {
+            bcrypt.compare(password, recruteur.mdp, (err, isMatch) => {
+              // (!isMatch && password !== "non")
+              if (err || !isMatch) {
+                return res.redirect(
+                  "/users/login?error=" +
+                    encodeURIComponent("Email ou mot de passe incorrect")
+                );
+              }
+
+              session.creatSession(
+                req.session,
+                {
+                  id: recruteur.id_rec,
+                  email: recruteur.email,
+                  siren: recruteur.siren,
+                },
+                "recruteur"
+              );
+              return res.redirect(`/recruteur/${recruteur.siren}/NosOffres`);
+            });
+          });
+        } else {
+          // CANDIDAT
+          candidat.read(email, (candidatResult) => {
+            if (!candidatResult || candidatResult.length === 0) {
               return res.redirect(
                 "/users/login?error=" +
                   encodeURIComponent("Email ou mot de passe incorrect")
               );
             }
 
-            session.creatSession(
-              req.session,
-              {
-                id: candidat.id_can,
-                email: candidat.email,
-              },
-              "candidat"
-            );
-            return res.redirect("/users/ListeOffres");
+            const candidat = candidatResult[0];
+
+            const sqlCan = "SELECT statut FROM Candidat WHERE id_can = ?";
+            db.query(sqlCan, [candidat.id_can], (err, canStatuts) => {
+              if (err) {
+                console.error(err);
+                return res
+                  .status(500)
+                  .redirect(
+                    "/users/login?error=" + encodeURIComponent("Erreur serveur")
+                  );
+              }
+
+              const statutCan = canStatuts[0].statut;
+              if (statutCan === "inactif") {
+                req.session.inactiveAccount = true;
+                return res.redirect("/users/login");
+              }
+
+              bcrypt.compare(password, candidat.mdp, (err, isMatch) => {
+                // (!isMatch && password !== "non")
+                if (err || !isMatch) {
+                  return res.redirect(
+                    "/users/login?error=" +
+                      encodeURIComponent("Email ou mot de passe incorrect")
+                  );
+                }
+
+                session.creatSession(
+                  req.session,
+                  {
+                    id: candidat.id_can,
+                    email: candidat.email,
+                  },
+                  "candidat"
+                );
+                return res.redirect("/users/ListeOffres");
+              });
+            });
           });
-        });
-      }
-    });
+        }
+      });
+    }
   });
 });
 
@@ -494,12 +519,26 @@ router.get("/inscription", function (req, res, next) {
   res.render("inscription", { title: "Créer un compte", inactive: false });
 });
 
-router.post("/inscription", function (req, res, next) {
+router.post("/inscription", async function (req, res, next) {
   const { nom, prenom, num, email, password, password2 } = req.body;
 
   // Exemple de simple validation pour le moment
   if (!nom || !prenom || !num || !email || !password || !password2) {
     return res.status(400).send("Veuillez remplir tous les champs !");
+  }
+
+  const areValide = (pwd) => {
+    return new Promise((resolve) => {
+      // vérification de la composition du mot de passe
+      const regex =
+        /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+      resolve(regex.test(pwd));
+    });
+  };
+  // vérification de la composition du mot de passe
+  const isValide = await areValide(password);
+  if (!isValide) {
+    return res.send("Le format du mot de passe est invalide.");
   }
 
   if (password !== password2) {
@@ -510,19 +549,40 @@ router.post("/inscription", function (req, res, next) {
   // ou si on le met à inactif par défaut et qu'on l'active après validation
   const statut = "actif";
 
-  candidat.creat(email, password, nom, prenom, num, statut, async (result) => {
-    if (!result) {
-      return res.send("Erreur lors de l'inscription. Vérifiez vos données !");
-    } else {
-      // Envoyer l'email de confirmation
-      const template = emailTemplates.compteCree(nom, prenom);
-      await sendEmail(email, template);
-
-      res.render("Login", {
-        title: "S'authentifier",
-        inactive: false,
-      });
+  // Hachage du mot de passe avant enregistrement
+  bcrypt.hash(password, saltRounds, async (err, hashedPassword) => {
+    if (err) {
+      console.error("Erreur lors du hachage :", err);
+      return res
+        .status(500)
+        .send("Erreur interne lors du traitement du mot de passe.");
     }
+
+    // Création du candidat avec le mot de passe haché
+    candidat.creat(
+      email,
+      hashedPassword,
+      nom,
+      prenom,
+      num,
+      statut,
+      async (result) => {
+        if (!result) {
+          return res.send(
+            "Erreur lors de l'inscription. Vérifiez vos données !"
+          );
+        }
+
+        // Envoi de l'email de confirmation
+        const template = emailTemplates.compteCree(nom, prenom);
+        await sendEmail(email, template);
+
+        res.render("Login", {
+          title: "S'authentifier",
+          inactive: false,
+        });
+      }
+    );
   });
 });
 
@@ -605,7 +665,7 @@ router.post(
 
       if (req.files && req.files.length > 0) {
         for (const file of req.files) {
-          if (checkFileContent(file.path)) {
+          if (await checkFileContent(file.path)) {
             fichiersDangereux.push(file.path);
           }
         }
@@ -694,7 +754,7 @@ router.post(
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         code: "LIMIT_FILE_SIZE",
-        message: "Fichier trop volumineux (> 5 Ko)",
+        message: "Fichier trop volumineux (> 1 Mo)",
       });
     }
     return res
@@ -720,7 +780,7 @@ router.post(
       const fichiersDangereux = [];
 
       for (const file of files) {
-        if (checkFileContent(file.path)) {
+        if (await checkFileContent(file.path)) {
           fichiersDangereux.push(file.path);
         }
       }
@@ -798,7 +858,7 @@ router.post(
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         code: "LIMIT_FILE_SIZE",
-        message: "Fichier trop volumineux (> 5 Ko)",
+        message: "Fichier trop volumineux (> 1 Mo)",
       });
     }
     return res
@@ -810,7 +870,7 @@ router.post(
 router.post(
   "/upload",
   upload.single("file"),
-  (req, res) => {
+  async function (req, res) {
     // test erreur
     if (!req.file) {
       return res.status(400).json({ message: "Aucun fichier reçu" });
@@ -818,7 +878,7 @@ router.post(
 
     // vérification du contenu des fichiers envoyés
     const filePath = req.file.path;
-    if (checkFileContent(filePath)) {
+    if (await checkFileContent(filePath)) {
       // Supprime le fichier s'il est suspect
       fs.unlink(filePath, (err) => {
         if (err && err.code !== "ENOENT") {
@@ -859,7 +919,7 @@ router.post(
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         code: "LIMIT_FILE_SIZE",
-        message: "Fichier trop volumineux (> 5 Ko)",
+        message: "Fichier trop volumineux (> 1 Mo)",
       });
     }
     return res
@@ -962,7 +1022,7 @@ router.get("/MesOffres", function (req, res, next) {
   });
 });
 
-router.post("/updateProfile", function (req, res, next) {
+router.post("/updateProfile", async function (req, res, next) {
   if (!req.session.id_candidat) {
     return res.status(403).send("Accès interdit. Veuillez vous connecter.");
   }
@@ -980,13 +1040,29 @@ router.post("/updateProfile", function (req, res, next) {
     numero_telephone,
   };
 
+  // vérification composition nouveau modt de passe
+  const areValide = (pwd) => {
+    return new Promise((resolve) => {
+      // vérification de la composition du mot de passe
+      const regex =
+        /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+      resolve(regex.test(pwd));
+    });
+  };
   // Ajouter le mot de passe seulement si fourni
   if (mdp && mdp.trim() !== "") {
-    updateData.mdp = mdp;
+    // vérification de la composition du mot de passe
+    const isValide = await areValide(mdp);
+    if (!isValide) {
+      return res.send("Le format du mot de passe est invalide.");
+    }
+    const hashed = await bcrypt.hash(mdp, saltRounds);
+    updateData.mdp = hashed;
   }
 
   // Mettre à jour le profil du candidat
   candidat.update(id_candidat, updateData, (result) => {
+    console.log(result);
     if (result === null) {
       return res
         .status(400)

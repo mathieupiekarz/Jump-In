@@ -6,6 +6,8 @@ if (!regex.test(mdp)) console.log("erreur");
 else console.log("valide");
 */
 
+const e = require("express");
+
 /*
 var mdp = "ttAA11##izgoaajivza";
 
@@ -89,6 +91,7 @@ console.log(regex.test(email1));
 console.log(regex.test(email2));
 */
 
+/*
 const tab = [
   "LM Atos_2025-06-15T18_36_56_206Z.pdf",
   "LM WPP Media_2025-06-15T18_36_56_204Z.pdf",
@@ -99,3 +102,21 @@ tab.forEach((t, index) => {
   console.log(t);
   console.log("------------");
 });
+*/
+
+var mdp = "ttAA11izg%%oaajivza";
+var mdp2 = "AB10ru&#bbbbbbbbbbbbb";
+
+const areValide = (pwd) => {
+  return new Promise((resolve) => {
+    // vérification de la composition du mot de passe
+    const regex =
+      /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*\d){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ\d!?@\$%&\*\+=\-_.,;:\/\\|^~#()[\]{}<>'"`€£µ§°¤]{12,}$/;
+    resolve(regex.test(pwd));
+  });
+};
+// vérification de la composition du mot de passe
+console.log(areValide(mdp2));
+if (!areValide(mdp2)) {
+  return console.log("Le format du mot de passe est invalide.");
+} else console.log("valide");

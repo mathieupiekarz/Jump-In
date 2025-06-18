@@ -32,7 +32,7 @@
       </div>
       <nav>
         <ul class="nav-links">
-          <li><a href="#">Home</a></li>
+          <li><a href="/users/login" class="active">Connexion</a></li>
           <li><a href="./ListeOffres">Les offres</a></li>
           <li><a href="./MesOffres">Mes candidatures</a></li>
           <li><a href="./Profile" class="btn-connexion">Mon Profil</a></li>
@@ -532,17 +532,6 @@
           e.preventDefault();
           alert("Les mots de passe ne correspondent pas.");
           return false;
-        }
-
-        // Vérifier le format du mot de passe si renseigné
-        if (mdpInput.value) {
-          const regex =
-            /^(?=(?:.*[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙ]){2,})(?=(?:.*[a-zàâäçéèêëîïôöûüùÿ]){2,})(?=(?:.*[!?@\$%&\*\+=\-_.,;:\/\\\|\^~#\(\)\[\]\{\}<>`'"€£µ§°¤]){2,})[A-ZÀÂÄÇÉÈÊËÎÏÔÖÛÜÙa-zàâäçéèêëîïôöûüùÿ!?@\$%&\*\+=\-_.,;:\/\\|^~#()\[\]{}<>'"`€£µ§°¤]{12,}$/;
-          if (!regex.test(mdpInput.value)) {
-            e.preventDefault();
-            alert("Le mot de passe ne respecte pas les critères de sécurité.");
-            return false;
-          }
         }
 
         return true;
