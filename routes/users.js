@@ -657,8 +657,6 @@ router.post(
   res.send("données reçues");
   */
     try {
-      console.log(req.file);
-
       if (!req.session.id_candidat) {
         return res.status(403).send("Accès interdit. Veuillez vous connecter.");
       }
@@ -781,8 +779,6 @@ router.post(
     const numero_offre = req.body.numero_offre;
     const originalName = JSON.parse(req.body.originalFiles);
     const files = req.files || [];
-
-    console.log(files);
 
     if (files.length === 0) {
       return res.redirect(`/offre2/${numero_offre}`);
@@ -1075,7 +1071,6 @@ router.post("/updateProfile", async function (req, res, next) {
 
   // Mettre à jour le profil du candidat
   candidat.update(id_candidat, updateData, (err, result) => {
-    console.log(result);
     if (result === null) {
       return res
         .status(400)

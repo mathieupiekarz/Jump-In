@@ -59,8 +59,10 @@
           <div class="job-header2">
             <div class="job-header2">
               <img
-                src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
-                alt="<%= offre.organisation_nom %>"
+                src="/images/<%= organisation.nom.toLowerCase() %>-logo.png"
+                alt="<%= organisation.nom %>"
+                class="org-logo"
+                onerror="this.onerror=null; this.src='/images/JumpIn_IMG'"
               />
               <div>
                 <h2><%= offre.intitule || "Poste à pourvoir" %></h2>

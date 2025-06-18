@@ -155,7 +155,6 @@ const offre = {
       const totalOffres = countResult[0].total;
 
       db.query(sql, [id_can, limit, offset], (err, results) => {
-        console.log(results);
         if (err) {
           console.error("Erreur lors de la récupération des offres:", err);
           return callback([], totalOffres);

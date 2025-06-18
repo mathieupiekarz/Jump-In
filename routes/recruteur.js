@@ -334,16 +334,14 @@ router.post(
   "/:entreprise_id/fiche/:fiche_id/modifier",
   function (req, res, next) {
     const siren = req.params.entreprise_id;
-    const fiche_id = req.params.fiche_id;
+    const fiche_id = parseInt(req.params.fiche_id);
 
-    // Vérifier si l'organisation existe
     organisation.read(siren, function (orgResult) {
       if (!orgResult || orgResult.length === 0) {
         return res.status(404).send("Organisation non trouvée.");
       }
 
-      // Vérifier si la fiche de poste existe et appartient à l'organisation
-      fp.read(parseInt(fiche_id), function (ficheResult) {
+      fp.read(fiche_id, function (ficheResult) {
         if (!ficheResult || ficheResult.length === 0) {
           return res.status(404).send("Fiche de poste non trouvée.");
         }
@@ -354,17 +352,20 @@ router.post(
             .send("Vous n'avez pas accès à cette fiche de poste.");
         }
 
-        // Reconstruire l'objet lieu_mission
-        const lieuMission = {
-          nom: req.body["lieu_mission[nom]"],
-          adresse: req.body["lieu_mission[adresse]"],
-          complement: req.body["lieu_mission[complement]"] || null,
-          code_postal: req.body["lieu_mission[code_postal]"],
-          ville: req.body["lieu_mission[ville]"],
-          pays: req.body["lieu_mission[pays]"] || "France",
-        };
+        let lieuMission;
+        try {
+          lieuMission = JSON.stringify({
+            nom: req.body["lieu_mission[nom]"] || "",
+            adresse: req.body["lieu_mission[adresse]"] || "",
+            complement: req.body["lieu_mission[complement]"] || null,
+            code_postal: req.body["lieu_mission[code_postal]"] || "",
+            ville: req.body["lieu_mission[ville]"] || "",
+            pays: req.body["lieu_mission[pays]"] || "France",
+          });
+        } catch (e) {
+          return res.status(400).send("Erreur de format dans lieu_mission.");
+        }
 
-        // Créer l'objet de mise à jour avec les champs modifiés
         const updateData = {
           intitule: req.body.intitule,
           statut_de_poste: req.body.statut_de_poste,
@@ -376,17 +377,19 @@ router.post(
           description: req.body.description,
         };
 
-        // Mettre à jour la fiche de poste
-        fp.update(parseInt(fiche_id), updateData, function (err, result) {
-          if (!result) {
+        fp.update(fiche_id, updateData, function (err, result) {
+          if (err) {
+            console.error("Erreur SQL:", err);
             return res
-              .status(400)
-              .send(
-                "Erreur lors de la modification de la fiche de poste. Veuillez vérifier les données saisies."
-              );
+              .status(500)
+              .send("Erreur serveur lors de la mise à jour.");
           }
-          // Rediriger vers la page des offres
-          res.redirect(`/recruteur/${siren}/NosOffres`);
+          if (!result) {
+            return res.status(400).send("Aucune ligne modifiée.");
+          }
+
+          // réponse finale
+          return res.redirect(`/recruteur/${siren}/NosOffres`);
         });
       });
     });

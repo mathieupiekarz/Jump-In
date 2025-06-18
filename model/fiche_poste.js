@@ -134,7 +134,6 @@ const fp = {
   },
   // prend en argument un dictionnaire qui contient tous les arguments de Fiche_Poste en clé
   update: (id_fiche, dictUpdate, callback) => {
-    // vérification si la fiche_poste existe
     db.query(
       "SELECT * FROM Fiche_Poste WHERE id_fiche = ?",
       [id_fiche],
@@ -142,7 +141,6 @@ const fp = {
         if (err) return callback(err, null);
         if (results.length === 0) return callback(null, null);
 
-        // vérification si dictUpdate est du bon format
         const champsValides = [
           "intitule",
           "statut_de_poste",
@@ -160,50 +158,41 @@ const fp = {
             return o;
           }, {});
 
-        // si rien à mettre à jour, on renvoie 0 lignes affectées
         if (Object.keys(nv).length === 0) {
           return callback(null, 0);
         }
 
-        // vérification si intitule est un string
         if ("intitule" in nv && typeof nv.intitule !== "string")
           return callback(null, null);
 
-        // vérification si statut_de_poste est un string
         if ("statut_de_poste" in nv && typeof nv.statut_de_poste !== "string")
           return callback(null, null);
 
-        // vérification si responsable_hierarchique est un string
         if (
           "responsable_hierarchique" in nv &&
           typeof nv.responsable_hierarchique !== "string"
         )
           return callback(null, null);
 
-        // vérification si type_metier est un string
         if ("type_metier" in nv && typeof nv.type_metier !== "string")
           return callback(null, null);
 
-        // vérification si rythme est un string
         if ("rythme" in nv && typeof nv.rythme !== "string")
           return callback(null, null);
 
-        // vérification si fourchette_salaire est un string
         if (
           "fourchette_salaire" in nv &&
           typeof nv.fourchette_salaire !== "string"
         )
           return callback(null, null);
 
-        // vérification si description est un string
         if ("description" in nv && typeof nv.description !== "string")
           return callback(null, null);
 
-        // vérification si lieu_mission est dans le bon format
         if ("lieu_mission" in nv) {
-          if (typeof nv.lieu_mission !== "object") {
-            return callback(null, null);
-          }
+          nv.lieu_mission = JSON.parse(nv.lieu_mission);
+          if (typeof nv.lieu_mission !== "object") return callback(null, null);
+
           const champsLieu = [
             "nom",
             "adresse",
@@ -213,11 +202,10 @@ const fp = {
             "pays",
           ];
           const clefs = Object.keys(nv.lieu_mission);
-          // chaque clé doit être autorisée
           if (!clefs.every((k) => champsLieu.includes(k))) {
             return callback(null, null);
           }
-          // types : nom, adresse, code_postal, ville, pays => string ; complement => string ou null
+
           const vals = nv.lieu_mission;
           if (
             typeof vals.nom !== "string" ||
@@ -232,7 +220,7 @@ const fp = {
             return callback(null, null);
           }
         }
-        // mise à jour de la BDD
+
         const updates = [];
         const params = [];
 
@@ -269,17 +257,17 @@ const fp = {
           params.push(nv.description);
         }
 
-        // vérification si statut est dans le bon format
         const sql = `UPDATE Fiche_Poste SET ${updates.join(
           ", "
         )} WHERE id_fiche = ?`;
         db.query(sql, [...params, id_fiche], (err, result) => {
           if (err) return callback(err, null);
-          callback(null, results.affectedRows);
+          return callback(null, result.affectedRows);
         });
       }
     );
   },
+
   delete: (id_fiche, callback) => {
     // vérification si la fiche_poste existe
     db.query(

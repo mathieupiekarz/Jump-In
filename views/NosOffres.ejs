@@ -254,7 +254,7 @@
             src="/images/<%= organisation.nom.toLowerCase() %>-logo.png"
             alt="<%= organisation.nom %>"
             class="org-logo"
-            onerror="this.src='/images/default-logo.png'"
+            onerror="this.onerror=null; this.src='/images/JumpIn_IMG'"
           />
           <div class="org-info">
             <h2><%= organisation.nom %></h2>
@@ -306,9 +306,10 @@
             <div class="job-header2">
               <div class="job-header2">
                 <img
-                  src="/images/<%= offre.organisation_nom.toLowerCase() %>-logo.png"
-                  alt="<%= offre.organisation_nom %>"
-                  onerror="this.src='/images/default-logo.png'"
+                  src="/images/<%= organisation.nom.toLowerCase() %>-logo.png"
+                  alt="<%= organisation.nom %>"
+                  class="org-logo"
+                  onerror="this.onerror=null; this.src='/images/JumpIn_IMG'"
                 />
                 <div>
                   <h2><%= offre.intitule %></h2>
