@@ -12,9 +12,8 @@ const dco = {
   },
   readall: (callback) => {
     db.query("SELECT * FROM DemandeCreationOrganisation", (err, results) => {
-      if (err) throw err;
-      if (results.length === 0) return callback(null);
-      callback(results);
+      if (err) return callback(err, null);
+      callback(null, results);
     });
   },
   creat: (

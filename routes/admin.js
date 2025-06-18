@@ -43,19 +43,19 @@ function fetchAllData() {
     }),
 
     getDemandesCreation: new Promise((resolve) => {
-      demandeCreation.readall((results) => {
+      demandeCreation.readall((err, results) => {
         resolve(results);
       });
     }),
 
     getDemandesChangement: new Promise((resolve) => {
-      demandeChangement.readall((results) => {
+      demandeChangement.readall((err, results) => {
         resolve(results);
       });
     }),
 
     getDemandesRecrutement: new Promise((resolve) => {
-      demandeRecrutement.readall((results) => {
+      demandeRecrutement.readall((err, results) => {
         resolve(results);
       });
     }),
