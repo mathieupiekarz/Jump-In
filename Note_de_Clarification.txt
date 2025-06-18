@@ -1,4 +1,4 @@
-install multer, archiver, uiid, mammoth, bcrypt
+install multer, archiver, uiid, mammoth, bcrypt, pdf-parse, xlsx
 api : navigator.geolocation
 
 
@@ -18,7 +18,12 @@ Mathieu : ttAA11izg%%oaajivza
 Matheo : AB10ru&#bbbbbbbbbbbbb
 Robin : AB10ru&#bbbbbbbbbbbbb
 Pierre : AB10ru&#bbbbbbbbbbbbb
-
+Maxence : ttAA11izg%%oaajivza
+Titouan : ttAA11izg%%oaajivza
+Hadrien : ttAA11izg%%oaajivza
+Helise : AB10ru&#bbbbbbbbbbbbb
+Nala : AB10ru&#bbbbbbbbbbbbb
+Kaloo : AB10ru&#bbbbbbbbbbbbb
 
 
 
@@ -47,9 +52,9 @@ Numero SIREN possible :
 552100554 --> MICROSOFT
 407751858 --> RICARD
 941615692 --> INTEL
+343134763 --> NIKE
+216751073 --> Whiskas
 
-343134763 
-216751073
 585403074
 251385035
 116809831

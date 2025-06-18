@@ -50,12 +50,12 @@ const recruteur = {
       !statut ||
       !["actif", "inactif"].includes(statut)
     ) {
-      return callback(null);
+      return callback(null, null);
     }
 
     //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
     if (!/^\d{9}$/.test(siren)) {
-      return callback(null);
+      return callback(null, null);
     }
     let sum = 0;
     for (let i = 0; i < 9; i++) {
@@ -65,7 +65,7 @@ const recruteur = {
       sum += digit;
     }
     if (sum % 10 !== 0) {
-      return callback(null);
+      return callback(null, null);
     }
 
     /*
@@ -78,28 +78,28 @@ const recruteur = {
     // vérification du format du numéro de téléphone
     let numSansEspace = num.replace(/\s+/g, "");
     numValide = /^\+33\d{9}$/.test(numSansEspace);
-    if (!numValide) return callback(null);
+    if (!numValide) return callback(null, null);
 
     // vérification du format de l'email
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) {
-      return callback(null);
+      return callback(null, null);
     }
 
     // vérification si l'organisation existe
     let sql_siren = "SELECT * FROM Organisation WHERE siren = ?";
     db.query(sql_siren, [siren], (err, result) => {
-      if (err) throw err;
+      if (err) return callback(err, null);
       if (result.length === 0) {
         console.log("Organisation non trouvée avec le SIREN:", siren);
-        return callback(null);
+        return callback(null, null);
       }
 
       // vérification si un recruteur existant a déjà le même email
       recruteur.read(email, (result) => {
         if (result && result.length > 0) {
           console.log("Un recruteur avec cet email existe déjà:", email);
-          return callback(null);
+          return callback(null, null);
         } else {
           let sql =
             "INSERT INTO Recruteur (siren, email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -122,10 +122,10 @@ const recruteur = {
                   "Erreur MySQL lors de la création du recruteur:",
                   err
                 );
-                throw err;
+                return callback(err, null);
               }
               console.log("Recruteur créé avec succès, ID:", results.insertId);
-              callback(results.insertId);
+              callback(null, results.insertId);
             }
           );
         }
@@ -139,8 +139,8 @@ const recruteur = {
       "SELECT * FROM Recruteur WHERE id_rec = ?",
       [id_rec],
       async (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) callback(err, null);
+        if (results.length === 0) return callback(null, null);
         // vérification si dict est du bon format
         const champsValides = [
           "siren",
@@ -153,7 +153,7 @@ const recruteur = {
         ];
         const keyslist = Object.keys(dictUpdate);
         if (!keyslist.every((k) => champsValides.includes(k)))
-          return callback(null);
+          return callback(null, null);
         const nvdict = Object.fromEntries(
           Object.entries(dictUpdate).filter(([_, valeur]) => valeur !== null)
         );
@@ -162,11 +162,11 @@ const recruteur = {
           // vérification si tous les types sont bien des strings
           const valueslist = Object.values(nvdict);
           if (!valueslist.every((valeur) => typeof valeur === "string"))
-            return callback(null);
+            return callback(null, null);
 
           if ("siren" in nvdict) {
             //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
-            if (!/^\d{9}$/.test(nvdict.siren)) return callback(null);
+            if (!/^\d{9}$/.test(nvdict.siren)) return callback(null, null);
             let sum = 0;
             for (let i = 0; i < 9; i++) {
               let digit = parseInt(nvdict.siren[i], 10);
@@ -174,7 +174,7 @@ const recruteur = {
               if (digit > 9) digit -= 9;
               sum += digit;
             }
-            if (sum % 10 !== 0) return callback(null);
+            if (sum % 10 !== 0) return callback(null, null);
           }
 
           // vérification si le nouveau statut est bien compris entre 'actif' et 'inactif'
@@ -182,7 +182,7 @@ const recruteur = {
             "statut" in nvdict &&
             !["actif", "inactif"].includes(nvdict.statut)
           )
-            return callback(null);
+            return callback(null, null);
 
           /*
           // vérification si le nouveau mdp est dans le bon format
@@ -200,7 +200,7 @@ const recruteur = {
               ""
             );
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);
-            if (!numValide) return callback(null);
+            if (!numValide) return callback(null, null);
           }
 
           const champs = Object.keys(nvdict);
@@ -211,27 +211,27 @@ const recruteur = {
           // vérification que l'organisation existe bien
           let sql_siren = "SELECT * FROM Organisation WHERE siren = ?";
           db.query(sql_siren, [nvdict.siren], (err, result) => {
-            if (err) throw err;
-            if (result === 0) return callback(null);
+            if (err) return callback(err, null);
+            if (result === 0) return callback(null, null);
 
             // vérification si le nouvel email existe déjà
             if ("email" in nvdict) {
               const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              if (!regex.test(nvdict.email)) return callback(null);
+              if (!regex.test(nvdict.email)) return callback(null, null);
 
               recruteur.read(nvdict.email, (result) => {
                 if (result && result.length > 1) return callback(null);
                 // mise à jour de la BDD
                 db.query(sql, [...values, id_rec], (err, results) => {
-                  if (err) throw err;
-                  callback(results.affectedRows);
+                  if (err) return callback(err, null);
+                  callback(null, results.affectedRows);
                 });
               });
             } else {
               // mise à jour de la BDD
               db.query(sql, [...values, id_rec], (err, results) => {
-                if (err) throw err;
-                callback(results.affectedRows);
+                if (err) return callback(err, null);
+                callback(null, results.affectedRows);
               });
             }
           });

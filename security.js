@@ -1,7 +1,6 @@
 const fs = require("fs");
 const mammoth = require("mammoth");
 const path = require("path");
-const pdfParse = require("pdf-parse");
 const xlsx = require("xlsx");
 
 async function checkFileContent(filePath) {
@@ -20,18 +19,6 @@ async function checkFileContent(filePath) {
     } catch (err) {
       console.error("Erreur lecture DOCX :", err);
     }
-  } else if (ext === ".pdf") {
-    try {
-      const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
-      const matches = data.text.match(regex);
-      if (matches) {
-        console.log(`PDF interdit : ${matches.join(", ")}`);
-        return true;
-      }
-    } catch (err) {
-      console.error("Erreur lecture PDF :", err);
-    }
   } else if (ext === ".xlsx") {
     try {
       const workbook = xlsx.readFile(filePath);
@@ -46,7 +33,7 @@ async function checkFileContent(filePath) {
     } catch (err) {
       console.error("Erreur lecture XLSX :", err);
     }
-  } else if ([".png", ".jpeg", ".jpg"].includes(ext)) {
+  } else if ([".png", ".jpeg", ".jpg", "pdf"].includes(ext)) {
     // Optionnel : ne pas lire les images en texte
     return false;
   } else {

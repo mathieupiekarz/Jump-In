@@ -18,7 +18,7 @@ var pjt = require("../model/piece_jointe_temporaire.js");
 // Route pour afficher les offres d'une organisation spécifique
 router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
   try {
-  const siren = req.params.entreprise_id;
+    const siren = req.params.entreprise_id;
     // Vérification de l’organisation
     const orgRes = await new Promise((y, e) =>
       organisation.read(siren, (r) => (r ? y(r) : e("not found")))
@@ -202,7 +202,7 @@ router.get(
       // Récupérer les détails de l'offre avec la fiche de poste
       offre.readWithFicheAndOrganisation(
         parseInt(offre_id),
-        function (offreResult) {
+        function (err, offreResult) {
           if (!offreResult || offreResult.length === 0) {
             return res.status(404).send("Offre non trouvée.");
           }
@@ -231,14 +231,14 @@ router.get("/downloadCandidature/:numero/:id_can", async (req, res, next) => {
   try {
     // Récupération de tous les noms de fichiers temporaires
     const files = await new Promise((resolve, reject) => {
-      pjt.readByCandidature(id_can, numero, (results) => {
+      pjt.readByCandidature(id_can, numero, (err, results) => {
         if (!Array.isArray(results)) {
           // en cas d'erreur interne, on considère qu'il n'y a rien
           return resolve([]);
         }
         resolve(results.map((r) => r.nom));
       });
-  });
+    });
     if (files.length === 0) {
       return res.status(404).send("Aucune pièce à télécharger");
     }
@@ -274,16 +274,17 @@ router.get("/downloadCandidature/:numero/:id_can", async (req, res, next) => {
 router.post(
   "/:entreprise_id/offre/:offre_id/modifier",
   function (req, res, next) {
-  const siren = req.params.entreprise_id;
-  const offre_id = req.params.offre_id;
+    const siren = req.params.entreprise_id;
+    const offre_id = req.params.offre_id;
     const { etat, date_validite, indication, nb_pieces_demandees } = req.body;
 
+    console.log("caca1");
     // Vérifier si l'organisation existe
     organisation.read(siren, function (orgResult) {
       if (!orgResult || orgResult.length === 0) {
         return res.status(404).send("Organisation non trouvée.");
       }
-
+      console.log("caca2");
       // Créer l'objet de mise à jour avec les champs modifiés
       const updateData = {
         etat: etat,
@@ -291,9 +292,10 @@ router.post(
         indication: indication || null,
         nb_pieces_demandees: parseInt(nb_pieces_demandees),
       };
-
+      console.log("caca3");
       // Mettre à jour l'offre
-      offre.update(parseInt(offre_id), updateData, function (result) {
+      offre.update(parseInt(offre_id), updateData, function (err, result) {
+        console.log("caca4");
         if (!result) {
           return res
             .status(400)
@@ -312,9 +314,9 @@ router.post(
 router.post(
   "/:entreprise_id/offre/:offre_id/supprimer",
   function (req, res, next) {
-  const siren = req.params.entreprise_id;
-  const offre_id = req.params.offre_id;
-  
+    const siren = req.params.entreprise_id;
+    const offre_id = req.params.offre_id;
+
     // Vérifier si l'organisation existe
     organisation.read(siren, function (orgResult) {
       if (!orgResult || orgResult.length === 0) {
@@ -341,9 +343,9 @@ router.post(
 router.post(
   "/:entreprise_id/fiche/:fiche_id/modifier",
   function (req, res, next) {
-  const siren = req.params.entreprise_id;
-  const fiche_id = req.params.fiche_id;
-  
+    const siren = req.params.entreprise_id;
+    const fiche_id = req.params.fiche_id;
+
     // Vérifier si l'organisation existe
     organisation.read(siren, function (orgResult) {
       if (!orgResult || orgResult.length === 0) {
@@ -385,7 +387,7 @@ router.post(
         };
 
         // Mettre à jour la fiche de poste
-        fp.update(parseInt(fiche_id), updateData, function (result) {
+        fp.update(parseInt(fiche_id), updateData, function (err, result) {
           if (!result) {
             return res
               .status(400)
@@ -405,9 +407,9 @@ router.post(
 router.post(
   "/:entreprise_id/fiche/:fiche_id/supprimer",
   function (req, res, next) {
-  const siren = req.params.entreprise_id;
-  const fiche_id = req.params.fiche_id;
-  
+    const siren = req.params.entreprise_id;
+    const fiche_id = req.params.fiche_id;
+
     // Vérifier si l'organisation existe
     organisation.read(siren, function (orgResult) {
       if (!orgResult || orgResult.length === 0) {
@@ -444,13 +446,13 @@ router.post(
 // Route pour afficher le formulaire de création d'une fiche de poste
 router.get("/:entreprise_id/fiche/creer", function (req, res, next) {
   const siren = req.params.entreprise_id;
-  
+
   // Vérifier si l'organisation existe
   organisation.read(siren, function (orgResult) {
     if (!orgResult || orgResult.length === 0) {
       return res.status(404).send("Organisation non trouvée.");
     }
-    
+
     res.render("CreerFichePoste", {
       title: "Créer une fiche de poste",
       organisation: orgResult[0],
@@ -498,7 +500,7 @@ router.post("/:entreprise_id/fiche/creer", function (req, res, next) {
       fourchette_salaire,
       description,
       siren,
-      function (result) {
+      function (err, result) {
         if (!result) {
           return res
             .status(400)
@@ -532,7 +534,7 @@ router.post("/:entreprise_id/offre/creer", function (req, res, next) {
       indication || null,
       parseInt(nb_pieces_demandees),
       parseInt(id_fiche),
-      function (result) {
+      function (err, result) {
         if (!result) {
           return res
             .status(400)
@@ -580,7 +582,7 @@ router.post(
           indication || null,
           parseInt(nb_pieces_demandees),
           parseInt(fiche_id),
-          function (result) {
+          function (err, result) {
             if (!result) {
               return res
                 .status(400)
@@ -604,7 +606,7 @@ router.get("/:entreprise_id/offre/:offre_id/api", function (req, res, next) {
 
   offre.readWithFicheAndOrganisation(
     parseInt(offre_id),
-    function (offreResult) {
+    function (err, offreResult) {
       if (!offreResult || offreResult.length === 0) {
         return res.status(404).json({ error: "Offre non trouvée." });
       }
@@ -713,7 +715,7 @@ router.post("/changer-organisation", function (req, res, next) {
       nouveau_siren,
       description,
       "en_attente",
-      function (result) {
+      function (err, result) {
         if (!result) {
           return res.redirect("/recruteur/mon-compte");
         }
@@ -725,4 +727,4 @@ router.post("/changer-organisation", function (req, res, next) {
   });
 });
 
-module.exports = router; 
+module.exports = router;

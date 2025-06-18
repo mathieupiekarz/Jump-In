@@ -18,9 +18,9 @@ const pjt = {
           "Erreur lors de la récupération des pieces jointes:",
           err
         );
-        return callback([]);
+        return callback(err, []);
       }
-      callback(results);
+      callback(null, results);
     });
   },
   readByEverything: (nom, id_can, num_OE, callback) => {
@@ -43,38 +43,63 @@ const pjt = {
       !nom ||
       typeof nom !== "string" ||
       !type ||
-      !["pdf", "jpeg", "png", "xlsx", "docx"].includes(type) ||
+      !["pdf", "jpeg", "png", "xlsx", "docx"].includes(type.toLowerCase()) ||
       typeof id_can !== "number" ||
       typeof num_OE !== "number"
-    )
-      return callback(null);
+    ) {
+      return callback(null, null);
+    }
 
+    // Vérifier si la PJ existe déjà
     pjt.readByEverything(nom, id_can, num_OE, (readErr, existing) => {
       if (readErr) {
         console.error("Erreur readByEverything :", readErr);
-        return callback(readErr);
+        return callback(readErr, null);
       }
-      if (existing.length > 0) return callback(null);
+      if (existing && existing.length > 0) {
+        return callback(null, null);
+      }
 
-      const sql_can = "SELECT 1 FROM Candidat WHERE id_can = ?";
-      db.query(sql_can, [id_can], (err, resCan) => {
-        if (err || resCan.length === 0) return callback(null);
+      // Vérifier que le candidat existe
+      db.query(
+        "SELECT 1 FROM Candidat WHERE id_can = ?",
+        [id_can],
+        (err, resCan) => {
+          if (err || resCan.length === 0) {
+            if (err) console.error("Erreur vérif candidat :", err);
+            return callback(null, null);
+          }
 
-        const sql_offre = "SELECT 1 FROM Offre_Emploi WHERE numero = ?";
-        db.query(sql_offre, [num_OE], (err, resOffre) => {
-          if (err || resOffre.length === 0) return callback(null);
+          // Vérifier que l'offre existe
+          db.query(
+            "SELECT 1 FROM Offre_Emploi WHERE numero = ?",
+            [num_OE],
+            (err, resOffre) => {
+              if (err || resOffre.length === 0) {
+                if (err) console.error("Erreur vérif offre :", err);
+                return callback(null, null);
+              }
 
-          const sql =
-            "INSERT INTO Piece_Jointe_Temporaire (nom, type, id_can, num_OE) VALUES (?, ?, ?, ?)";
-          db.query(sql, [nom, type, id_can, num_OE], (err, results) => {
-            if (err) {
-              console.error(err);
-              return callback(null);
+              // Insertion dans la table
+              const sql = `
+          INSERT INTO Piece_Jointe_Temporaire (nom, type, id_can, num_OE)
+          VALUES (?, ?, ?, ?)
+        `;
+              db.query(
+                sql,
+                [nom, type.toLowerCase(), id_can, num_OE],
+                (err, results) => {
+                  if (err) {
+                    console.error("Erreur insertion PJ temporaire :", err);
+                    return callback(err, null);
+                  }
+                  callback(null, results);
+                }
+              );
             }
-            callback(results);
-          });
-        });
-      });
+          );
+        }
+      );
     });
   },
   countByName: (nom, callback) => {

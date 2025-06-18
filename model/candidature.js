@@ -70,7 +70,7 @@ const candidature = {
       !num_OE ||
       typeof num_OE !== "number"
     ) {
-      return callback(null);
+      return callback(null, null);
     }
 
     // Vérification si le candidat existe
@@ -78,20 +78,20 @@ const candidature = {
       "SELECT 1 FROM Candidat WHERE id_can = ?",
       [id_can],
       (err, resCan) => {
-        if (err) throw err;
-        if (resCan.length === 0) return callback(null); // id_can inexistant
+        if (err) return callback(err, null);
+        if (resCan.length === 0) return callback(null, null); // id_can inexistant
 
         // Vérification si l'offre d'emploi existe
         db.query(
           "SELECT 1 FROM Offre_Emploi WHERE numero = ?",
           [num_OE],
           (err, resOffre) => {
-            if (err) throw err;
-            if (resOffre.length === 0) return callback(null); // num_OE inexistant
+            if (err) return callback(err, null);
+            if (resOffre.length === 0) return callback(null, null); // num_OE inexistant
 
             // Vérification si une candidature existe déjà
-            candidature.read(id_can, num_OE, (result) => {
-              if (result && result.length > 0) return callback(null);
+            candidature.read(id_can, num_OE, (err, result) => {
+              if (result && result.length > 0) return callback(null, null);
 
               // Insertion si tout est valide
               const sql =
@@ -101,8 +101,8 @@ const candidature = {
                 sql,
                 [id_can, num_OE, date_candidature],
                 (err, results) => {
-                  if (err) throw err;
-                  callback(results);
+                  if (err) return callback(err, null);
+                  callback(null, results);
                 }
               );
             });

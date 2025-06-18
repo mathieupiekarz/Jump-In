@@ -76,30 +76,30 @@ const pjd = {
       "SELECT * FROM Piece_Jointe_Durable WHERE nom = ? AND id_can = ?",
       [nom, id_can],
       (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) return callback(err, null);
+        if (results.length === 0) return callback(null, null);
 
         // vérification si dict est du bon format
         const champsValides = ["nom", "type"];
         const keyslist = Object.keys(dictUpdate);
         if (!keyslist.every((k) => champsValides.includes(k)))
-          return callback(null);
+          return callback(null, null);
         const nvdict = Object.fromEntries(
           Object.entries(dictUpdate).filter(([_, valeur]) => valeur !== null)
         );
 
-        if (Object.keys(nvdict) !== 0) {
+        if (Object.keys(nvdict).length !== 0) {
           // vérification si tous les types sont bien des strings
           const valueslist = Object.values(nvdict);
           if (!valueslist.every((valeur) => typeof valeur === "string"))
-            return callback(null);
+            return callback(null, null);
 
           // vérification si le nouveau type respecte toutes les possibilités
           if (
             "type" in nvdict &&
             !["pdf", "jpeg", "png", "xlsx", "docx"].includes(nvdict.type)
           )
-            return callback(null);
+            return callback(null, null);
 
           // mise à jour de la BDD
           const champs = Object.keys(nvdict);
@@ -107,8 +107,8 @@ const pjd = {
           const clause = champs.map((k) => `${k} = ?`).join(", ");
           const sql = `UPDATE Piece_Jointe_Durable SET ${clause} WHERE nom = ? AND id_can = ?`;
           db.query(sql, [...values, nom, id_can], (err, results) => {
-            if (err) throw err;
-            callback(results.affectedRows);
+            if (err) return callback(err, null);
+            callback(null, results.affectedRows);
           });
         }
       }

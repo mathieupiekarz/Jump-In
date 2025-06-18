@@ -94,8 +94,8 @@ const admin = {
       "SELECT * FROM Administrateur WHERE id_admin = ?",
       [id_admin],
       async (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) return callback(err, null);
+        if (results.length === 0) return callback(null, null);
         // vérification si dict est du bon format
         const champsValides = [
           "email",
@@ -107,7 +107,7 @@ const admin = {
         ];
         const keyslist = Object.keys(dictUpdate);
         if (!keyslist.every((k) => champsValides.includes(k)))
-          return callback(null);
+          return callback(null, null);
         const nvdict = Object.fromEntries(
           Object.entries(dictUpdate).filter(([_, valeur]) => valeur !== null)
         );
@@ -116,14 +116,14 @@ const admin = {
           // vérification si tous les types sont bien des strings
           const valueslist = Object.values(nvdict);
           if (!valueslist.every((valeur) => typeof valeur === "string"))
-            return callback(null);
+            return callback(null, null);
 
           // vérification si le nouveau statut est bien compris entre 'actif' et 'inactif'
           if (
             "statut" in nvdict &&
             !["actif", "inactif"].includes(nvdict.statut)
           )
-            return callback(null);
+            return callback(null, null);
 
           /*
           // vérification si le nouveau mdp est dans le bon format
@@ -141,7 +141,7 @@ const admin = {
               ""
             );
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);
-            if (!numValide) return callback(null);
+            if (!numValide) return callback(null, numValide);
           }
 
           const champs = Object.keys(nvdict);
@@ -152,21 +152,21 @@ const admin = {
           // vérification si le nouvel email existe déjà
           if ("email" in nvdict) {
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!regex.test(nvdict.email)) return callback(null);
+            if (!regex.test(nvdict.email)) return callback(null, null);
 
-            admin.read(nvdict.email, (result) => {
-              if (result && result.length > 1) return callback(null);
+            admin.read(nvdict.email, (err, result) => {
+              if (result && result.length > 1) return callback(null, null);
               // mise à jour de la BDD
               db.query(sql, [...values, id_admin], (err, results) => {
-                if (err) throw err;
-                callback(results.affectedRows);
+                if (err) return callback(err, null);
+                callback(null, results.affectedRows);
               });
             });
           } else {
             // mise à jour de la BDD
             db.query(sql, [...values, id_admin], (err, results) => {
-              if (err) throw err;
-              callback(results.affectedRows);
+              if (err) return callback(err, null);
+              callback(null, results.affectedRows);
             });
           }
         }

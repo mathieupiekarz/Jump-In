@@ -52,11 +52,11 @@ const organisation = {
       !statut ||
       !["inactive", "active"].includes(statut)
     ) {
-      return callback(null);
+      return callback(null, null);
     }
 
     //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
-    if (!/^\d{9}$/.test(siren)) return callback(null);
+    if (!/^\d{9}$/.test(siren)) return callback(null, null);
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
@@ -64,7 +64,7 @@ const organisation = {
       if (digit > 9) digit -= 9;
       sum += digit;
     }
-    if (sum % 10 !== 0) return callback(null);
+    if (sum % 10 !== 0) return callback(null, null);
 
     // vérification du json siege_social
     const champsValides = [
@@ -76,7 +76,8 @@ const organisation = {
       "pays",
     ];
     const keylist = Object.keys(siege_social);
-    if (!keylist.every((k) => champsValides.includes(k))) return callback(null);
+    if (!keylist.every((k) => champsValides.includes(k)))
+      return callback(null, null);
     const valueslist = Object.values(siege_social);
     if (
       typeof valueslist[0] !== "string" ||
@@ -86,11 +87,11 @@ const organisation = {
       typeof valueslist[4] !== "string" ||
       typeof valueslist[5] !== "string"
     )
-      return callback(null);
+      return callback(null, null);
 
     // vérification si une Organisation existante a déjà le même siren
     organisation.read(siren, (result) => {
-      if (result) return callback(null);
+      if (result) return callback(null, null);
       else {
         let sql =
           "INSERT INTO Organisation (siren, nom, type, siege_social, statut) VALUES (?, ?, ?, ?, ?)";
@@ -99,10 +100,13 @@ const organisation = {
           [siren, nom, type, JSON.stringify(siege_social), statut],
           (err, results) => {
             if (err) {
-              console.error("Erreur MySQL lors de la création de l'organisation:", err);
-              return callback(null, err);
+              console.error(
+                "Erreur MySQL lors de la création de l'organisation:",
+                err
+              );
+              return callback(err, null);
             }
-            callback(results.insertId);
+            callback(null, results);
           }
         );
       }
@@ -115,8 +119,8 @@ const organisation = {
       "SELECT * FROM Organisation WHERE siren = ?",
       [siren],
       (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) return callback(err, null);
+        if (results.length === 0) return callback(null, null);
 
         // vérification si dictUpdate est du bon format
         const champsValides = ["nom", "type", "siege_social", "statut"];
@@ -133,7 +137,8 @@ const organisation = {
         }
 
         // vérification si nom est un string
-        if ("nom" in nv && typeof nv.nom !== "string") return callback(null);
+        if ("nom" in nv && typeof nv.nom !== "string")
+          return callback(null, null);
 
         // vérification si type est dans le bon format
         if (
@@ -164,12 +169,12 @@ const organisation = {
             "GE",
           ].includes(nv.type)
         )
-          return callback(null);
+          return callback(null, null);
 
         // vérification si siege_social est dans le bon format
         if ("siege_social" in nv) {
           if (typeof nv.siege_social !== "object") {
-            return callback(null);
+            return callback(null, null);
           }
           const champsSiege = [
             "nom",
@@ -182,7 +187,7 @@ const organisation = {
           const clefs = Object.keys(nv.siege_social);
           // chaque clé doit être autorisée
           if (!clefs.every((k) => champsSiege.includes(k))) {
-            return callback(null);
+            return callback(null, null);
           }
           // types : nom, adresse, code_postal, ville, pays => string ; complement => string ou null
           const vals = nv.siege_social;
@@ -196,13 +201,13 @@ const organisation = {
             typeof vals.ville !== "string" ||
             typeof vals.pays !== "string"
           ) {
-            return callback(null);
+            return callback(null, null);
           }
         }
 
         // Construction dynamique de la requête
         if ("statut" in nv && !["inactive", "active"].includes(nv.statut))
-          return callback(null);
+          return callback(null, null);
 
         // mise à jour de la BDD
         const updates = [];
@@ -231,9 +236,8 @@ const organisation = {
           ", "
         )} WHERE siren = ?`;
         db.query(sql, [...params, siren], (err, result) => {
-          if (err) throw err;
-          // affectedRows = nombre de lignes modifiées
-          callback(result.affectedRows);
+          if (err) return callback(err, null);
+          callback(null, results.affectedRows);
         });
       }
     );

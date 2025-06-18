@@ -42,7 +42,9 @@
       </div>
       <nav>
         <ul class="nav-links">
-          <li><a href="/users/login" class="active">Connexion</a></li>
+          <a href="/users/login" class="active" style="color: indianred"
+            >Déconnexion</a
+          >
           <li><a href="./ListeOffres" class="active">Les offres</a></li>
           <li><a href="./MesOffres">Mes candidatures</a></li>
           <li><a href="./profile" class="btn-connexion">Mon Profil</a></li>
@@ -142,7 +144,7 @@
             <label>
               <input type="checkbox" name="fourchette_salaire" value="<%= f %>"
               <%= selectedFilters.fourchette_salaire &&
-              [].concat(selectedFilters.fourchettes_salaire).includes(f) ?
+              [].concat(selectedFilters.fourchette_salaire).includes(f) ?
               "checked" : "" %> /> <%= f %>
             </label>
             <% }) %>

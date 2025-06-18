@@ -320,13 +320,23 @@ router.get("/ListeOffres", function (req, res, next) {
 });
 */
 
+// Route pour afficher les offres disponibles (non déjà postulées par le candidat), avec filtres et pagination
 router.get("/ListeOffres", async (req, res, next) => {
   try {
+    // Récupération des coordonnées GPS transmises en GET (lat, lng)
     const uLat = parseFloat(req.query.lat);
     const uLon = parseFloat(req.query.lng);
+
+    // Identifiant du candidat depuis la session
     const id_can = req.session.id_candidat;
+
+    // Page actuelle pour la pagination (par défaut à 1)
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+
+    // Nombre d'offres par page
+    const limit = 7;
+
+    // Filtres transmis via la requête GET
     const {
       type_metier,
       rythme,
@@ -336,180 +346,177 @@ router.get("/ListeOffres", async (req, res, next) => {
       city,
     } = req.query;
 
-    // Récupérer les offres avec pagination
-    offre.readSansPostulerPaginated(
-      id_can,
-      page,
-      limit,
-      (offres, totalOffres) => {
-        if (!offres) {
-          return res.render("ListeOffres", {
-            title: "Liste des Offres d'Emploi",
-            offres: [],
-            citiesDistances: [],
-            typesMetier: [],
-            rythmes: [],
-            statutsDePoste: [],
-            fourchettesSalaires: [],
-            datesPublication: [],
-            selectedFilters: req.query,
-            pagination: {
-              currentPage: page,
-              totalPages: Math.ceil(totalOffres / limit),
-              totalOffres: totalOffres,
-            },
-          });
-        }
+    // Récupération de toutes les offres auxquelles le candidat n'a pas encore postulé, sans pagination
+    offre.readSansPostuler(id_can, async (offres) => {
+      // Si aucune offre disponible, on affiche une page vide
+      if (!offres) {
+        return res.render("ListeOffres", {
+          title: "Liste des Offres d'Emploi",
+          offres: [],
+          citiesDistances: [],
+          typesMetier: [],
+          rythmes: [],
+          statutsDePoste: [],
+          fourchettesSalaires: [],
+          datesPublication: [],
+          selectedFilters: req.query,
+          pagination: {
+            currentPage: page,
+            totalPages: 0,
+            totalOffres: 0,
+          },
+        });
+      }
 
-        // Récupération des listes de valeurs dans ma table d'offres triées
-        Promise.all([
-          query(`SELECT DISTINCT f.type_metier 
-               FROM Fiche_Poste f 
-               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
-               WHERE o.etat = 'publiee'`),
-          query(`SELECT DISTINCT f.rythme 
-               FROM Fiche_Poste f 
-               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
-               WHERE o.etat = 'publiee'`),
-          query(`SELECT DISTINCT f.statut_de_poste 
-               FROM Fiche_Poste f 
-               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
-               WHERE o.etat = 'publiee'`),
-          query(`SELECT DISTINCT f.fourchette_salaire 
-               FROM Fiche_Poste f 
-               JOIN Offre_Emploi o ON f.id_fiche = o.id_fiche 
-               WHERE o.etat = 'publiee'`),
-          query(`SELECT DISTINCT DATE_FORMAT(o.date_validite, '%Y-%m-%d') AS date_validite 
-               FROM Offre_Emploi o 
-               WHERE o.etat = 'publiee'`),
-        ]).then(
-          ([
-            typesMetierRows,
-            rythmesRows,
-            statutsRows,
-            salairesRows,
-            datesRows,
-          ]) => {
-            // Récupération de toutes les villes et distances
-            Promise.all(
-              offres.map(async (of) => {
-                let ville = null,
-                  distance = Infinity;
-                try {
-                  const lieu =
-                    typeof of.lieu_mission === "string"
-                      ? JSON.parse(of.lieu_mission)
-                      : of.lieu_mission;
-                  ville = lieu.ville;
-                  if (ville && uLat != null && uLon != null) {
-                    const { lat, lon } = await geocode(ville);
-                    distance = calculDistance(uLat, uLon, lat, lon);
-                  }
-                } catch {}
-                return { ...of, ville, distance };
-              })
-            ).then((enriched) => {
-              // Filtrage pour une ville, garder la plus petite distance trouvée
-              const cityMap = {};
-              enriched.forEach((of) => {
-                if (of.ville) {
-                  const prev = cityMap[of.ville];
-                  if (prev === undefined || of.distance < prev) {
-                    cityMap[of.ville] = of.distance;
-                  }
-                }
-              });
+      // Enrichissement des offres avec la ville et la distance calculée par rapport à l'utilisateur
+      const enriched = await Promise.all(
+        offres.map(async (of) => {
+          let ville = null,
+            distance = Infinity;
+          try {
+            const lieu =
+              typeof of.lieu_mission === "string"
+                ? JSON.parse(of.lieu_mission)
+                : of.lieu_mission;
+            ville = lieu?.ville;
+            if (ville && uLat != null && uLon != null) {
+              const { lat, lon } = await geocode(ville);
+              distance = calculDistance(uLat, uLon, lat, lon);
+            }
+          } catch {}
+          return { ...of, ville, distance };
+        })
+      );
 
-              // Transformation en tableau trié pour les checkbox
-              const citiesDistances = Object.entries(cityMap)
-                .map(([ville, distance]) => ({ ville, distance }))
-                .sort((a, b) => a.distance - b.distance);
-
-              // Filtrage final selon la sélection de l'utilisateur
-              let filteredOffres = enriched;
-
-              // Filtrage par ville
-              if (city) {
-                const selection = Array.isArray(city) ? city : [city];
-                filteredOffres = filteredOffres.filter((o) =>
-                  selection.includes(o.ville)
-                );
+      // Extraction des valeurs uniques pour les filtres à partir des offres enrichies
+      const typesMetierRows = [
+        ...new Set(enriched.map((o) => o.type_metier).filter(Boolean)),
+      ];
+      const rythmesRows = [
+        ...new Set(enriched.map((o) => o.rythme).filter(Boolean)),
+      ];
+      const statutsRows = [
+        ...new Set(enriched.map((o) => o.statut_de_poste).filter(Boolean)),
+      ];
+      const salairesRows = [
+        ...new Set(enriched.map((o) => o.fourchette_salaire).filter(Boolean)),
+      ];
+      const datesRows = [
+        ...new Set(
+          enriched
+            .map((o) => {
+              try {
+                return new Date(o.date_validite).toISOString().split("T")[0];
+              } catch {
+                return null;
               }
+            })
+            .filter(Boolean)
+        ),
+      ];
 
-              // Filtrage par type de métier
-              if (type_metier) {
-                const selection = Array.isArray(type_metier)
-                  ? type_metier
-                  : [type_metier];
-                filteredOffres = filteredOffres.filter((o) =>
-                  selection.includes(o.type_metier)
-                );
-              }
-
-              // Filtrage par rythme
-              if (rythme) {
-                const selection = Array.isArray(rythme) ? rythme : [rythme];
-                filteredOffres = filteredOffres.filter((o) =>
-                  selection.includes(o.rythme)
-                );
-              }
-
-              // Filtrage par statut de poste
-              if (statut_de_poste) {
-                const selection = Array.isArray(statut_de_poste)
-                  ? statut_de_poste
-                  : [statut_de_poste];
-                filteredOffres = filteredOffres.filter((o) =>
-                  selection.includes(o.statut_de_poste)
-                );
-              }
-
-              // Filtrage par fourchette de salaire
-              if (fourchette_salaire) {
-                const selection = Array.isArray(fourchette_salaire)
-                  ? fourchette_salaire
-                  : [fourchette_salaire];
-                filteredOffres = filteredOffres.filter((o) =>
-                  selection.includes(o.fourchette_salaire)
-                );
-              }
-
-              // Filtrage par date de validité
-              if (date_validite) {
-                const selection = Array.isArray(date_validite)
-                  ? date_validite
-                  : [date_validite];
-                filteredOffres = filteredOffres.filter((o) => {
-                  const offreDate = new Date(o.date_validite)
-                    .toISOString()
-                    .split("T")[0];
-                  return selection.includes(offreDate);
-                });
-              }
-
-              res.render("ListeOffres", {
-                title: "Liste des Offres d'Emploi",
-                offres: filteredOffres,
-                citiesDistances,
-                typesMetier: typesMetierRows.map((r) => r.type_metier),
-                rythmes: rythmesRows.map((r) => r.rythme),
-                statutsDePoste: statutsRows.map((r) => r.statut_de_poste),
-                fourchettesSalaires: salairesRows.map(
-                  (r) => r.fourchette_salaire
-                ),
-                datesPublication: datesRows.map((r) => r.date_validite),
-                selectedFilters: req.query,
-                pagination: {
-                  currentPage: page,
-                  totalPages: Math.ceil(totalOffres / limit),
-                  totalOffres: totalOffres,
-                },
-              });
-            });
+      // Construction d’un tableau villes/distances pour afficher les options de filtres géographiques
+      const cityMap = {};
+      enriched.forEach((of) => {
+        if (of.ville) {
+          const prev = cityMap[of.ville];
+          if (prev === undefined || of.distance < prev) {
+            cityMap[of.ville] = of.distance;
           }
+        }
+      });
+
+      // Transformation de cityMap en tableau trié par distance
+      const citiesDistances = Object.entries(cityMap)
+        .map(([ville, distance]) => ({ ville, distance }))
+        .sort((a, b) => a.distance - b.distance);
+
+      // Application des filtres dynamiques aux offres
+      let filteredOffres = enriched;
+
+      // Filtrage par ville
+      if (city) {
+        const selection = Array.isArray(city) ? city : [city];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.ville)
         );
       }
-    );
+
+      // Filtrage par type de métier
+      if (type_metier) {
+        const selection = Array.isArray(type_metier)
+          ? type_metier
+          : [type_metier];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.type_metier)
+        );
+      }
+
+      // Filtrage par rythme
+      if (rythme) {
+        const selection = Array.isArray(rythme) ? rythme : [rythme];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.rythme)
+        );
+      }
+
+      // Filtrage par statut de poste
+      if (statut_de_poste) {
+        const selection = Array.isArray(statut_de_poste)
+          ? statut_de_poste
+          : [statut_de_poste];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.statut_de_poste)
+        );
+      }
+
+      // Filtrage par fourchette de salaire
+      if (fourchette_salaire) {
+        const selection = Array.isArray(fourchette_salaire)
+          ? fourchette_salaire
+          : [fourchette_salaire];
+        filteredOffres = filteredOffres.filter((o) =>
+          selection.includes(o.fourchette_salaire)
+        );
+      }
+
+      // Filtrage par date de validité
+      if (date_validite) {
+        const selection = Array.isArray(date_validite)
+          ? date_validite
+          : [date_validite];
+        filteredOffres = filteredOffres.filter((o) => {
+          const offreDate = new Date(o.date_validite)
+            .toISOString()
+            .split("T")[0];
+          return selection.includes(offreDate);
+        });
+      }
+
+      // Calcul de la pagination sur les offres filtrées
+      const totalFiltered = filteredOffres.length;
+      const totalPages = Math.ceil(totalFiltered / limit);
+      const start = (page - 1) * limit;
+      const paginated = filteredOffres.slice(start, start + limit);
+
+      // Rendu final de la vue avec les offres paginées et les données pour les filtres
+      res.render("ListeOffres", {
+        title: "Liste des Offres d'Emploi",
+        offres: paginated,
+        citiesDistances,
+        typesMetier: typesMetierRows,
+        rythmes: rythmesRows,
+        statutsDePoste: statutsRows,
+        fourchettesSalaires: salairesRows,
+        datesPublication: datesRows,
+        selectedFilters: req.query,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalOffres: totalFiltered,
+        },
+      });
+    });
   } catch (err) {
     next(err);
   }
@@ -566,7 +573,7 @@ router.post("/inscription", async function (req, res, next) {
       prenom,
       num,
       statut,
-      async (result) => {
+      async (err, result) => {
         if (!result) {
           return res.send(
             "Erreur lors de l'inscription. Vérifiez vos données !"
@@ -602,11 +609,11 @@ router.get("/offre/:id", function (req, res) {
 
 router.get("/offre2/:id", function (req, res, next) {
   const numero = req.params.id;
-  offre.readWithFicheAndOrganisation(numero, function (result1) {
+  offre.readWithFicheAndOrganisation(numero, function (err, result1) {
     if (!result1 || result1.length === 0) {
       return res.status(404).send("Offre non trouvée.");
     }
-    pjt.readByCandidature(req.session.id_candidat, numero, (result2) => {
+    pjt.readByCandidature(req.session.id_candidat, numero, (err, result2) => {
       if (!result2 || result2.length === 0) {
         return res.status(404).send("Offre non trouvée.");
       }
@@ -662,7 +669,6 @@ router.post(
 
       // vérification du contenu des fichiers envoyés
       const fichiersDangereux = [];
-
       if (req.files && req.files.length > 0) {
         for (const file of req.files) {
           if (await checkFileContent(file.path)) {
@@ -686,8 +692,11 @@ router.post(
       }
 
       // création candidature
-      const result = await new Promise((resolve) => {
-        candidature.creat(id_candidat, numero_offre, resolve);
+      const result = await new Promise((resolve, reject) => {
+        candidature.creat(id_candidat, numero_offre, (err, res) => {
+          if (err) return reject(err);
+          resolve(res);
+        });
       });
       if (!result) {
         return res.send(
@@ -710,7 +719,7 @@ router.post(
             piece.split(".").pop(),
             id_candidat,
             numero_offre,
-            (r) => {
+            (err, r) => {
               if (r) resolve();
               else {
                 reject(
@@ -731,8 +740,12 @@ router.post(
               file.filename.split(".").pop(),
               id_candidat,
               numero_offre,
-              (r) =>
-                r ? resolve() : reject("Erreur enregistrement fichier uploadé")
+              (err, result) => {
+                if (err || !result) {
+                  return reject("Erreur enregistrement fichier uploadé");
+                }
+                resolve();
+              }
             );
           });
         }
@@ -770,6 +783,8 @@ router.post(
     const numero_offre = req.body.numero_offre;
     const originalName = JSON.parse(req.body.originalFiles);
     const files = req.files || [];
+
+    console.log(files);
 
     if (files.length === 0) {
       return res.redirect(`/offre2/${numero_offre}`);
@@ -894,12 +909,12 @@ router.post(
     pjd.creat(
       req.file.filename,
       path.extname(req.file.originalname).toLowerCase().slice(1),
-      req.session.id_candidat,
+      parseInt(req.session.id_candidat),
       (resultat) => {
         if (!resultat) {
           return res.status(400).json({
             success: false,
-            message: "Échec de l'enregistrement du document.",
+            message: "Échec lors de l'enregistrement du document.",
           });
         }
         res.json({
@@ -1061,7 +1076,7 @@ router.post("/updateProfile", async function (req, res, next) {
   }
 
   // Mettre à jour le profil du candidat
-  candidat.update(id_candidat, updateData, (result) => {
+  candidat.update(id_candidat, updateData, (err, result) => {
     console.log(result);
     if (result === null) {
       return res
@@ -1109,7 +1124,7 @@ router.post("/demande-recruteur", function (req, res, next) {
       siren,
       description,
       "en_attente",
-      (result) => {
+      (err, result) => {
         if (!result) {
           req.session.errorMessage =
             "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation.";
@@ -1188,7 +1203,7 @@ router.post("/demande-creation-organisation", function (req, res, next) {
       nom,
       type,
       siege_social,
-      (result) => {
+      (err, result) => {
         if (!result) {
           req.session.errorMessage =
             "Une erreur est survenue lors de la création de la demande. Vous avez peut-être déjà fait une demande pour cette organisation ou le SIREN existe déjà.";

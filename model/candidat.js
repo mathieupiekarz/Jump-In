@@ -48,13 +48,13 @@ const candidat = {
       !statut ||
       !["actif", "inactif"].includes(statut)
     ) {
-      return callback(null);
+      return callback(null, null);
     }
 
     // vérification du format du numéro de téléphone
     let numSansEspace = num.replace(/\s+/g, "");
     numValide = /^\+33\d{9}$/.test(numSansEspace);
-    if (!numValide) return callback(null);
+    if (!numValide) return callback(null, null);
 
     /*
     // vérification de la composition du mot de passe
@@ -66,12 +66,12 @@ const candidat = {
     // vérification du format de l'email
     regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) {
-      return callback(null);
+      return callback(null, null);
     }
 
     // vérification si un candidat existant a déjà le même email
-    candidat.read(email, (result) => {
-      if (result && result.length > 0) return callback(null);
+    candidat.read(email, (err, result) => {
+      if (result && result.length > 0) return callback(null, null);
       else {
         let sql =
           "INSERT INTO Candidat (email, mdp, nom, prenom, numero_telephone, date_creation, statut) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -85,9 +85,9 @@ const candidat = {
                 "Erreur lors de la récupération des candidatures:",
                 err
               );
-              return callback(null);
+              return callback(err, null);
             }
-            callback(results.insertId);
+            callback(null, results.insertId);
           }
         );
       }
@@ -100,8 +100,8 @@ const candidat = {
       "SELECT * FROM Candidat WHERE id_can = ?",
       [id_can],
       async (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) return callback(err, null);
+        if (results.length === 0) return callback(null, null);
         // vérification si dict est du bon format
         const champsValides = [
           "email",
@@ -113,7 +113,7 @@ const candidat = {
         ];
         const keyslist = Object.keys(dictUpdate);
         if (!keyslist.every((k) => champsValides.includes(k)))
-          return callback(null);
+          return callback(null, null);
         const nvdict = Object.fromEntries(
           Object.entries(dictUpdate).filter(([_, valeur]) => valeur !== null)
         );
@@ -122,14 +122,14 @@ const candidat = {
           // vérification si tous les types sont bien des strings
           const valueslist = Object.values(nvdict);
           if (!valueslist.every((valeur) => typeof valeur === "string"))
-            return callback(null);
+            return callback(null, null);
 
           // vérification si le nouveau statut est bien compris entre 'actif' et 'inactif'
           if (
             "statut" in nvdict &&
             !["actif", "inactif"].includes(nvdict.statut)
           )
-            return callback(null);
+            return callback(null, null);
 
           /*
           // vérification si le nouveau mdp est dans le bon format
@@ -147,7 +147,7 @@ const candidat = {
               ""
             );
             const numValide = /^\+33\d{9}$/.test(nvdict.numero_telephone);
-            if (!numValide) return callback(null);
+            if (!numValide) return callback(null, null);
           }
 
           const champs = Object.keys(nvdict);
@@ -158,21 +158,21 @@ const candidat = {
           // vérification si le nouvel email existe déjà
           if ("email" in nvdict) {
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!regex.test(nvdict.email)) return callback(null);
+            if (!regex.test(nvdict.email)) return callback(null, null);
 
-            candidat.read(nvdict.email, (result) => {
-              if (result && result.length > 1) return callback(null);
+            candidat.read(nvdict.email, (err, result) => {
+              if (result && result.length > 1) return callback(null, null);
               // mise à jour de la BDD
               db.query(sql, [...values, id_can], (err, results) => {
-                if (err) throw err;
-                callback(results.affectedRows);
+                if (err) return callback(err, null);
+                callback(null, results.affectedRows);
               });
             });
           } else {
             // mise à jour de la BDD
             db.query(sql, [...values, id_can], (err, results) => {
-              if (err) throw err;
-              callback(results.affectedRows);
+              if (err) return callback(err, null);
+              callback(null, results.affectedRows);
             });
           }
         }

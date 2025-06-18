@@ -67,7 +67,7 @@ const fp = {
       !description ||
       typeof description !== "string"
     ) {
-      return callback(null);
+      return callback(null, null);
     }
 
     // vérification du json lieu_mission
@@ -90,10 +90,10 @@ const fp = {
       typeof valueslist[4] !== "string" ||
       typeof valueslist[5] !== "string"
     )
-      return callback(null);
+      return callback(null, null);
 
     //vérification sur le format du siren + algo de Luhn pour le dernier chiffre
-    if (!/^\d{9}$/.test(siren)) return callback(null);
+    if (!/^\d{9}$/.test(siren)) return callback(null, null);
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       let digit = parseInt(siren[i], 10);
@@ -101,13 +101,13 @@ const fp = {
       if (digit > 9) digit -= 9;
       sum += digit;
     }
-    if (sum % 10 !== 0) return callback(null);
+    if (sum % 10 !== 0) return callback(null, null);
 
     // vérificatuon que l'organisatione existe bien
     let sql_org = "SELECT * FROM Organisation WHERE siren = ?";
     db.query(sql_org, [siren], (err, results) => {
-      if (err) throw err;
-      if (results.length === 0) return callback(null);
+      if (err) return callback(err, null);
+      if (results.length === 0) return callback(null, null);
 
       // insertion dans BDD
       let sql =
@@ -126,8 +126,8 @@ const fp = {
           siren,
         ],
         (err, results) => {
-          if (err) throw err;
-          callback(results.insertId);
+          if (err) return callback(err, null);
+          callback(null, results.insertId);
         }
       );
     });
@@ -139,8 +139,8 @@ const fp = {
       "SELECT * FROM Fiche_Poste WHERE id_fiche = ?",
       [id_fiche],
       (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) return callback(err, null);
+        if (results.length === 0) return callback(null, null);
 
         // vérification si dictUpdate est du bon format
         const champsValides = [
@@ -167,42 +167,42 @@ const fp = {
 
         // vérification si intitule est un string
         if ("intitule" in nv && typeof nv.intitule !== "string")
-          return callback(null);
+          return callback(null, null);
 
         // vérification si statut_de_poste est un string
         if ("statut_de_poste" in nv && typeof nv.statut_de_poste !== "string")
-          return callback(null);
+          return callback(null, null);
 
         // vérification si responsable_hierarchique est un string
         if (
           "responsable_hierarchique" in nv &&
           typeof nv.responsable_hierarchique !== "string"
         )
-          return callback(null);
+          return callback(null, null);
 
         // vérification si type_metier est un string
         if ("type_metier" in nv && typeof nv.type_metier !== "string")
-          return callback(null);
+          return callback(null, null);
 
         // vérification si rythme est un string
         if ("rythme" in nv && typeof nv.rythme !== "string")
-          return callback(null);
+          return callback(null, null);
 
         // vérification si fourchette_salaire est un string
         if (
           "fourchette_salaire" in nv &&
           typeof nv.fourchette_salaire !== "string"
         )
-          return callback(null);
+          return callback(null, null);
 
         // vérification si description est un string
         if ("description" in nv && typeof nv.description !== "string")
-          return callback(null);
+          return callback(null, null);
 
         // vérification si lieu_mission est dans le bon format
         if ("lieu_mission" in nv) {
           if (typeof nv.lieu_mission !== "object") {
-            return callback(null);
+            return callback(null, null);
           }
           const champsLieu = [
             "nom",
@@ -215,7 +215,7 @@ const fp = {
           const clefs = Object.keys(nv.lieu_mission);
           // chaque clé doit être autorisée
           if (!clefs.every((k) => champsLieu.includes(k))) {
-            return callback(null);
+            return callback(null, null);
           }
           // types : nom, adresse, code_postal, ville, pays => string ; complement => string ou null
           const vals = nv.lieu_mission;
@@ -229,7 +229,7 @@ const fp = {
             typeof vals.ville !== "string" ||
             typeof vals.pays !== "string"
           ) {
-            return callback(null);
+            return callback(null, null);
           }
         }
         // mise à jour de la BDD
@@ -274,9 +274,8 @@ const fp = {
           ", "
         )} WHERE id_fiche = ?`;
         db.query(sql, [...params, id_fiche], (err, result) => {
-          if (err) throw err;
-          // affectedRows = nombre de lignes modifiées
-          callback(result.affectedRows);
+          if (err) return callback(err, null);
+          callback(null, results.affectedRows);
         });
       }
     );

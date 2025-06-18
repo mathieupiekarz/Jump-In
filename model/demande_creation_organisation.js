@@ -65,7 +65,7 @@ const dco = {
         "GE",
       ].includes(type)
     ) {
-      return callback(null);
+      return callback(null, null);
     }
     // vérification que le json siege social est dans le bon format
     const champsValides = [
@@ -77,7 +77,8 @@ const dco = {
       "pays",
     ];
     const keylist = Object.keys(siege_social);
-    if (!keylist.every((k) => champsValides.includes(k))) return callback(null);
+    if (!keylist.every((k) => champsValides.includes(k)))
+      return callback(null, null);
     const valueslist = Object.values(siege_social);
     if (
       typeof valueslist[0] !== "string" ||
@@ -87,23 +88,23 @@ const dco = {
       typeof valueslist[4] !== "string" ||
       typeof valueslist[5] !== "string"
     )
-      return callback(null);
+      return callback(null, null);
 
     // Vérifier que le candidat existe
     const sqlVerifCandidat = "SELECT 1 FROM Candidat WHERE id_can = ?";
     db.query(sqlVerifCandidat, [id_can], (err, resCandidat) => {
-      if (err) throw err;
-      if (resCandidat.length === 0) return callback(null);
+      if (err) return callback(err, null);
+      if (resCandidat.length === 0) return callback(null, null);
 
       // Vérifier que le siren n'existe pas déjà dans Organisation
       const sqlVerifSiren = "SELECT 1 FROM Organisation WHERE siren = ?";
       db.query(sqlVerifSiren, [siren], (err, resSiren) => {
-        if (err) throw err;
-        if (resSiren.length > 0) return callback(null);
+        if (err) return callback(err, null);
+        if (resSiren.length > 0) return callback(null, null);
 
         // Vérification si une demande identique existe déjà
-        dco.read(id_can, siren, (result) => {
-          if (result && result.length > 0) return callback(null);
+        dco.read(id_can, siren, (err, result) => {
+          if (result && result.length > 0) return callback(null, null);
 
           // Insertion de la nouvelle demande
           const sql =
@@ -122,8 +123,8 @@ const dco = {
               JSON.stringify(siege_social),
             ],
             (err, results) => {
-              if (err) throw err;
-              callback(results.insertId);
+              if (err) return callback(err, null);
+              callback(null, results.insertId);
             }
           );
         });
@@ -137,8 +138,8 @@ const dco = {
       "SELECT * FROM DemandeCreationOrganisation WHERE id_can = ? AND siren = ?",
       [id_can, siren],
       (err, results) => {
-        if (err) throw err;
-        if (results.length === 0) return callback(null);
+        if (err) return callback(err, null);
+        if (results.length === 0) return callback(null, null);
 
         // vérification si dictUpdate est du bon format
         const champsValides = [
@@ -167,7 +168,7 @@ const dco = {
         // vérification si statutCrO est dans le bon format
         if (
           "statutCrO" in nv &&
-          !["inactive", "en_attente", "active"].includes(nv.statutCrO)
+          !["validee", "en_attente", "refusee"].includes(nv.statutCrO)
         )
           return callback(null);
 
@@ -203,12 +204,12 @@ const dco = {
             "GE",
           ].includes(nv.type)
         )
-          return callback(null);
+          return callback(null, null);
 
         // vérification si siege_social est dans le bon format
         if ("siege_social" in nv) {
           if (typeof nv.siege_social !== "object") {
-            return callback(null);
+            return callback(null, null);
           }
           const champsSiege = [
             "nom",
@@ -221,7 +222,7 @@ const dco = {
           const clefs = Object.keys(nv.siege_social);
           // chaque clé doit être autorisée
           if (!clefs.every((k) => champsSiege.includes(k))) {
-            return callback(null);
+            return callback(null, null);
           }
           // types : nom, adresse, code_postal, ville, pays => string ; complement => string ou null
           const vals = nv.siege_social;
@@ -235,7 +236,7 @@ const dco = {
             typeof vals.ville !== "string" ||
             typeof vals.pays !== "string"
           ) {
-            return callback(null);
+            return callback(null, null);
           }
         }
 
@@ -269,9 +270,8 @@ const dco = {
           ", "
         )} WHERE siren = ?`;
         db.query(sql, [...params, siren], (err, result) => {
-          if (err) throw err;
-          // affectedRows = nombre de lignes modifiées
-          callback(result.affectedRows);
+          if (err) return callback(err, null);
+          callback(null, results.affectedRows);
         });
       }
     );
