@@ -20,7 +20,7 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
   try {
     const siren = req.params.entreprise_id;
 
-    // Vérification de l’organisation
+    // Vérification de l'organisation
     const orgRes = await new Promise((resolve, reject) =>
       organisation.read(siren, (res) =>
         res ? resolve(res) : reject("not found")
@@ -70,6 +70,14 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
         );
       }
     }
+
+    // --- PAGINATION ---
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const totalOffres = filteredOffres.length;
+    const totalPages = Math.ceil(totalOffres / limit);
+    const start = (page - 1) * limit;
+    const paginatedOffres = filteredOffres.slice(start, start + limit);
 
     // Préparation des fiches de poste
     let filteredFiches = [];
@@ -155,7 +163,7 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
     res.render("NosOffres", {
       title: "Offres de " + orgRes[0].nom,
       organisation: orgRes[0],
-      offres: filteredOffres,
+      offres: paginatedOffres,
       fichesPoste: !etat && !date_validite ? filteredFiches : [],
       citiesDistances,
       selectedFilters: req.query,
@@ -174,6 +182,11 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
       fourchettesSalaires: (fichesPoste || [])
         .map((f) => f.fourchette_salaire)
         .filter((v, i, a) => a.indexOf(v) === i),
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalOffres,
+      },
     });
   } catch (err) {
     next(err);

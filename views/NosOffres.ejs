@@ -366,6 +366,25 @@
             </div>
           </div>
           <% }) %> <% } %>
+
+          <!-- Pagination -->
+          <% if (pagination && pagination.totalPages > 1) { %>
+          <div class="pagination">
+            <% if (pagination.currentPage > 1) { %>
+            <a href="?<%= Object.entries(selectedFilters).map(([k,v]) => k !== 'page' ? (Array.isArray(v) ? v.map(val => `${encodeURIComponent(k)}=${encodeURIComponent(val)}`).join('&') : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`) : '').filter(Boolean).join('&') %>&page=<%= pagination.currentPage - 1 %>" class="page-link">&laquo; Précédent</a>
+            <% } %>
+            <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+              <% if (i === pagination.currentPage) { %>
+                <span class="page-link active"><%= i %></span>
+              <% } else { %>
+                <a href="?<%= Object.entries(selectedFilters).map(([k,v]) => k !== 'page' ? (Array.isArray(v) ? v.map(val => `${encodeURIComponent(k)}=${encodeURIComponent(val)}`).join('&') : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`) : '').filter(Boolean).join('&') %>&page=<%= i %>" class="page-link"><%= i %></a>
+              <% } %>
+            <% } %>
+            <% if (pagination.currentPage < pagination.totalPages) { %>
+            <a href="?<%= Object.entries(selectedFilters).map(([k,v]) => k !== 'page' ? (Array.isArray(v) ? v.map(val => `${encodeURIComponent(k)}=${encodeURIComponent(val)}`).join('&') : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`) : '').filter(Boolean).join('&') %>&page=<%= pagination.currentPage + 1 %>" class="page-link">Suivant &raquo;</a>
+            <% } %>
+          </div>
+          <% } %>
         </div>
 
         <div id="fiches" class="tab-content">
@@ -1256,9 +1275,9 @@
           action="/recruteur/<%= organisation.siren %>/NosOffres"
           onsubmit="return requestlocation(event)"
         >
-          <!-- État de l’offre -->
+          <!-- État de l'offre -->
           <section class="filter-section">
-            <h4>État de l’offre</h4>
+            <h4>État de l'offre</h4>
             <% ['publiee','non_publiee','expiree'].forEach(e=>{ %>
             <label>
               <input type="checkbox" name="etat" value="<%=e%>" <%=
