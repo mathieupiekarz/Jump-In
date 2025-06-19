@@ -545,7 +545,7 @@
                 "Extension non autorisée. Veuillez choisir un fichier valide (PDF, DOCX, etc.)."
               );
             } else if (result.code === "LIMIT_FILE_SIZE") {
-              alert("Le fichier est trop volumineux. Limite : 200 Ko.");
+              alert("Le fichier est trop volumineux. Limite : 1 Mo.");
             } else if (result.message?.includes("contenu interdit")) {
               alert(
                 "Un ou plusieurs fichiers contiennent du contenu interdit (ex: <?php, eval, shell_exec...)."
