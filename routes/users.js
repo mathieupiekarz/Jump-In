@@ -332,7 +332,7 @@ router.get("/ListeOffres", async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
 
     // Nombre d'offres par page
-    const limit = 7;
+    const limit = 6;
 
     // Filtres transmis via la requête GET
     const {
@@ -593,7 +593,7 @@ router.post("/inscription", async function (req, res, next) {
 
 router.get("/offre/:id", function (req, res) {
   const numero = req.params.id;
-  offre.readWithFicheAndOrganisation(numero, function (result) {
+  offre.readWithFicheAndOrganisation(numero, function (err, result) {
     if (!result || result.length === 0) {
       return res.status(404).send("Offre non trouvée.");
     }
@@ -611,6 +611,15 @@ router.get("/offre2/:id", function (req, res, next) {
     if (!result1 || result1.length === 0) {
       return res.status(404).send("Offre non trouvée.");
     }
+    // on modifie le contenu de offre avec les nouveaux noms
+    const offreObj = result1[0];
+    offreObj.organisation = {
+      nom: offreObj.organisation_nom,
+      siren: offreObj.siren,
+      type: offreObj.type,
+      siege_social: offreObj.siege_social,
+    };
+
     pjt.readByCandidature(req.session.id_candidat, numero, (err, result2) => {
       if (!result2 || result2.length === 0) {
         return res.status(404).send("Offre non trouvée.");
@@ -618,7 +627,7 @@ router.get("/offre2/:id", function (req, res, next) {
 
       res.render("OffreDetail2", {
         title: "Détail de l'offre",
-        offre: result1[0],
+        offre: offreObj,
         pjts: result2,
       });
     });

@@ -25,8 +25,9 @@ const offre = {
       } else {
         for (const offre of results) {
           offre.lieu_mission = JSON.parse(offre.lieu_mission);
+          offre.siege_social = JSON.parse(offre.siege_social);
         }
-        if (results.length === 0) return callback(null, null);
+        if (results.length === 0) return callback(null, []);
         else callback(null, results);
       }
     });
@@ -94,7 +95,7 @@ const offre = {
   },
 
   // Nouvelle fonction pour la pagination
-  readSansPostulerPaginated: (id_can, page = 1, limit = 7, callback) => {
+  readSansPostulerPaginated: (id_can, page = 1, limit = 6, callback) => {
     const offset = (page - 1) * limit;
 
     // Requête pour obtenir le nombre total d'offres

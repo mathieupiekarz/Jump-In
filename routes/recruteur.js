@@ -73,7 +73,7 @@ router.get("/:entreprise_id/NosOffres", async (req, res, next) => {
 
     // --- PAGINATION ---
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 6;
     const totalOffres = filteredOffres.length;
     const totalPages = Math.ceil(totalOffres / limit);
     const start = (page - 1) * limit;
