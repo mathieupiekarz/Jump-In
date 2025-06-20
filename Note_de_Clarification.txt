@@ -1,4 +1,4 @@
-install multer, archiver, uiid, mammoth, bcrypt, pdf-parse, xlsx
+install multer, archiver, uiid, mammoth, bcrypt, xlsx
 api : navigator.geolocation
 
 
