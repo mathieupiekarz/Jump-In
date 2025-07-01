@@ -27,8 +27,6 @@ var pjt = require("../model/piece_jointe_temporaire.js");
 var rec = require("../model/recruteur.js");
 var demandeChO = require("../model/Demande_changer_organisation.js");
 
-// const DISABLE_ENCRYPTION = true;
-
 router.get("/userlist", function (req, res, next) {
   result = candidat.readall((result) => {
     res.render("userlist", { title: "Liste des Utilisateurs", users: result });
