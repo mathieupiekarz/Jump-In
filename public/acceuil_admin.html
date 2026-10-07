@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S'inscrire - Jump'In</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"/>
+
+    <style>
+      @media screen and (max-width: 828px) {
+        .demande2 {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .demande-btn {
+            width: 100%;
+            height: auto;
+            flex-grow: 1;
+            min-height: 200px;
+        }
+        }
+    </style>
+
+    <script>
+      function toggleMenu() {
+          document.querySelector(".nav-links").classList.toggle("active");
+      }
+    </script>
+
+  </head>
+  <body>
+    <header class="header">
+      <div>
+          <img src="JumpIn_Logo.png" alt="Jump'In Logo" height="80">
+      </div>
+      <nav>
+          <ul class="nav-links">
+              <li><a href="#" class="btn-connexion">Mon Profil</a></li>
+          </ul>
+
+          <div class="burger" onclick="toggleMenu()">
+              <div></div>
+              <div></div>
+              <div></div>
+          </div>
+      </nav>
+  </header>
+    <div class="main-container">
+      <div class="login-container-2">
+        <div class="profil-header">
+          <i class="bi bi-shield-check" style="color: #0066d3; font-size: 30px;"></i>
+          <div style="margin-left: 18px">
+            <h2>Mathéo Gros</h2>
+            <p style="font-size: clamp(14px, 1.6vw, 18px)">
+              Espace Administrateur
+            </p>
+          </div>
+          <button class="grant-right">Donnez des droits</button>
+        </div>
+      </div>
+      <div class="demande1">
+        <h2>Les demandes :</h2>
+        <div class="demande2">
+          <button class="demande-btn">
+            <div></div>
+            <div class="center-block">
+              <i
+                class="bi bi-person-fill-add"
+                style="font-size: 80px; color: #66a6ef"
+              ></i>
+              <b style="font-size: 20px">Demandes de création d'organisation</b>
+            </div>
+            <b class="bottom-text">X en attente</b>
+          </button>
+          <button class="demande-btn">
+            <div></div>
+            <div class="center-block">
+              <i
+                class="bi bi-envelope-paper-fill"
+                style="font-size: 80px; color: #66a6ef"
+              ></i>
+              <b style="font-size: 20px"
+                >Demandes pour rejoindre une organisation</b
+              >
+            </div>
+            <b class="bottom-text">X en attente</b>
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+install multer, archiver, uiid, mammoth, bcrypt, xlsx
+api : navigator.geolocation
+
+
+MDP :
+    - au minimum 12 caractères
+    - comprenant des majuscules, des minuscules, des chiffres et des caractères spéciaux à choisir dans
+une liste d'au moins 37 caractères spéciaux possibles
+
+liste caractères spéciaux : 
+    - ['!', '?', '@', '$', '%', '&', '*', '+', '=', '-', '_', '.', ',', ';', ':', '/', '\\', '|', '^', '~', '#', '(', ')', '[', ']', '{', '}', '<', '>', '`', "'", '"', '€', '£', 'µ', '§', '°', '¤']
+
+dans les caractères non spéciaux, on comprend les caractères suivant : [à, â, ä, ç, é, è, ê, ë, î, ï, ô, ö, û, ü, ù, ÿ, À, Â, Ä, Ç, É, È, Ê, Ë, Î, Ï, Ô, Ö, Û, Ü, Ù]
+
+
+MOTS DE PASSE : 
+Mathieu : ttAA11izg%%oaajivza
+Matheo : AB10ru&#bbbbbbbbbbbbb
+Robin : AB10ru&#bbbbbbbbbbbbb
+Pierre : AB10ru&#bbbbbbbbbbbbb
+Maxence : ttAA11izg%%oaajivza
+Titouan : ttAA11izg%%oaajivza
+Hadrien : ttAA11izg%%oaajivza
+Helise : AB10ru&#bbbbbbbbbbbbb
+Nala : AB10ru&#bbbbbbbbbbbbb
+Kaloo : AB10ru&#bbbbbbbbbbbbb
+
+
+
+siege_social Organisation & lie_mission Fiche_Poste : json 
+[NOM DE L’ENTREPRISE]
+[Numéro et nom de rue]
+[Complément éventuel : Bâtiment, étage, boîte, etc.]
+[Code postal] [Ville]
+[FRANCE]
+
+==> format obligatoire : 
+{ 
+    nom: "NOM DE L’ENTREPRISE",
+    adresse: "Numéro et nom de rue",
+    complement: "Bâtiment, étage, boîte, etc",
+    code_postal: "Code postal",
+    ville: "Ville",
+    pays: "Pays"
+};
+toutes les valeurs sont obligatoires sauf complément qui peut être null
+
+
+
+Numero SIREN possible :
+732829320 --> APPLE
+552100554 --> MICROSOFT
+407751858 --> RICARD
+941615692 --> INTEL
+343134763 --> NIKE
+216751073 --> Whiskas
+
+585403074
+251385035
+116809831
+668923873
+687994368
+922430715
+216537720
+681617908
+400708418
+977254481
+352912257
+381466515
+978794261
+059121483
+482091444
+810023739
+
+demande CrO :
+390989580
+  
+
