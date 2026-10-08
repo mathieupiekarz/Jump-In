@@ -154,7 +154,7 @@ Pour plus de détails, consulte l'historique Git (`git log --oneline`).
 
 ## Auteurs
 
-- Projet réalisé par Mathéo GROS et Mathieu PIEKARZ dans le cadre du module SR10.
+- Projet réalisé par Mathéo GROS et Mathieu PIEKARZ.
 
 ---
 
